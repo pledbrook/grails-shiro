@@ -16,23 +16,22 @@
  *
  *
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
- *
+ * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
 
- import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
- import org.codehaus.groovy.grails.commons.GrailsClassUtils
- import org.codehaus.groovy.grails.plugins.support.GrailsPluginUtils
- import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
+import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
+import org.codehaus.groovy.grails.commons.GrailsClassUtils
+import org.codehaus.groovy.grails.plugins.support.GrailsPluginUtils
+import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
- import org.apache.shiro.SecurityUtils
- import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
- import org.apache.shiro.grails.*
- import org.apache.shiro.realm.Realm
- import org.apache.shiro.subject.DelegatingSubject
- import org.apache.shiro.web.DefaultWebSecurityManager
+import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
+import org.apache.shiro.grails.*
+import org.apache.shiro.realm.Realm
+import org.apache.shiro.subject.DelegatingSubject
+import org.apache.shiro.web.DefaultWebSecurityManager
 
- import org.springframework.beans.factory.config.MethodInvokingFactoryBean
-
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean
  
 class ShiroGrailsPlugin {
     // the plugin version
@@ -57,6 +56,7 @@ class ShiroGrailsPlugin {
     // URL to the plugin's documentation
     def documentation = "http://grails.org/Shiro+Plugin"
 
+    def loadAfter = [ 'controllers', 'services' ]
     def observe = [ 'controllers' ]
     def watchedResources = 'file:./grails-app/realms/**/*Realm.groovy'
     def artefacts = [ RealmArtefactHandler ]
@@ -74,6 +74,19 @@ class ShiroGrailsPlugin {
 
           realmBeans << configureRealm(realmClass)
       }
+      
+      /* In jsecurity 0.4  plugin it is written that this does not work
+         I have not yet tested it if it is the case currently or not.
+         Keeping the code commented as in jsecurity plugin till we test it out
+      lifecycleBeanPostProcessor(org.apache.shiro.spring.LifecycleBeanPostProcessor)
+      
+      defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
+        bean.dependsOn = "lifecycleBeanPostProcessor"
+      }
+
+      authorizationAttributeSourceAdvisor(org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor) {bean ->
+        securityManager = shiroSecurityManager
+      }*/
 
       credentialMatcher(Sha1CredentialsMatcher) {
           storedCredentialsHexEncoded = true
@@ -94,15 +107,7 @@ class ShiroGrailsPlugin {
       }
 
 
-      lifecycleBeanPostProcessor(org.apache.shiro.spring.LifecycleBeanPostProcessor)
       
-      defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
-        bean.dependsOn = "lifecycleBeanPostProcessor"
-      }
-
-      authorizationAttributeSourceAdvisor(org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor) {bean ->
-        securityManager = shiroSecurityManager
-      }
     }
 
     def doWithApplicationContext = { applicationContext ->
@@ -116,6 +121,44 @@ class ShiroGrailsPlugin {
       log.info "Registering native realms: $beans"
       def mgr = applicationContext.getBean('shiroSecurityManager')
       mgr.realms.addAll(beans.collect { applicationContext.getBean(it) })
+    }
+    
+    /**
+     * Adds 'roleMap' and 'permissionMap' properties to controllers
+     * so that the before-interceptor can query them to find out
+     * whether a user has the required role/permission for an action.
+     */
+    def doWithDynamicMethods = { ctx ->
+        // Get the access control information from the controllers, if
+        // there are any.
+      if (manager?.hasGrailsPlugin("controllers")) {
+            // Process each controller.
+          application.controllerClasses.each { controllerClass ->
+              processController(controllerClass, log)
+          }
+      }
+
+      application.filtersClasses.each { filterClass ->
+          filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
+          filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
+      }
+
+      /* Get the config option that determines whether authentication
+      is required for access control or not. By default, it is
+      required. */
+      boolean authcRequired = true
+      if (application.config.security.shiro.authc.required instanceof Boolean) {
+          authcRequired = application.config.security.shiro.authc.required
+      }
+
+        // Add an 'accessControl' method to FilterConfig (so that it's
+        // available from Grails filters).
+      def mc = FilterConfig.metaClass
+
+      mc.accessControl << { -> return accessControlMethod(delegate, authcRequired) }
+      mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
+      mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
+      mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
     }
 
     def doWithWebDescriptor = { xml ->
@@ -197,39 +240,7 @@ class ShiroGrailsPlugin {
       }
     }
 
-    /**
-     * Adds 'roleMap' and 'permissionMap' properties to controllers
-     * so that the before-interceptor can query them to find out
-     * whether a user has the required role/permission for an action.
-     */
-    def doWithDynamicMethods = { ctx ->
-      if (manager?.hasGrailsPlugin("controllers")) {
-          application.controllerClasses.each { controllerClass ->
-              processController(controllerClass, log)
-          }
-      }
 
-      application.filtersClasses.each { filterClass ->
-          filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
-          filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
-      }
-
-      /* Get the config option that determines whether authentication
-      is required for access control or not. By default, it is
-      required. */
-      boolean authcRequired = true
-      if (application.config.security.shiro.authc.required instanceof Boolean) {
-          authcRequired = application.config.security.shiro.authc.required
-      }
-
-      // Add an 'accessControl' method to FilterConfig
-      def mc = FilterConfig.metaClass
-
-      mc.accessControl << { -> return accessControlMethod(delegate, authcRequired) }
-      mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
-      mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
-      mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
-    }
 
     def onChange = { event ->
       if (application.isControllerClass(event.source)) {
@@ -264,6 +275,7 @@ class ShiroGrailsPlugin {
             beanDefinitions.registerBeans(context)
           }
           catch (MissingMethodException ex) {
+                    // This version of Grails does not support this.
             log.warn("Unable to register beans (Grails version < 0.5.5)")
           }
         }
