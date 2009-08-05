@@ -26,101 +26,124 @@ import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
+import org.apache.shiro.authz.permission.WildcardPermissionResolver
 import org.apache.shiro.grails.*
+import org.apache.shiro.grails.annotations.PermissionRequired
+import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
 import org.apache.shiro.subject.DelegatingSubject
 import org.apache.shiro.web.DefaultWebSecurityManager
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
- 
+
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "0.1"
+    def version = "1.0-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp"
+    "grails-app/views/error.gsp"
     ]
-
+    
     def author = "Peter Ledbrook"
     def authorEmail = ""
     def title = "Apache Shiro Integration for Grails"
-    def description = '''\\
-                          Enables Grails applications to take advantage of the Apache Shiro security layer.
-                          Adopted from previous JSecurity plugin.
-    '''
-
+    def description = """\
+Enables Grails applications to take advantage of the Apache Shiro security layer.
+Adopted from previous JSecurity plugin.
+"""
+    
     // URL to the plugin's documentation
     def documentation = "http://grails.org/Shiro+Plugin"
-
-    def loadAfter = [ 'controllers', 'services' ]
-    def observe = [ 'controllers' ]
-    def watchedResources = 'file:./grails-app/realms/**/*Realm.groovy'
+    
+    def loadAfter = [ "controllers", "services" ]
+    def observe = [ "controllers" ]
+    def watchedResources = "file:./grails-app/realms/**/*Realm.groovy"
     def artefacts = [ RealmArtefactHandler ]
-
+    
     def roleMaps = [:]
     def permMaps = [:]
-
+    
     def doWithSpring = {
-      // Configure realms defined in the project.
-      def realmBeans = []
-      def realmClasses = application.realmClasses
-      application.realmClasses.each { realmClass ->
-          log.info "Registering realm: ${realmClass.fullName}"
-          configureRealm.delegate = delegate
-
-          realmBeans << configureRealm(realmClass)
-      }
-      
-      /* In jsecurity 0.4  plugin it is written that this does not work
+        // Configure realms defined in the project.
+        def realmBeans = []
+        def realmClasses = application.realmClasses
+        application.realmClasses.each { realmClass ->
+            log.info "Registering realm: ${realmClass.fullName}"
+            configureRealm.delegate = delegate
+            
+            realmBeans << configureRealm(realmClass)
+        }
+        
+        /* In jsecurity 0.4  plugin it is written that this does not work
          I have not yet tested it if it is the case currently or not.
          Keeping the code commented as in jsecurity plugin till we test it out
-      lifecycleBeanPostProcessor(org.apache.shiro.spring.LifecycleBeanPostProcessor)
-      
-      defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
-        bean.dependsOn = "lifecycleBeanPostProcessor"
-      }
-
-      authorizationAttributeSourceAdvisor(org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor) {bean ->
-        securityManager = shiroSecurityManager
-      }*/
-
-      credentialMatcher(Sha1CredentialsMatcher) {
-          storedCredentialsHexEncoded = true
-      }
-
-      shiroSecurityManager(DefaultWebSecurityManager) { bean ->
-          realms = realmBeans.collect { ref(it) }
-
-          // Allow the user to customise the session type: 'http' or 'shiro'.
-          if (application.config.security.shiro.session.mode) {
-              sessionMode = application.config.security.shiro.session.mode
-          }
-
-          // Allow the user to customise the authentication strategy.
-          if (application.config.security.shiro.authentication.strategy) {
-              modularAuthenticationStrategy = application.config.security.shiro.authentication.strategy
-          }
-      }
-
-
-      
+         lifecycleBeanPostProcessor(org.apache.shiro.spring.LifecycleBeanPostProcessor)
+         defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
+         bean.dependsOn = "lifecycleBeanPostProcessor"
+         }
+         authorizationAttributeSourceAdvisor(org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor) {bean ->
+         securityManager = shiroSecurityManager
+         }*/
+        
+        // The default credential matcher.
+        credentialMatcher(Sha1CredentialsMatcher) {
+            storedCredentialsHexEncoded = true
+        }
+        
+        // Default permission resolver: WildcardPermissionResolver.
+        // This converts permission strings into WildcardPermission
+        // instances.
+        permissionResolver(WildcardPermissionResolver)
+        
+        shiroSecurityManager(DefaultWebSecurityManager) { bean ->
+            // Shiro doesn't like an empty collection of realms, so we
+            // only configure the "realms" property if there are some.
+            if (!realmBeans.isEmpty()) {
+                realms = realmBeans.collect { ref(it) }
+            }
+            
+            // Allow the user to customise the session type: 'http' or 'shiro'.
+            if (application.config.security.shiro.session.mode) {
+                sessionMode = application.config.security.shiro.session.mode
+            }
+            
+            // Allow the user to customise the authentication strategy.
+            if (application.config.security.shiro.authentication.strategy) {
+                modularAuthenticationStrategy = application.config.security.shiro.authentication.strategy
+            }
+        }
     }
-
+    
     def doWithApplicationContext = { applicationContext ->
-      // Add any extra realms that might have been defined in the project
-      def beans = applicationContext.getBeanNamesForType(Realm) as List
-
-      // Filter out beans created by the plugin for the realm artefacts.
-      beans = beans.findAll { !(it.endsWith("Wrapper") || it.endsWith("Proxy")) }
-
-      // Add the remaining beans to the security manager.
-      log.info "Registering native realms: $beans"
-      def mgr = applicationContext.getBean('shiroSecurityManager')
-      mgr.realms.addAll(beans.collect { applicationContext.getBean(it) })
+        // Add any extra realms that might have been defined in the project
+        def beans = applicationContext.getBeanNamesForType(Realm) as List
+        
+        // Filter out beans created by the plugin for the realm artefacts.
+        beans = beans.findAll { !(it.endsWith("Wrapper") || it.endsWith("Proxy")) }
+        
+        // Add the remaining beans to the security manager.
+        log.info "Registering native realms: $beans"
+        def mgr = applicationContext.getBean("shiroSecurityManager")
+        def realms = beans.collect { applicationContext.getBean(it) }
+        
+        if (mgr.realms == null){
+            // If there are no native realms and no normal realms,
+            // then there is probably something wrong.
+            if (!realms) {
+                log.warn "No Shiro realms configured - access control won't work!"
+            }
+            else {
+                mgr.realms = realms
+            }
+        }
+        else {
+            mgr.realms.addAll(realms)
+        }
+        
     }
     
     /**
@@ -131,236 +154,220 @@ class ShiroGrailsPlugin {
     def doWithDynamicMethods = { ctx ->
         // Get the access control information from the controllers, if
         // there are any.
-      if (manager?.hasGrailsPlugin("controllers")) {
+        if (manager?.hasGrailsPlugin("controllers")) {
             // Process each controller.
-          application.controllerClasses.each { controllerClass ->
-              processController(controllerClass, log)
-          }
-      }
-
-      application.filtersClasses.each { filterClass ->
-          filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
-          filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
-      }
-
-      /* Get the config option that determines whether authentication
-      is required for access control or not. By default, it is
-      required. */
-      boolean authcRequired = true
-      if (application.config.security.shiro.authc.required instanceof Boolean) {
-          authcRequired = application.config.security.shiro.authc.required
-      }
-
+            application.controllerClasses.each { controllerClass ->
+                processController(controllerClass, log)
+            }
+        }
+        
+        application.filtersClasses.each { filterClass ->
+            filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
+            filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
+        }
+        
+        // Get the config option that determines whether authentication
+        // is required for access control or not. By default, it is
+        // required.
+        boolean authcRequired = true
+        if (application.config.security.shiro.authc.required instanceof Boolean) {
+            authcRequired = application.config.security.shiro.authc.required
+        }
+        
         // Add an 'accessControl' method to FilterConfig (so that it's
         // available from Grails filters).
-      def mc = FilterConfig.metaClass
-
-      mc.accessControl << { -> return accessControlMethod(delegate, authcRequired) }
-      mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
-      mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
-      mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
+        def mc = FilterConfig.metaClass
+        
+        mc.accessControl << { -> return accessControlMethod(delegate, authcRequired) }
+        mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
+        mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
+        mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
     }
-
+    
     def doWithWebDescriptor = { xml ->
-      def contextParam = xml.'context-param'
-      contextParam[contextParam.size() - 1] + {
-        'filter' {
-          'filter-name'('securityContextFilter')
-          'filter-class'('org.apache.shiro.spring.SpringShiroFilter')
-          'init-param' {
-              'param-name'('securityManagerBeanName')
-              'param-value'('shiroSecurityManager')
-          }
-
-          /* If a Shiro configuration is available, add it
-           as an 'init-param' of the filter. This config should
-           be in .ini format. */
-          if (application.config.security.shiro.filter.config) {
-              'init-param' {
-                  'param-name'('config')
-                  'param-value'(application.config.security.shiro.filter.config)
-              }
-          }
+        def contextParam = xml.'context-param'
+        contextParam[contextParam.size() - 1] + {
+            'filter' {
+                'filter-name'('securityContextFilter')
+                'filter-class'('org.apache.shiro.spring.SpringShiroFilter')
+                'init-param' {
+                    'param-name'('securityManagerBeanName')
+                    'param-value'('shiroSecurityManager')
+                }
+                
+                // If a Shiro configuration is available, add it
+                // as an 'init-param' of the filter. This config should
+                // be in .ini format.
+                if (application.config.security.shiro.filter.config) {
+                    'init-param' {
+                        'param-name'('config')
+                        'param-value'(application.config.security.shiro.filter.config)
+                    }
+                }
+            }
         }
-      }
-
-      // Place the Shiro filter after the Spring character encoding filter, otherwise the latter filter won't work.
-      def filter = xml.'filter-mapping'.find { it.'filter-name'.text() == "charEncodingFilter" }
-
-      /* NOTE: The following shenanigans are designed to ensure that
-      the filter mapping is inserted in the right location under
-      a variety of circumstances. However, at this point in time
-      it's a bit of wasted effort because Grails itself can't handle
-      certain situations, such as no filter mappings at all, or
-      a SiteMesh one but no character encoding filter mapping.
-      Bleh. */
-
-      if (!filter) {
-          /* Of course, if there is no char encoding filter, the next
-          requirement is that we come before the SiteMesh filter.
-          This is trickier to accomplish. First we find out at what
-          index the SiteMesh filter mapping is. */
-          int i = 0
-          int siteMeshIndex = -1
-          xml.'filter-mapping'.each {
-              if (it.'filter-name'.text().equalsIgnoreCase("sitemesh")) {
-                  siteMeshIndex = i
-              }
-              i++
-          }
-
-          if (siteMeshIndex > 0) {
-              /* There is at least one other filter mapping that comes
-              before the SiteMesh one, so we can simply use the filter
-              mapping that comes immediately before SiteMesh as the
-              insertion point. */
-              filter = xml.'filter-mapping'[siteMeshIndex - 1]
-          }
-          else if (siteMeshIndex == 0 || xml.'filter-mapping'.size() == 0) {
-              /* If the index of the SiteMesh filter mapping is 0, i.e.
-              it's the first one, we need to use the last filter
-              definition as the insertion point. We also need to do
-              this if there are no filter mappings. */
-              def filters = xml.'filter'
-              filter = filters[filters.size() - 1]
-          }
-          else {
-              // Simply add this filter mapping to the end.
-              def filterMappings = xml.'filter-mapping'
-              filter = filterMappings[filterMappings.size() - 1]
-          }
-      }
-
-      // Finally add the Shiro filter mapping after the selected insertion point.
-      filter + {
-          'filter-mapping' {
-              'filter-name'('securityContextFilter')
-              'url-pattern'("/*")
-          }
-      }
+        
+        // Place the Shiro filter after the Spring character encoding filter, otherwise the latter filter won't work.
+        def filter = xml.'filter-mapping'.find { it.'filter-name'.text() == "charEncodingFilter" }
+        
+        // NOTE: The following shenanigans are designed to ensure that
+        // the filter mapping is inserted in the right location under
+        // a variety of circumstances. However, at this point in time
+        // it's a bit of wasted effort because Grails itself can't handle
+        // certain situations, such as no filter mappings at all, or
+        // a SiteMesh one but no character encoding filter mapping.
+        // Bleh.
+        
+        if (!filter) {
+            /* Of course, if there is no char encoding filter, the next
+             requirement is that we come before the SiteMesh filter.
+             This is trickier to accomplish. First we find out at what
+             index the SiteMesh filter mapping is. */
+            int i = 0
+            int siteMeshIndex = -1
+            xml.'filter-mapping'.each {
+                if (it.'filter-name'.text().equalsIgnoreCase("sitemesh")) {
+                    siteMeshIndex = i
+                }
+                i++
+            }
+            
+            if (siteMeshIndex > 0) {
+                /* There is at least one other filter mapping that comes
+                 before the SiteMesh one, so we can simply use the filter
+                 mapping that comes immediately before SiteMesh as the
+                 insertion point. */
+                filter = xml.'filter-mapping'[siteMeshIndex - 1]
+            }
+            else if (siteMeshIndex == 0 || xml.'filter-mapping'.size() == 0) {
+                /* If the index of the SiteMesh filter mapping is 0, i.e.
+                 it's the first one, we need to use the last filter
+                 definition as the insertion point. We also need to do
+                 this if there are no filter mappings. */
+                def filters = xml.'filter'
+                filter = filters[filters.size() - 1]
+            }
+            else {
+                // Simply add this filter mapping to the end.
+                def filterMappings = xml.'filter-mapping'
+                filter = filterMappings[filterMappings.size() - 1]
+            }
+        }
+        
+        // Finally add the Shiro filter mapping after the selected insertion point.
+        filter + {
+            'filter-mapping' {
+                'filter-name'('securityContextFilter')
+                'url-pattern'("/*")
+            }
+        }
     }
-
-
 
     def onChange = { event ->
-      if (application.isControllerClass(event.source)) {
-        // Get the GrailsClass instance for the controller.
-        def controllerClass = application.getControllerClass(event.source?.name)
+        if (application.isControllerClass(event.source)) {
+            // Get the GrailsClass instance for the controller.
+            def controllerClass = application.getControllerClass(event.source?.name)
 
-        // If no GrailsClass can be found, i.e. 'controllerClass' is null, then this is a new controller.
-        if (controllerClass == null) {
-            controllerClass = application.addArtefact(ControllerArtefactHandler.TYPE, event.source)
-        }
+            // If no GrailsClass can be found, i.e. 'controllerClass' is null, then this is a new controller.
+            if (controllerClass == null) {
+                controllerClass = application.addArtefact(ControllerArtefactHandler.TYPE, event.source)
+            }
 
-        // Now update the role and permission information for this controller.
-        log.info "Reconfiguring access control for ${controllerClass.shortName}"
-        processController(controllerClass, log)
-        return
-      }
-      else if (application.isRealmClass(event.source)) {
-        log.info "Realm modified!"
-
-        def context = event.ctx
-        if (!context) {
-            log.debug("Application context not found - can't reload.")
+            // Now update the role and permission information for this controller.
+            log.info "Reconfiguring access control for ${controllerClass.shortName}"
+            processController(controllerClass, log)
             return
         }
+        else if (application.isRealmClass(event.source)) {
+            log.info "Realm modified!"
 
-        boolean isNew = event.application.getRealmClass(event.source?.name) == null
-        def realmClass = application.addArtefact(RealmArtefactHandler.TYPE, event.source)
+            def context = event.ctx
+            if (!context) {
+                log.debug("Application context not found - can't reload.")
+                return
+            }
 
-        if (isNew) {
-          try {
-            def beanDefinitions = beans(configureRealm.curry(realmClass))
-            beanDefinitions.registerBeans(context)
-          }
-          catch (MissingMethodException ex) {
+            boolean isNew = event.application.getRealmClass(event.source?.name) == null
+            def realmClass = application.addArtefact(RealmArtefactHandler.TYPE, event.source)
+
+            if (isNew) {
+                try {
+                    def beanDefinitions = beans(configureRealm.curry(realmClass))
+                    beanDefinitions.registerBeans(context)
+                }
+                catch (MissingMethodException ex) {
                     // This version of Grails does not support this.
-            log.warn("Unable to register beans (Grails version < 0.5.5)")
-          }
-        }
-        else {
-          def realmName = realmClass.shortName
-          def wrapperName = "${realmName}Wrapper".toString()
+                    log.warn("Unable to register beans (Grails version < 0.5.5)")
+                }
+            }
+            else {
+                def realmName = realmClass.shortName
+                def wrapperName = "${realmName}Wrapper".toString()
 
-          def beans = beans {
-            "${realmName}Class"(MethodInvokingFactoryBean) {
-                targetObject = ref('grailsApplication', true)
-                targetMethod = 'getArtefact'
-                arguments = [RealmArtefactHandler.TYPE, realmClass.fullName]
+                // We clone the closure because we're going to change
+                // the delegate.
+                def c = configureRealm.clone()
+                c.delegate = delegate
+
+                def beans = beans {
+                    // The bean definitions are provided by the
+                    // configureRealm closure.
+                    c(realmClass)
+                }
+
+                if (context) {
+                    context.registerBeanDefinition("${realmName}Class", beans.getBeanDefinition("${realmName}Class"))
+                    context.registerBeanDefinition("${realmName}Instance", beans.getBeanDefinition("${realmName}Instance"))
+                    context.registerBeanDefinition(wrapperName, beans.getBeanDefinition(wrapperName))
+                }
             }
 
-            "${realmName}Instance"(ref("${realmName}Class")) {bean ->
-                bean.factoryMethod = 'newInstance'
-                bean.singleton = true
-                bean.autowire = 'byName'
+            // HACK
+            // The problem here is that the subject has been created
+            // within a servlet filter *before* the realm reloading
+            // has occurred. The above 'registerBeanDefinition()'
+            // calls result in the security manager being destroyed
+            // and a new one created, but the subject still refers
+            // to the old security manager.
+            // So, we update the subject's security manager directly.
+            // Note that we are using Groovy's ability to circumvent
+            // visibility controls since the 'securityManager' field
+            // is protected, not public.
+            if (SecurityUtils.subject instanceof DelegatingSubject) {
+                def mgr = applicationContext.getBean("shiroSecurityManager")
+                SecurityUtils.subject.@securityManager = mgr
             }
-
-            "${wrapperName}"(RealmWrapper) {
-                realm = ref("${realmName}Instance")
-                tokenClass = GrailsClassUtils.getStaticPropertyValue(realmClass.clazz, 'authTokenClass')
-            }
-          }
-
-          if (context) {
-            context.registerBeanDefinition("${realmName}Class", beans.getBeanDefinition("${realmName}Class"))
-            context.registerBeanDefinition("${realmName}Instance", beans.getBeanDefinition("${realmName}Instance"))
-            context.registerBeanDefinition(wrapperName, beans.getBeanDefinition(wrapperName))
-          }
         }
-
-        /*
-         HACK
-
-         The problem here is that the subject has been created
-         within a servlet filter *before* the realm reloading
-         has occurred. The above 'registerBeanDefinition()'
-         calls result in the security manager being destroyed
-         and a new one created, but the subject still refers
-         to the old security manager.
-
-         So, we update the subject's security manager directly.
-         Note that we are using Groovy's ability to circumvent
-         visibility controls since the 'securityManager' field
-         is protected, not public. */
-        if (SecurityUtils.subject instanceof DelegatingSubject) {
-            def mgr = applicationContext.getBean('shiroSecurityManager')
-            SecurityUtils.subject.@securityManager = mgr
-        }
-      }
-    }
-
-    def onConfigChange = { event ->
-        
     }
 
     def configureRealm = { grailsClass ->
         def realmName = grailsClass.shortName
-
+        
         // Create the realm bean.
         "${realmName}Class"(MethodInvokingFactoryBean) {
-            targetObject = ref('grailsApplication', true)
-            targetMethod = 'getArtefact'
+            targetObject = ref("grailsApplication", true)
+            targetMethod = "getArtefact"
             arguments = [RealmArtefactHandler.TYPE, grailsClass.fullName]
         }
-
+        
         "${realmName}Instance"(ref("${realmName}Class")) {bean ->
-            bean.factoryMethod = 'newInstance'
+            bean.factoryMethod = "newInstance"
             bean.singleton = true
-            bean.autowire = 'byName'
+            bean.autowire = "byName"
         }
-
+        
         // Wrap each realm with an adapter that implements the Shiro Realm interface.
         def wrapperName = "${realmName}Wrapper".toString()
         "${wrapperName}"(RealmWrapper) {
             realm = ref("${realmName}Instance")
-            tokenClass = GrailsClassUtils.getStaticPropertyValue(grailsClass.clazz, 'authTokenClass')
+            tokenClass = GrailsClassUtils.getStaticPropertyValue(grailsClass.clazz, "authTokenClass")
+            permissionResolver = ref("permissionResolver")
         }
-
+        
         // Return the bean name for this realm.
         return wrapperName
     }
-
+    
     /**
      * Implementation of the "accessControl()" dynamic method available
      * to filters. It requires a reference to the filter so that it can
@@ -379,28 +386,28 @@ class ShiroGrailsPlugin {
      * <code>true</code> to allow access, or <code>false</code> otherwise.
      */
     boolean accessControlMethod(filter, boolean authcRequired, Map args = [:], Closure c = null) {
-        /* If we're accessing the auth controller itself, we don't
-        want to check whether the user is authenticated, otherwise
-        we end up in an infinite loop of redirects. */
-        if (filter.controllerName == 'auth') return true
-
+        // If we're accessing the auth controller itself, we don't
+        // want to check whether the user is authenticated, otherwise
+        // we end up in an infinite loop of redirects.
+        if (filter.controllerName == "auth") return true
+        
         // Get hold of the filters class instance.
         def filtersClass = filter.filtersDefinition
-
+        
         // ...and the HTTP request.
         def request = filter.request
-
-        /* Is an authenticated user required for this URL? If not,
-        then we can do a permission check for remembered users
-        as well as authenticated ones. Otherwise, remembered
-        users will have to log in. */
+        
+        // Is an authenticated user required for this URL? If not,
+        // then we can do a permission check for remembered users
+        // as well as authenticated ones. Otherwise, remembered
+        // users will have to log in.
         def authenticatedUserRequired = args["auth"] || (args["auth"] == null && authcRequired)
-
+        
         // If required, check that the user is authenticated.
         def subject = SecurityUtils.subject
         if (subject.principal == null || (authenticatedUserRequired && !subject.authenticated)) {
             // User is not authenticated, so deal with it.
-            if (filtersClass.metaClass.respondsTo(filtersClass, 'onNotAuthenticated')) {
+            if (filtersClass.metaClass.respondsTo(filtersClass, "onNotAuthenticated")) {
                 filtersClass.onNotAuthenticated(subject, filter)
             }
             else {
@@ -413,105 +420,97 @@ class ShiroGrailsPlugin {
                     }
                     targetUri += query
                 }
-
+                
                 filter.redirect(
-                        controller: 'auth',
-                        action: 'login',
+                        controller: "auth",
+                        action: "login",
                         params: [ targetUri: targetUri ])
             }
-
+            
             return false
         }
-
+        
         def isPermitted
         if (c == null) {
             // Check that the user has the required permission for the target controller/action.
-            isPermitted = subject.isPermitted(new ShiroBasicPermission(filter.controllerName, filter.actionName ?: 'index'))
+            isPermitted = subject.isPermitted(new ShiroBasicPermission(filter.controllerName, filter.actionName ?: "index"))
         }
         else {
-            /* Call the closure with the access control builder and
-            check the result. The closure will return 'true' if the
-            user is permitted access, otherwise 'false'. */
+            // Call the closure with the access control builder and
+            // check the result. The closure will return 'true' if the
+            // user is permitted access, otherwise 'false'.
             c.delegate = new FilterAccessControlBuilder(subject)
             isPermitted = c.call()
         }
-
+        
         if (!isPermitted) {
             // User does not have the required permission(s)
-            if (filtersClass.metaClass.respondsTo(filtersClass, 'onUnauthorized')) {
+            if (filtersClass.metaClass.respondsTo(filtersClass, "onUnauthorized")) {
                 filtersClass.onUnauthorized(subject, filter)
             }
             else {
                 // Default behaviour is to redirect to the 'unauthorized' page.
-                filter.redirect(controller: 'auth', action: 'unauthorized')
+                filter.redirect(controller: "auth", action: "unauthorized")
             }
-
+            
             return false
         }
         else {
             return true
         }
     }
-
+    
     def processController(controllerClass, log) {
         // This is the wrapped class.
         def clazz = controllerClass.clazz
-
+        
         // These maps are made available to controllers via the dynamically injected 'roleMap' and 'permissionMap' properties.
         def roleMap = [:]
         def permissionMap = [:]
         this.roleMaps[controllerClass.logicalPropertyName] = roleMap
         this.permMaps[controllerClass.logicalPropertyName] = permissionMap
-
+        
         // Process any annotations that this controller declares.
-        try {
-            // Check whether the JVM supports annotations.
-            Class.forName('java.lang.annotation.Annotation')
-
-            // Process any annotations on this controller.
-            log.debug "Processing annotations on ${controllerClass.shortName}"
-            processAnnotations(controllerClass, roleMap, permissionMap, log)
-        }
-        catch (ClassNotFoundException ex) {
-        }
-
-        /* Check whether this controller class has a static
-        'accessControl' property. If so, use that as a definition
-        of the controller's role and permission requirements.
-        Note that these settings override any annotations that
-        are declared in the class. */
-        if (GrailsClassUtils.isStaticProperty(clazz, 'accessControl')) {
+        log.debug "Processing annotations on ${controllerClass.shortName}"
+        processAnnotations(controllerClass, roleMap, permissionMap, log)
+        
+        // Check whether this controller class has a static
+        // 'accessControl' property. If so, use that as a definition
+        // of the controller's role and permission requirements.
+        // Note that these settings override any annotations that
+        // are declared in the class.
+        if (GrailsClassUtils.isStaticProperty(clazz, "accessControl")) {
             // The property should be a Closure. If it's not, we can't do anything with it.
-            def c = GrailsClassUtils.getStaticPropertyValue(clazz, 'accessControl')
+            def c = GrailsClassUtils.getStaticPropertyValue(clazz, "accessControl")
             if (!(c instanceof Closure)) {
                 log.error("Static property [accessControl] on controller [${controllerClass.fullName}] is not a closure.")
                 return
             }
-
+            
             // Process the closure, building a map of actions to permissions and a map of actions to roles.
             def b = new AccessControlBuilder(clazz)
             c.delegate = b
             c.call()
-
+            
             roleMap.putAll(b.roleMap)
             permissionMap.putAll(b.permissionMap)
-
+            
             if (log.isDebugEnabled()) {
                 log.debug("Access control role map for controller '${controllerClass.logicalPropertyName}': ${roleMap}")
                 log.debug("Access control permission map for controller '${controllerClass.logicalPropertyName}': ${permissionMap}")
             }
         }
-
+        
         // Inject the role and permission maps into the controller.
         controllerClass.metaClass.getRoleMap = {->
             return roleMap
         }
-
+        
         controllerClass.metaClass.getPermissionMap = {->
             return permissionMap
         }
     }
-
+    
     /**
      * Process any plugin annotations (RoleRequired or PermissionRequired)
      * on the given controller. Any annotations are evaluated and used
@@ -520,15 +519,13 @@ class ShiroGrailsPlugin {
     def processAnnotations(controllerClass, roleMap, permissionMap, log) {
         def clazz = controllerClass.clazz
         clazz.declaredFields.each { field ->
-            /* First see whether this field/action requires any roles.
-            We load the annotation classes dynamically so that the
-            plugin can be used with the 1.4 JDK. */
-            def ann = field.getAnnotation(Class.forName('org.apache.shiro.grails.annotations.RoleRequired'))
+            // First see whether this field/action requires any roles.
+            def ann = field.getAnnotation(RoleRequired)
             if (ann != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Annotation role required by controller '${controllerClass.logicalPropertyName}', action '${field.name}': ${ann.value()}")
                 }
-
+                
                 // Found RoleRequired annotation. Configure the interceptor
                 def roles = roleMap[field.name]
                 if (!roles) {
@@ -537,21 +534,21 @@ class ShiroGrailsPlugin {
                 }
                 roles << ann.value()
             }
-
+            
             // Now check for permission requirements.
-            ann = field.getAnnotation(Class.forName('org.apache.shiro.grails.annotations.PermissionRequired'))
+            ann = field.getAnnotation(PermissionRequired)
             if (ann != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Annotation permission required by controller '${controllerClass.logicalPropertyName}', action '${field.name}': ${ann.value()}")
                 }
-
+                
                 // Found PermissionRequired annotation. Configure the interceptor for this.
                 def permissions = permissionMap[field.name]
                 if (!permissions) {
                     permissions = []
                     permissionMap[field.name] = permissions
                 }
-
+                
                 def constructor = ann.type().getConstructor([ String, String ] as Class[])
                 permissions << constructor.newInstance([ ann.target(), ann.actions() ] as Object[])
             }

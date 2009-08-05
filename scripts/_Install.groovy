@@ -23,9 +23,9 @@
  * Script invoked when the plugin is installed.
  * @author Peter Ledbrook
  */
-Ant.mkdir(dir:"${basedir}/grails-app/realms")
+ant.mkdir(dir:"${basedir}/grails-app/realms")
 
 // Install the message bundle.
-Ant.copy(
+ant.copy(
         file: "${shiroPluginDir}/grails-app/i18n/messages.properties",
         tofile: "grails-app/i18n/shiro.properties")

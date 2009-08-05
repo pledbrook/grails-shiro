@@ -18,20 +18,11 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
- 
-includeTargets << new File ("${shiroPluginDir}/scripts/CreateDbRealm.groovy")
-includeTargets << new File ("${shiroPluginDir}/scripts/CreateAuthController.groovy")
+
+includeTargets << grailsScript("_GrailsArgParsing")
+includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
 target("default": "Sets up a basic security system with a database realm, auth controller, etc.") {
-    // Make sure any arguments have been parsed if the parser is available.
-    hasArgsParser = getBinding().variables.containsKey('argsMap')
-    if (hasArgsParser) {
-        depends(parseArguments, checkVersion)
-    }
-    else {
-        depends(checkVersion)
-    }
-
-    createDbRealm()
-    createAuthController()
+    // Make sure any arguments have been parsed.
+    depends(parseArguments, createDbRealm, createAuthController)
 }

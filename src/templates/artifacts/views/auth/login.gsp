@@ -8,7 +8,7 @@
   <g:if test="${flash.message}">
     <div class="message">${flash.message}</div>
   </g:if>
-  <g:form action="signin">
+  <g:form action="signIn">
     <input type="hidden" name="targetUri" value="${targetUri}" />
     <table>
       <tbody>

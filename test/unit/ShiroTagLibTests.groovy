@@ -70,24 +70,24 @@ class ShiroTagLibTests extends GroovyTestCase {
 
     void testIsLoggedIn() {
         // Local setup.
-        def testBody = 'You are logged in!'
+        def testBody = "You are logged in!"
         this.tagLib.isLoggedIn.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
         this.tagLib.isLoggedIn([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Clear the output buffer and execute the tag again, but with
         // and 'authenticated' user.
         this.tagDelegate.reset()
-        this.mockSubject['isAuthenticated'] = {-> true }
+        this.mockSubject["isAuthenticated"] = {-> true }
         this.tagLib.isLoggedIn([:], {-> testBody})
         assertEquals testBody, this.tagDelegate.output
     }
 
     void testIsNotLoggedIn() {
         // Local setup.
-        def testBody = 'You are not logged in!'
+        def testBody = "You are not logged in!"
         this.tagLib.isNotLoggedIn.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
@@ -97,30 +97,30 @@ class ShiroTagLibTests extends GroovyTestCase {
         // Clear the output buffer and execute the tag again, but with
         // and 'authenticated' user.
         this.tagDelegate.reset()
-        this.mockSubject['isAuthenticated'] = {-> true }
+        this.mockSubject["isAuthenticated"] = {-> true }
         this.tagLib.isNotLoggedIn([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
     }
 
     void testUser() {
         // Local setup.
-        def testBody = 'Some output or other'
-        this.mockSubject['getPrincipal'] = {-> null}
+        def testBody = "Some output or other"
+        this.mockSubject["getPrincipal"] = {-> null}
         this.tagLib.user.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
         this.tagLib.user([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject['getPrincipal'] = {-> 'admin'}
+        this.mockSubject["getPrincipal"] = {-> "admin"}
         this.tagDelegate.reset()
         this.tagLib.user([:], {-> testBody})
         assertEquals testBody, this.tagDelegate.output
 
         // Finally try with an authenticated user.
-        this.mockSubject['isAuthenticated'] = {-> true}
+        this.mockSubject["isAuthenticated"] = {-> true}
         this.tagDelegate.reset()
         this.tagLib.user([:], {-> testBody})
         assertEquals testBody, this.tagDelegate.output
@@ -128,8 +128,8 @@ class ShiroTagLibTests extends GroovyTestCase {
 
     void testNotUser() {
         // Local setup.
-        def testBody = 'Some output or other'
-        this.mockSubject['getPrincipal'] = {-> null}
+        def testBody = "Some output or other"
+        this.mockSubject["getPrincipal"] = {-> null}
         this.tagLib.notUser.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
@@ -138,46 +138,46 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject['getPrincipal'] = {-> 'admin'}
+        this.mockSubject["getPrincipal"] = {-> "admin"}
         this.tagDelegate.reset()
         this.tagLib.notUser([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Finally try with an authenticated user.
-        this.mockSubject['isAuthenticated'] = {-> true}
+        this.mockSubject["isAuthenticated"] = {-> true}
         this.tagDelegate.reset()
         this.tagLib.notUser([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
     }
 
     void testRemembered() {
         // Local setup.
-        def testBody = 'Some output or other'
-        this.mockSubject['getPrincipal'] = {-> null}
+        def testBody = "Some output or other"
+        this.mockSubject["getPrincipal"] = {-> null}
         this.tagLib.remembered.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
         this.tagLib.remembered([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject['getPrincipal'] = {-> 'admin'}
+        this.mockSubject["getPrincipal"] = {-> "admin"}
         this.tagDelegate.reset()
         this.tagLib.remembered([:], {-> testBody})
         assertEquals testBody, this.tagDelegate.output
 
         // Finally try with an authenticated user.
-        this.mockSubject['isAuthenticated'] = {-> true}
+        this.mockSubject["isAuthenticated"] = {-> true}
         this.tagDelegate.reset()
         this.tagLib.remembered([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
     }
 
     void testNotRemembered() {
         // Local setup.
-        def testBody = 'Some output or other'
-        this.mockSubject['getPrincipal'] = {-> null}
+        def testBody = "Some output or other"
+        this.mockSubject["getPrincipal"] = {-> null}
         this.tagLib.notRemembered.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
@@ -186,13 +186,13 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject['getPrincipal'] = {-> 'admin'}
+        this.mockSubject["getPrincipal"] = {-> "admin"}
         this.tagDelegate.reset()
         this.tagLib.notRemembered([:], {-> testBody})
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Finally try with an authenticated user.
-        this.mockSubject['isAuthenticated'] = {-> true}
+        this.mockSubject["isAuthenticated"] = {-> true}
         this.tagDelegate.reset()
         this.tagLib.notRemembered([:], {-> testBody})
         assertEquals testBody, this.tagDelegate.output
@@ -200,17 +200,17 @@ class ShiroTagLibTests extends GroovyTestCase {
 
     void testPrincipal() {
         // Local setup.
-        def principal = 'admin'
-        this.mockSubject['getPrincipal'] = {-> null}
+        def principal = "admin"
+        this.mockSubject["getPrincipal"] = {-> null}
         this.tagLib.principal.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
         this.tagLib.principal([:])
-        assertEquals '', this.tagDelegate.output
+        assertEquals "", this.tagDelegate.output
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject['getPrincipal'] = {-> principal}
+        this.mockSubject["getPrincipal"] = {-> principal}
         this.tagDelegate.reset()
         this.tagLib.principal([:])
         assertEquals principal, this.tagDelegate.output
@@ -218,17 +218,17 @@ class ShiroTagLibTests extends GroovyTestCase {
 
     void testPrincipalWithType() {
         // Local setup.
-        def principal = 'admin'
-        this.mockSubject['getPrincipalByType'] = {Class clazz -> null}
+        def principal = "admin"
+        this.mockSubject["getPrincipalByType"] = {Class clazz -> null}
         this.tagLib.principal.delegate = this.tagDelegate
 
         // Now execute the tag and check the output that it generates.
 //        this.tagLib.principal([:])
-//        assertEquals '', this.tagDelegate.output
+//        assertEquals "", this.tagDelegate.output
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-//        this.mockSubject['getPrincipal'] = {-> principal}
+//        this.mockSubject["getPrincipal"] = {-> principal}
 //        this.tagDelegate.reset()
 //        this.tagLib.principal([:])
 //        assertEquals principal, this.tagDelegate.output
@@ -240,21 +240,55 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // First test the case where the user does not have the role.
         this.tagLib.hasRole.delegate = this.tagDelegate
-        this.mockSubject['hasRole'] = { String name -> assertEquals testRole, name; false }
+        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; false }
 
         this.tagLib.hasRole(name: testRole) {-> testBody }
         assertEquals "", this.tagDelegate.output
 
         // Now try the case where the user *does* have it.
         testRole = "User"
-        this.mockSubject['hasRole'] = { String name -> assertEquals testRole, name; true }
+        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; true }
 
         this.tagLib.hasRole(name: testRole) {-> testBody }
         assertEquals testBody, this.tagDelegate.output
 
         // Check that the 'name' attribute is required.
-        shouldFail(GrailsTagException) {
+        try {
             this.tagLib.hasRole(dummy: "Administrator") {-> testBody }
+            fail("Should have thrown a tag exception.")
+        }
+        catch (GrailsTagException ex) {
+            // The exception message should contain the correct tag name.
+            assertTrue ex.message.contains("hasRole")
+        }
+    }
+
+    void testLacksRole() {
+        String testBody = "I am an administrator!"
+        String testRole = "Administrator"
+
+        // First test the case where the user does not have the role.
+        this.tagLib.lacksRole.delegate = this.tagDelegate
+        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; true }
+
+        this.tagLib.lacksRole(name: testRole) {-> testBody }
+        assertEquals "", this.tagDelegate.output
+
+        // Now try the case where the user *does* have it.
+        testRole = "User"
+        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; false }
+
+        this.tagLib.lacksRole(name: testRole) {-> testBody }
+        assertEquals testBody, this.tagDelegate.output
+
+        // Check that the 'name' attribute is required.
+        try {
+            this.tagLib.lacksRole(dummy: "Administrator") {-> testBody }
+            fail("Should have thrown a tag exception.")
+        }
+        catch (GrailsTagException ex) {
+            // The exception message should contain the correct tag name.
+            assertTrue ex.message.contains("lacksRole")
         }
     }
 
@@ -264,15 +298,15 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // First test the case where the user does not have the roles.
         this.tagLib.hasAllRoles.delegate = this.tagDelegate
-        this.mockSubject['hasAllRoles'] = { List roles -> assertEquals testRoles, roles; false }
+        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; false }
 
-        this.tagLib.hasAllRoles('in': testRoles) {-> testBody }
+        this.tagLib.hasAllRoles("in": testRoles) {-> testBody }
         assertEquals "", this.tagDelegate.output
 
         // Now try the case where the user *does* have them.
-        this.mockSubject['hasAllRoles'] = { List roles -> assertEquals testRoles, roles; true }
+        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; true }
 
-        this.tagLib.hasAllRoles('in': testRoles) {-> testBody }
+        this.tagLib.hasAllRoles("in": testRoles) {-> testBody }
         assertEquals testBody, this.tagDelegate.output
 
         // Check that the 'in' attribute is required.
@@ -287,16 +321,16 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // First test the case where the user has all the roles.
         this.tagLib.lacksAnyRole.delegate = this.tagDelegate
-        this.mockSubject['hasAllRoles'] = { List roles -> assertEquals testRoles, roles; true }
+        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; true }
 
-        this.tagLib.lacksAnyRole('in': testRoles) {-> testBody }
+        this.tagLib.lacksAnyRole("in": testRoles) {-> testBody }
         assertEquals "", this.tagDelegate.output
 
         // Now try the case where the user is missing at least one of
         // them.
-        this.mockSubject['hasAllRoles'] = { List roles -> assertEquals testRoles, roles; false }
+        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; false }
 
-        this.tagLib.lacksAnyRole('in': testRoles) {-> testBody }
+        this.tagLib.lacksAnyRole("in": testRoles) {-> testBody }
         assertEquals testBody, this.tagDelegate.output
 
         // Check that the 'in' attribute is required.
@@ -311,21 +345,21 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // First test the case where the user has none of the roles.
         this.tagLib.hasAnyRole.delegate = this.tagDelegate
-        this.mockSubject['hasRoles'] = { List roles ->
+        this.mockSubject["hasRoles"] = { List roles ->
             assertEquals testRoles, roles
             [ false, false, false ] as boolean[]
         }
 
-        this.tagLib.hasAnyRole('in': testRoles) {-> testBody }
+        this.tagLib.hasAnyRole("in": testRoles) {-> testBody }
         assertEquals "", this.tagDelegate.output
 
         // Now try the case where the user has at least one of them.
-        this.mockSubject['hasRoles'] = { List roles ->
+        this.mockSubject["hasRoles"] = { List roles ->
             assertEquals testRoles, roles
             [ false, true, false ] as boolean[]
         }
 
-        this.tagLib.hasAnyRole('in': testRoles) {-> testBody }
+        this.tagLib.hasAnyRole("in": testRoles) {-> testBody }
         assertEquals testBody, this.tagDelegate.output
 
         // Check that the 'in' attribute is required.
@@ -341,21 +375,21 @@ class ShiroTagLibTests extends GroovyTestCase {
         // First test the case where the user has at least one of the
         // roles.
         this.tagLib.lacksAllRoles.delegate = this.tagDelegate
-        this.mockSubject['hasRoles'] = { List roles ->
+        this.mockSubject["hasRoles"] = { List roles ->
             assertEquals testRoles, roles
             [ false, true, true ] as boolean[]
         }
 
-        this.tagLib.lacksAllRoles('in': testRoles) {-> testBody }
+        this.tagLib.lacksAllRoles("in": testRoles) {-> testBody }
         assertEquals "", this.tagDelegate.output
 
         // Now try the case where the user has none of them.
-        this.mockSubject['hasRoles'] = { List roles ->
+        this.mockSubject["hasRoles"] = { List roles ->
             assertEquals testRoles, roles
             [ false, false, false ] as boolean[]
         }
 
-        this.tagLib.lacksAllRoles('in': testRoles) {-> testBody }
+        this.tagLib.lacksAllRoles("in": testRoles) {-> testBody }
         assertEquals testBody, this.tagDelegate.output
 
         // Check that the 'in' attribute is required.

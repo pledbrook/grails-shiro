@@ -23,4 +23,4 @@
  * Script invoked when the host project is upgraded.
  * @author Peter Ledbrook
  */
-Ant.mkdir(dir:"${basedir}/grails-app/realms")
+ant.mkdir(dir:"${basedir}/grails-app/realms")

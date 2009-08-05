@@ -19,15 +19,15 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
         def mockSubject = [
             hasRole: { String role ->
                 hasRoleCalled = true
-                Assert.assertEquals('Incorrect role checked.', 'Administrator', role)
+                Assert.assertEquals("Incorrect role checked.", "Administrator", role)
                 return true
             }
         ] as Subject
 
         def testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertTrue('Access control returned wrong result.', testBuilder.role('Administrator'))
-        assertTrue('hasRole() not called.', hasRoleCalled)
+        assertTrue("Access control returned wrong result.", testBuilder.role("Administrator"))
+        assertTrue("hasRole() not called.", hasRoleCalled)
     }
 
     /**
@@ -39,15 +39,15 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
         def mockSubject = [
             hasRole: { role ->
                 hasRoleCalled = true
-                Assert.assertEquals('Incorrect role checked.', 'Observer', role)
+                Assert.assertEquals("Incorrect role checked.", "Observer", role)
                 return false
             }
         ] as Subject
 
         def testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertFalse('Access control returned wrong result.', testBuilder.role('Observer'))
-        assertTrue('hasRole() not called.', hasRoleCalled)
+        assertFalse("Access control returned wrong result.", testBuilder.role("Observer"))
+        assertTrue("hasRole() not called.", hasRoleCalled)
     }
 
     /**
@@ -59,7 +59,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
         def mockSubject = [
             hasRole: { String role ->
                 hasRoleCalled = true
-                Assert.assertEquals('Incorrect role checked.', 'Administrator', role)
+                Assert.assertEquals("Incorrect role checked.", "Administrator", role)
                 return true
             }
         ] as Subject
@@ -68,12 +68,12 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         // Invalid argument type.
         shouldFail {
-            testBuilder.role(target: 'Administrator')
+            testBuilder.role(target: "Administrator")
         }
 
         // Invalid number of arguments.
         shouldFail {
-            testBuilder.role('myRole', 'observer')
+            testBuilder.role("myRole", "observer")
         }
     }
 
@@ -83,7 +83,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
      */
     void testPermission() {
         def isPermittedCalled = false
-        def testPermission = new ShiroBasicPermission('profile', 'show')
+        def testPermission = new ShiroBasicPermission("profile", "show")
 
         def mockSubject = [
             isPermitted: { Permission p ->
@@ -95,8 +95,8 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         def testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertTrue('Access control returned wrong result.', testBuilder.permission(testPermission))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+        assertTrue("Access control returned wrong result.", testBuilder.permission(testPermission))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
 
         // Now test the case where the user is not permitted.
         isPermittedCalled = false
@@ -110,8 +110,8 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertFalse('Access control returned wrong result.', testBuilder.permission(testPermission))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+        assertFalse("Access control returned wrong result.", testBuilder.permission(testPermission))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
     }
 
     /**
@@ -125,38 +125,38 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
         def testPermission = new WildcardPermission(testString)
 
         def mockSubject = [
-            isPermitted: { Permission p ->
+            isPermitted: { String p ->
                 isPermittedCalled = true
                 Assert.assertEquals(
                         "Unexpected permission passed to 'isPermitted()'.",
-                        [ ["printer"] as Set, ["hp4401"] as Set, ["print"] as Set ],
-                        p.parts)
+                        testString,
+                        p)
                 return true
             }
         ] as Subject
 
         def testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertTrue('Access control returned wrong result.', testBuilder.permission(testString))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+        assertTrue("Access control returned wrong result.", testBuilder.permission(testString))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
 
         // Now test the case where the user is not permitted.
         isPermittedCalled = false
         mockSubject = [
-            isPermitted: { Permission p ->
+            isPermitted: { String p ->
                 isPermittedCalled = true
                 Assert.assertEquals(
                         "Unexpected permission passed to 'isPermitted()'.",
-                        [ ["printer"] as Set, ["hp4401"] as Set, ["print"] as Set ],
-                        p.parts)
+                        testString,
+                        p)
                 return false
             }
         ] as Subject
 
         testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertFalse('Access control returned wrong result.', testBuilder.permission(testString))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+        assertFalse("Access control returned wrong result.", testBuilder.permission(testString))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
     }
 
     /**
@@ -165,7 +165,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
      */
     void testPermissionWithMap() {
         def isPermittedCalled = false
-        def expectedPermission = new ShiroBasicPermission('profile', 'show')
+        def expectedPermission = new ShiroBasicPermission("profile", "show")
 
         def mockSubject = [
             isPermitted: { Permission p ->
@@ -177,12 +177,12 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         def testBuilder = new FilterAccessControlBuilder(mockSubject)
 
-        assertTrue('Access control returned wrong result.', testBuilder.permission(type: 'profile', actions: 'show'))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+        assertTrue("Access control returned wrong result.", testBuilder.permission(type: "profile", actions: "show"))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
 
         // Now test the case where the 'actions' arg is a list.
         isPermittedCalled = false
-        expectedPermission = new ShiroBasicPermission('book', 'show, edit')
+        expectedPermission = new ShiroBasicPermission("book", "show, edit")
 
         mockSubject = [
             isPermitted: { Permission p ->
@@ -195,9 +195,9 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
         testBuilder = new FilterAccessControlBuilder(mockSubject)
 
         assertTrue(
-                'Access control returned wrong result.',
-                testBuilder.permission(type: 'book', actions: [ 'show', 'edit' ]))
-        assertTrue('isPermitted() not called.', isPermittedCalled)
+                "Access control returned wrong result.",
+                testBuilder.permission(type: "book", actions: [ "show", "edit" ]))
+        assertTrue("isPermitted() not called.", isPermittedCalled)
     }
 
     /**
@@ -206,7 +206,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
      */
     void testPermissionWithInvalidArgs() {
         def isPermittedCalled = false
-        def expectedPermission = new ShiroBasicPermission('profile', 'show')
+        def expectedPermission = new ShiroBasicPermission("profile", "show")
 
         def mockSubject = [
             isPermitted: { Permission p ->
@@ -225,34 +225,34 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         // Test a missing 'type' argument
         shouldFail(IllegalArgumentException) {
-            testBuilder.permission(target: 'test', actions: 'show')
+            testBuilder.permission(target: "test", actions: "show")
         }
 
         // Test a missing 'actions' argument.
         shouldFail(IllegalArgumentException) {
-            testBuilder.permission(type: 'book')
+            testBuilder.permission(type: "book")
         }
 
         // Test a non-string 'type'.
         shouldFail(IllegalArgumentException) {
-            testBuilder.permission(type: ['profile'], actions: 'test')
+            testBuilder.permission(type: ["profile"], actions: "test")
         }
 
         // Test a non-string or non-collection 'actions' arg.
         shouldFail(IllegalArgumentException) {
-            testBuilder.permission(type: 'profile', actions: 10)
+            testBuilder.permission(type: "profile", actions: 10)
         }
     }
 
     void testMultipleControls1() {
         def hasRoleCalled = false
         def isPermittedCalled = false
-        def expectedPermission = new ShiroBasicPermission('project', 'edit')
+        def expectedPermission = new ShiroBasicPermission("project", "edit")
 
         def mockSubject = [
             hasRole: { String role ->
                 hasRoleCalled = true
-                Assert.assertEquals("Incorrect role checked.", 'Administrator', role)
+                Assert.assertEquals("Incorrect role checked.", "Administrator", role)
                 return false
             },
 
@@ -265,7 +265,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         def b = new FilterAccessControlBuilder(mockSubject)
         def accessControl = {
-            role('Administrator') || permission(type: 'project', actions: 'edit')
+            role("Administrator") || permission(type: "project", actions: "edit")
         }
         accessControl.delegate = b
         assertTrue(accessControl())
@@ -274,12 +274,12 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
     void testMultipleControls2() {
         def hasRoleCalled = false
         def isPermittedCalled = false
-        def expectedPermission = new ShiroBasicPermission('project', 'edit')
+        def expectedPermission = new ShiroBasicPermission("project", "edit")
 
         def mockSubject = [
             hasRole: { String role ->
                 hasRoleCalled = true
-                Assert.assertEquals("Incorrect role checked.", 'Administrator', role)
+                Assert.assertEquals("Incorrect role checked.", "Administrator", role)
                 return true
             },
 
@@ -292,7 +292,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         def b = new FilterAccessControlBuilder(mockSubject)
         def accessControl = {
-            role('Administrator') && permission(type: 'project', actions: 'edit')
+            role("Administrator") && permission(type: "project", actions: "edit")
         }
         accessControl.delegate = b
         assertTrue(accessControl())
@@ -301,12 +301,12 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
     void testMultipleControls3() {
         def hasRoleCalled = false
         def isPermittedCalled = false
-        def expectedPermission = new ShiroBasicPermission('project', 'edit')
+        def expectedPermission = new ShiroBasicPermission("project", "edit")
 
         def mockSubject = [
             hasRole: { String role ->
                 hasRoleCalled = true
-                Assert.assertEquals("Incorrect role checked.", 'Administrator', role)
+                Assert.assertEquals("Incorrect role checked.", "Administrator", role)
                 return true
             },
 
@@ -319,7 +319,7 @@ class FilterAccessControlBuilderTests extends GroovyTestCase {
 
         def b = new FilterAccessControlBuilder(mockSubject)
         def accessControl = {
-            role('Administrator') && permission(type: 'project', actions: 'edit')
+            role("Administrator") && permission(type: "project", actions: "edit")
         }
         accessControl.delegate = b
         assertFalse(accessControl())

@@ -5,13 +5,13 @@ import org.apache.shiro.SecurityUtils
 class AuthController {
     def shiroSecurityManager
 
-    def index = { redirect(action: 'login', params: params) }
+    def index = { redirect(action: "login", params: params) }
 
     def login = {
         return [ username: params.username, rememberMe: (params.rememberMe != null), targetUri: params.targetUri ]
     }
 
-    def signin = {
+    def signIn = {
         def authToken = new UsernamePasswordToken(params.username, params.password)
 
         // Support for "remember me"
@@ -42,28 +42,28 @@ class AuthController {
             // user doesn't have to enter them again.
             def m = [ username: params.username ]
             if (params.rememberMe) {
-                m['rememberMe'] = true
+                m["rememberMe"] = true
             }
 
             // Remember the target URI too.
             if (params.targetUri) {
-                m['targetUri'] = params.targetUri
+                m["targetUri"] = params.targetUri
             }
 
             // Now redirect back to the login page.
-            redirect(action: 'login', params: m)
+            redirect(action: "login", params: m)
         }
     }
 
-    def logout = {
+    def signOut = {
         // Log the user out of the application.
         SecurityUtils.subject?.logout()
 
         // For now, redirect back to the home page.
-        redirect(uri: '/')
+        redirect(uri: "/")
     }
 
     def unauthorized = {
-        render 'You do not have permission to access this page.'
+        render "You do not have permission to access this page."
     }
 }

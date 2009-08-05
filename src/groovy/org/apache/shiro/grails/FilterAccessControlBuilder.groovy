@@ -68,7 +68,7 @@ class FilterAccessControlBuilder {
      * WildcardPermission for more information.
      */
     boolean permission(String permissionString) {
-        return this.subject.isPermitted(new WildcardPermission(permissionString))
+        return this.subject.isPermitted(permissionString)
     }
 
     /**

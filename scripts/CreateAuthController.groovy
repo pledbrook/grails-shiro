@@ -21,28 +21,10 @@
 
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 
-grailsHome = Ant.project.properties."environment.GRAILS_HOME"
-
-includeTargets << new File ("${grailsHome}/scripts/Init.groovy")
+includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
 target("default": "Installs the base auth controller and associated views in this project") {
-    // Make sure any arguments have been parsed if the parser is available.
-    def hasArgsParser = getBinding().variables.containsKey('argsMap')
-    if (hasArgsParser) {
-        depends(parseArguments, checkVersion)
-    }
-    else {
-        depends(checkVersion)
-    }
-
-    createAuthController()
-}
-
-target(createAuthController: "") {
-    // Copy over the standard auth controller.
-    installTemplate("AuthController.groovy", "grails-app/controllers", "controllers")
-
-    // Now copy over the views for the controller.
-    installTemplate("login.gsp", "grails-app/views/auth", "views/auth")
+    // Make sure any arguments have been parsed.
+    depends(parseArguments, createAuthController)
 }

@@ -23,6 +23,10 @@ package org.apache.shiro.grails;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.permission.InvalidPermissionStringException;
+import org.apache.shiro.authz.permission.PermissionResolver;
+import org.apache.shiro.authz.permission.PermissionResolverAware;
 import org.apache.shiro.authz.permission.WildcardPermission;
 
 import java.util.List;
@@ -34,9 +38,15 @@ import java.util.ArrayList;
  * "String..." methods under JDK 1.5. So, these methods automatically
  * convert the strings into WildcardPermission instances.
  */
-public abstract class RealmAdapter implements Realm {
+public abstract class RealmAdapter implements Realm, PermissionResolverAware {
+    PermissionResolver permResolver = null;
+
+    public void setPermissionResolver(PermissionResolver pr) {
+        this.permResolver = pr;
+    }
+
     public void checkPermission(PrincipalCollection principal, String s) throws AuthorizationException {
-        checkPermission(principal, new WildcardPermission(s));
+        checkPermission(principal, toPermission(s));
     }
 
     public void checkPermissions(PrincipalCollection principal, String... strings) throws AuthorizationException {
@@ -44,7 +54,7 @@ public abstract class RealmAdapter implements Realm {
     }
 
     public boolean isPermitted(PrincipalCollection principal, String s) {
-        return isPermitted(principal, new WildcardPermission(s));
+        return isPermitted(principal, toPermission(s));
     }
 
     public boolean[] isPermitted(PrincipalCollection principal, String... strings) {
@@ -56,13 +66,27 @@ public abstract class RealmAdapter implements Realm {
     }
 
     /**
+     * Converts a single permission string into a Permission instances.
+     */
+    private Permission toPermission(String s) {
+        if (permResolver == null) return null;
+        try {
+            return permResolver.resolvePermission(s);
+        }
+        catch (InvalidPermissionStringException ex) {
+            // Nothing we can do about it
+            return null; //@todo Is returning null the right thing to do?
+        }
+    }
+
+    /**
      * Converts an array of string permissions into a list of
      * {@link WildcardPermission} instances.
      */
     private List toPermissionList(String[] strings) {
         List permissions = new ArrayList(strings.length);
         for (int i = 0; i < strings.length; i++) {
-            permissions.add(new WildcardPermission(strings[i]));
+            permissions.add(toPermission(strings[i]));
         }
 
         return permissions;
