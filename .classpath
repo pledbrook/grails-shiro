@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="grails-app/taglib"/>
+	<classpathentry kind="src" path="grails-app/conf"/>
+	<classpathentry kind="src" path="src/groovy"/>
+	<classpathentry kind="src" path="test/unit"/>
+	<classpathentry kind="lib" path="lib/shiro-all-1.0-incubating-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="output" path="eclipse"/>
+</classpath>
