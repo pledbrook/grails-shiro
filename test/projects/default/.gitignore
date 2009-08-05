@@ -1,0 +1,7 @@
+stacktrace.log
+docs/
+eclipse/
+grails-app/realms/
+test/reports/
+web-app/plugins/
+work/
