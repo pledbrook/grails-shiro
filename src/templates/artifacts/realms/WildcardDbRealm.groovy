@@ -45,6 +45,7 @@ class @realm.name@ {
             roles {
                 eq("name", roleName)
             }
+            eq("username", principal)
         }
 
         return roles.size() > 0
@@ -55,6 +56,7 @@ class @realm.name@ {
             roles {
                 'in'("name", roles)
             }
+            eq("username", principal)
         }
 
         return r.size() == roles.size()
