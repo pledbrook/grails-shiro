@@ -19,6 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
 
+import grails.util.GrailsUtil
 
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
@@ -27,8 +28,8 @@ import org.apache.shiro.authz.permission.WildcardPermissionResolver
 import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
+import org.apache.shiro.mgt.SecurityManager
 import org.apache.shiro.realm.Realm
-import org.apache.shiro.subject.DelegatingSubject
 import org.apache.shiro.web.DefaultWebSecurityManager
 import org.apache.shiro.web.WebRememberMeManager
 
@@ -37,7 +38,8 @@ import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
-import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+import org.springframework.aop.framework.ProxyFactoryBean
+import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
@@ -107,7 +109,35 @@ Adopted from previous JSecurity plugin.
 
         // Default remember-me manager.
         shiroRememberMeManager(WebRememberMeManager)
+
+        // If we're in development mode, then place the security manager
+        // behind a proxy. This allows us to change the security manager
+        // without adversely affecting the Shiro servlet filter (which
+        // holds a reference to the proxy). Without the proxy, realm
+        // reloading doesn't work.
+        if (GrailsUtil.isDevelopmentEnv()) {
+            // HACK! Ideally, we would configure the target source to
+            // use the proper security manager. However, if we do that,
+            // the target source itself will be reloaded when a realm
+            // changes. To avoid that, we register a dummy security
+            // manager. This ensures that the target source does not
+            // reload when a realm changes. We can then swap in the new
+            // security manager at will.
+            //
+            // The other part of the hack is in doWithApplicationContext,
+            // where the real security manager is swapped into the target
+            // source.
+            shiroDummySecurityManager(DummySecurityManager)
+
+            shiroSecurityManagerTargetSource(HotSwappableTargetSource, ref("shiroDummySecurityManager"))
+
+            shiroSecurityManagerProxy(ProxyFactoryBean) {
+                targetSource = ref("shiroSecurityManagerTargetSource")
+                proxyInterfaces = [ SecurityManager ]
+            }
+        }
         
+        // The real security manager instance.
         shiroSecurityManager(DefaultWebSecurityManager) { bean ->
             // Shiro doesn't like an empty collection of realms, so we
             // only configure the "realms" property if there are some.
@@ -129,17 +159,25 @@ Adopted from previous JSecurity plugin.
     }
     
     def doWithApplicationContext = { applicationContext ->
+        def mgr = applicationContext.getBean("shiroSecurityManager")
+        if (GrailsUtil.isDevelopmentEnv()) {
+            // HACK! Because we configure the target source with a dummy
+            // security manager in doWithSpring, we have to provide the
+            // real one now.
+            def targetSource = applicationContext.getBean("shiroSecurityManagerTargetSource")
+            targetSource.swap(mgr)
+        }
+
         // Add any extra realms that might have been defined in the project
         def beans = applicationContext.getBeanNamesForType(Realm) as List
-        
+
         // Filter out beans created by the plugin for the realm artefacts.
         beans = beans.findAll { !(it.endsWith("Wrapper") || it.endsWith("Proxy")) }
-        
+
         // Add the remaining beans to the security manager.
         log.info "Registering native realms: $beans"
-        def mgr = applicationContext.getBean("shiroSecurityManager")
         def realms = beans.collect { applicationContext.getBean(it) }
-        
+
         if (mgr.realms == null){
             // If there are no native realms and no normal realms,
             // then there is probably something wrong.
@@ -153,7 +191,6 @@ Adopted from previous JSecurity plugin.
         else {
             mgr.realms.addAll(realms)
         }
-        
     }
     
     /**
@@ -202,7 +239,12 @@ Adopted from previous JSecurity plugin.
                 'filter-class'('org.apache.shiro.spring.SpringShiroFilter')
                 'init-param' {
                     'param-name'('securityManagerBeanName')
-                    'param-value'('shiroSecurityManager')
+                    if (GrailsUtil.isDevelopmentEnv()) {
+                        'param-value'('shiroSecurityManagerProxy')
+                    }
+                    else {
+                        'param-value'('shiroSecurityManager')
+                    }
                 }
                 
                 // If a Shiro configuration is available, add it
@@ -297,51 +339,19 @@ Adopted from previous JSecurity plugin.
                 return
             }
 
-            boolean isNew = event.application.getRealmClass(event.source?.name) == null
+            // Make sure the new realm class is registered.
             def realmClass = application.addArtefact(RealmArtefactHandler.TYPE, event.source)
+            
+            // We clone the closure because we're going to change
+            // the delegate.
+            def beans = beans(configureRealm.curry(realmClass))
+            beans.registerBeans(context)
 
-            if (isNew) {
-                try {
-                    def beanDefinitions = beans(configureRealm.curry(realmClass))
-                    beanDefinitions.registerBeans(context)
-                }
-                catch (MissingMethodException ex) {
-                    // This version of Grails does not support this.
-                    log.warn("Unable to register beans (Grails version < 0.5.5)")
-                }
-            }
-            else {
-                def realmName = realmClass.shortName
-                def wrapperName = "${realmName}Wrapper".toString()
-
-                // We clone the closure because we're going to change
-                // the delegate.
-                def c = configureRealm.clone()
-                def beans = beans {
-                    // The bean definitions are provided by the
-                    // configureRealm closure.
-                    c.delegate = delegate
-                    c(realmClass)
-                }
-
-                beans.registerBeans(context)
-            }
-
-            // HACK
-            // The problem here is that the subject has been created
-            // within a servlet filter *before* the realm reloading
-            // has occurred. The above 'registerBeanDefinition()'
-            // calls result in the security manager being destroyed
-            // and a new one created, but the subject still refers
-            // to the old security manager.
-            // So, we update the subject's security manager directly.
-            // Note that we are using Groovy's ability to circumvent
-            // visibility controls since the 'securityManager' field
-            // is protected, not public.
-            if (SecurityUtils.subject instanceof DelegatingSubject) {
-                def mgr = applicationContext.getBean("shiroSecurityManager")
-                SecurityUtils.subject.@securityManager = mgr
-            }
+            // Update the proxy so that it's using the new security
+            // manager. Otherwise Shiro's servlet filter will continue
+            // to use the old one.
+            def targetSource = context.getBean("shiroSecurityManagerTargetSource")
+            targetSource.swap(context.getBean("shiroSecurityManager"))
         }
     }
 
@@ -349,15 +359,7 @@ Adopted from previous JSecurity plugin.
         def realmName = grailsClass.shortName
         
         // Create the realm bean.
-        "${realmName}Class"(MethodInvokingFactoryBean) {
-            targetObject = ref("grailsApplication", true)
-            targetMethod = "getArtefact"
-            arguments = [RealmArtefactHandler.TYPE, grailsClass.fullName]
-        }
-        
-        "${realmName}Instance"(ref("${realmName}Class")) {bean ->
-            bean.factoryMethod = "newInstance"
-            bean.singleton = true
+        "${realmName}Instance"(grailsClass.clazz) { bean ->
             bean.autowire = "byName"
         }
         

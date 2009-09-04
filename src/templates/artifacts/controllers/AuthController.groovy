@@ -23,7 +23,7 @@ class AuthController {
             // Perform the actual login. An AuthenticationException
             // will be thrown if the username is unrecognised or the
             // password is incorrect.
-            this.shiroSecurityManager.login(authToken)
+            SecurityUtils.subject.login(authToken)
 
             // If a controller redirected to this page, redirect back
             // to it. Otherwise redirect to the root URI.
