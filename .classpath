@@ -8,5 +8,12 @@
 	<classpathentry kind="lib" path="lib/shiro-all-1.0-incubating-SNAPSHOT.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="var" path="GRAILS_HOME/lib/junit-3.8.2.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/dist/grails-core-1.2-SNAPSHOT.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/dist/grails-test-1.2-SNAPSHOT.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/dist/grails-web-1.2-SNAPSHOT.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/lib/org.springframework.beans-3.0.0.M4.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/lib/org.springframework.core-3.0.0.M4.jar"/>
+	<classpathentry kind="var" path="GRAILS_HOME/lib/jcl-over-slf4j-1.5.6.jar"/>
 	<classpathentry kind="output" path="eclipse"/>
 </classpath>
