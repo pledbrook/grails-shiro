@@ -1,0 +1,6 @@
+Permission.groovy
+Role.groovy
+RolePermissionRel.groovy
+User.groovy
+UserPermissionRel.groovy
+UserRoleRel.groovy
