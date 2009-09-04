@@ -35,6 +35,7 @@ import org.apache.shiro.subject.DelegatingSubject
 import org.apache.shiro.web.DefaultWebSecurityManager
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ShiroGrailsPlugin {
     // the plugin version
@@ -420,11 +421,17 @@ Adopted from previous JSecurity plugin.
                     }
                     targetUri += query
                 }
-                
-                filter.redirect(
-                        controller: "auth",
-                        action: "login",
-                        params: [ targetUri: targetUri ])
+
+                def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
+                if (redirectUri) {
+                    filter.redirect(uri: redirectUri + "?targetUri=$targetUri")
+                }
+                else {
+                    filter.redirect(
+                            controller: "auth",
+                            action: "login",
+                            params: [ targetUri: targetUri ])
+                }
             }
             
             return false
