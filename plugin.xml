@@ -10,4 +10,5 @@ Adopted from previous JSecurity plugin.
     <resource>ShiroTagLib</resource>
   </resources>
   <dependencies />
+  <behavior />
 </plugin>
