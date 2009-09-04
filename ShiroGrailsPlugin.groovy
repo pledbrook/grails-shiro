@@ -433,7 +433,13 @@ Adopted from previous JSecurity plugin.
         def isPermitted
         if (c == null) {
             // Check that the user has the required permission for the target controller/action.
-            isPermitted = subject.isPermitted(new ShiroBasicPermission(filter.controllerName, filter.actionName ?: "index"))
+            def permString = new StringBuilder()
+            permString << filter.controllerName << ':' << (filter.actionName ?: "index")
+
+            // Add the ID if it's in the web parameters.
+            if (filter.params.id) permString << ':' << filter.params.id
+
+            isPermitted = subject.isPermitted(permString.toString())
         }
         else {
             // Call the closure with the access control builder and
