@@ -113,7 +113,7 @@ Adopted from previous JSecurity plugin.
             
             // Allow the user to customise the authentication strategy.
             if (application.config.security.shiro.authentication.strategy) {
-                modularAuthenticationStrategy = application.config.security.shiro.authentication.strategy
+                authenticationStrategy = application.config.security.shiro.authentication.strategy
             }
         }
     }
