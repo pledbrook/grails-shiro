@@ -52,4 +52,4 @@ log4j = {
             "org.hibernate"
 }
 
-jsecurity.authc.required = false
+security.shiro.authc.required = false
