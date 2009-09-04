@@ -317,19 +317,14 @@ Adopted from previous JSecurity plugin.
                 // We clone the closure because we're going to change
                 // the delegate.
                 def c = configureRealm.clone()
-                c.delegate = delegate
-
                 def beans = beans {
                     // The bean definitions are provided by the
                     // configureRealm closure.
+                    c.delegate = delegate
                     c(realmClass)
                 }
 
-                if (context) {
-                    context.registerBeanDefinition("${realmName}Class", beans.getBeanDefinition("${realmName}Class"))
-                    context.registerBeanDefinition("${realmName}Instance", beans.getBeanDefinition("${realmName}Instance"))
-                    context.registerBeanDefinition(wrapperName, beans.getBeanDefinition(wrapperName))
-                }
+                beans.registerBeans(context)
             }
 
             // HACK
