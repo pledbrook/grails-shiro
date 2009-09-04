@@ -19,13 +19,10 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
 
-import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import org.codehaus.groovy.grails.plugins.support.GrailsPluginUtils
-import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
+import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
 import org.apache.shiro.authz.permission.WildcardPermissionResolver
 import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
@@ -33,9 +30,14 @@ import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
 import org.apache.shiro.subject.DelegatingSubject
 import org.apache.shiro.web.DefaultWebSecurityManager
+import org.apache.shiro.web.WebRememberMeManager
+
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
+import org.codehaus.groovy.grails.commons.GrailsClassUtils
+import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ShiroGrailsPlugin {
     // the plugin version
@@ -98,7 +100,13 @@ Adopted from previous JSecurity plugin.
         // Default permission resolver: WildcardPermissionResolver.
         // This converts permission strings into WildcardPermission
         // instances.
-        permissionResolver(WildcardPermissionResolver)
+        shiroPermissionResolver(WildcardPermissionResolver)
+
+        // Default authentication strategy.
+        shiroAuthenticationStrategy(AtLeastOneSuccessfulStrategy)
+
+        // Default remember-me manager.
+        shiroRememberMeManager(WebRememberMeManager)
         
         shiroSecurityManager(DefaultWebSecurityManager) { bean ->
             // Shiro doesn't like an empty collection of realms, so we
@@ -107,15 +115,16 @@ Adopted from previous JSecurity plugin.
                 realms = realmBeans.collect { ref(it) }
             }
             
-            // Allow the user to customise the session type: 'http' or 'shiro'.
+            // Allow the user to customise the session type: 'http' or
+            // 'shiro'.
             if (application.config.security.shiro.session.mode) {
                 sessionMode = application.config.security.shiro.session.mode
             }
             
-            // Allow the user to customise the authentication strategy.
-            if (application.config.security.shiro.authentication.strategy) {
-                authenticationStrategy = application.config.security.shiro.authentication.strategy
-            }
+            // Allow the user to provide his own versions of these
+            // components in resources.xml or resources.groovy.
+            authenticationStrategy = ref("shiroAuthenticationStrategy")
+            rememberMeManager = ref("shiroRememberMeManager")
         }
     }
     
@@ -362,7 +371,7 @@ Adopted from previous JSecurity plugin.
         "${wrapperName}"(RealmWrapper) {
             realm = ref("${realmName}Instance")
             tokenClass = GrailsClassUtils.getStaticPropertyValue(grailsClass.clazz, "authTokenClass")
-            permissionResolver = ref("permissionResolver")
+            permissionResolver = ref("shiroPermissionResolver")
         }
         
         // Return the bean name for this realm.

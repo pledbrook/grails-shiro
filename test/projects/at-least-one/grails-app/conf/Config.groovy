@@ -68,5 +68,3 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
-
-security.shiro.authentication.strategy = new org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy()

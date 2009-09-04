@@ -8,7 +8,7 @@ class ShiroDbRealm {
     static authTokenClass = org.apache.shiro.authc.UsernamePasswordToken
 
     def credentialMatcher
-    def permissionResolver
+    def shiroPermissionResolver
 
     def authenticate(authToken) {
         log.info "Attempting to authenticate ${authToken.username} in DB realm..."
@@ -76,7 +76,7 @@ class ShiroDbRealm {
         def retval = permissions?.find { permString ->
             // Create a real permission instance from the database
             // permission.
-            def perm = permissionResolver.resolvePermission(permString)
+            def perm = shiroPermissionResolver.resolvePermission(permString)
 
             // Now check whether this permission implies the required
             // one.
@@ -107,7 +107,7 @@ class ShiroDbRealm {
         retval = results.find { permString ->
             // Create a real permission instance from the database
             // permission.
-            def perm = permissionResolver.resolvePermission(permString)
+            def perm = shiroPermissionResolver.resolvePermission(permString)
 
             // Now check whether this permission implies the required
             // one.
