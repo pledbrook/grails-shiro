@@ -1,6 +1,6 @@
 class SecurityFilters {
     def filters = {
-        auth(controller: /\b(?!(item|book)\b)\w+/, action: "*") {
+        auth(controller: /\b(?!(item|book|basic|form)\b)\w+/, action: "*") {
             before = {
                 accessControl(auth: true) { true }
             }

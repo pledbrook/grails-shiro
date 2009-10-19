@@ -52,4 +52,22 @@ log4j = {
             "org.hibernate"
 }
 
-jsecurity.authc.required = false
+security {
+    shiro {
+        authc.required = false
+        filter.config = """\
+[filters]
+# Standard authentication that redirects to a login form
+authcForm = org.apache.shiro.web.filter.authc.FormAuthenticationFilter
+authcForm.loginUrl = /auth/login
+
+# HTTP Basic authentication
+authcBasic = org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
+authcBasic.applicationName = Shiro Plugin Test
+
+[urls]
+/basic/** = authcBasic
+/form/** = authcForm
+"""
+    }
+}

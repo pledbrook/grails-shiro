@@ -13,14 +13,13 @@ class BootStrap {
         def testUser2 = new User(username: "test2", passwordHash: new Sha1Hash("test2").toHex()).save()
 
         // First user has access to index, show, create.
-        def permission = new Permission(type: "org.apache.shiro.grails.ShiroBasicPermission", possibleActions: "*").save()
-        new UserPermissionRel(user: testUser1, permission: permission, target: "test", actions: "index,show,create").save()
+        def wildcardPermission = new Permission(type: "org.apache.shiro.authz.permission.WildcardPermission", possibleActions: "*").save()
+        new UserPermissionRel(user: testUser1, permission: wildcardPermission, target: "test:index,show,create", actions: "*").save()
 
         // Second user has access to index, show, edit, delete.
-        new UserPermissionRel(user: testUser2, permission: permission, target: "test", actions: "index,show,edit,delete").save()
+        new UserPermissionRel(user: testUser2, permission: wildcardPermission, target: "test:index,show,edit,delete", actions: "*").save()
 
         // Wildcard permissions.
-        def wildcardPermission = new Permission(type: "org.apache.shiro.authz.permission.WildcardPermission", possibleActions: "*").save()
         new UserPermissionRel(user: testUser1, permission: wildcardPermission, target: "w:index,one", actions: "*").save()
         new UserPermissionRel(user: testUser2, permission: wildcardPermission, target: "w:index,two", actions: "*").save()
         
