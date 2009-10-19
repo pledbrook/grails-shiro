@@ -1,6 +1,8 @@
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.UsernamePasswordToken
-import org.apache.shiro.SecurityUtils
+import org.apache.shiro.web.SavedRequest
+import org.apache.shiro.web.WebUtils
 
 class AuthController {
     def shiroSecurityManager
@@ -18,16 +20,23 @@ class AuthController {
         if (params.rememberMe) {
             authToken.rememberMe = true
         }
-
+        
+        // If a controller redirected to this page, redirect back
+        // to it. Otherwise redirect to the root URI.
+        def targetUri = params.targetUri ?: "/"
+        
+        // Handle requests saved by Shiro filters.
+        def savedRequest = WebUtils.getSavedRequest(request)
+        if (savedRequest) {
+                targetUri = savedRequest.requestURI - request.contextPath
+                if (savedRequest.queryString) targetUri = targetUri + '?' + savedRequest.queryString
+        }
+        
         try{
             // Perform the actual login. An AuthenticationException
             // will be thrown if the username is unrecognised or the
             // password is incorrect.
-            this.shiroSecurityManager.login(authToken)
-
-            // If a controller redirected to this page, redirect back
-            // to it. Otherwise redirect to the root URI.
-            def targetUri = params.targetUri ?: "/"
+            SecurityUtils.subject.login(authToken)
 
             log.info "Redirecting to '${targetUri}'."
             redirect(uri: targetUri)
