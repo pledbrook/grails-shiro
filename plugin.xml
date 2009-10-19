@@ -1,4 +1,4 @@
-<plugin name='shiro' version='1.0-SNAPSHOT' grailsVersion='1.1 &gt; *'>
+<plugin name='shiro' version='1.0' grailsVersion='1.1 &gt; *'>
   <author>Peter Ledbrook</author>
   <title>Apache Shiro Integration for Grails</title>
   <description>Enables Grails applications to take advantage of the Apache Shiro security layer.
@@ -9,6 +9,8 @@ Adopted from previous JSecurity plugin.
     <resource>ShiroFilters</resource>
     <resource>ShiroTagLib</resource>
   </resources>
-  <dependencies />
+  <dependencies>
+    <resolvers />
+  </dependencies>
   <behavior />
 </plugin>
