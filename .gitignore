@@ -1,6 +1,7 @@
 stacktrace.log
 docs/
 eclipse/
+target/
 test/reports/
 web-app/
 work/
