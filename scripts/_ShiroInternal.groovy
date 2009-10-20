@@ -208,3 +208,12 @@ target(createLdapRealm: "Creates a new LDAP realm.") {
     event("CreatedFile", [artefactFile])
     event("CreatedArtefact", ['Realm', className])
 }
+
+/**
+ * Creates a SecurityFilters class from a template. This class protects
+ * all URLs by default using access control by convention.
+ */
+target(createSecurityFilters: "Creates a standard Grails filters class implementing access control by convention.") {
+    // Copy over the standard filters class.
+    installTemplate("SecurityFilters.groovy", "grails-app/conf", "filters")
+}

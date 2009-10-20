@@ -32,5 +32,5 @@ where
 
 target(default: "Sets up a basic security system with a wildcard realm, auth controller, etc.") {
     // Make sure any arguments have been parsed.
-    depends(parseArguments, createWildcardRealm, createAuthController)
+    depends(parseArguments, createWildcardRealm, createAuthController, createSecurityFilters)
 }
