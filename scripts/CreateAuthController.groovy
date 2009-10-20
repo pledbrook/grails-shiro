@@ -24,7 +24,11 @@ import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
-target("default": "Installs the base auth controller and associated views in this project") {
+USAGE = """
+    create-auth-controller
+"""
+
+target(default: "Installs the base auth controller and associated views in this project") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createAuthController)
 }

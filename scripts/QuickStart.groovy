@@ -22,7 +22,15 @@
 includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
-target("default": "Sets up a basic security system with a database realm, auth controller, etc.") {
+USAGE = """
+    quick-start [--prefix=PREFIX]
+
+where
+    PREFIX = The prefix to add to the names of the realm and domain classes
+             (default: "Shiro").
+"""
+
+target(default: "Sets up a basic security system with a wildcard realm, auth controller, etc.") {
     // Make sure any arguments have been parsed.
-    depends(parseArguments, createDbRealm, createAuthController)
+    depends(parseArguments, createWildcardRealm, createAuthController)
 }

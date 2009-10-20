@@ -21,7 +21,15 @@
 includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
-target ('default': 'Creates a database Shiro realm that only supports wildcard permissions.') {
+USAGE = """
+    create-db-realm [--prefix=PREFIX]
+
+where
+    PREFIX = The prefix to add to the names of the realm and domain classes
+             (default: "Shiro").
+"""
+
+target (default: "Creates a database Shiro realm (and domain classes) that only supports wildcard permissions.") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createWildcardRealm)
 }
