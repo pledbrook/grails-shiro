@@ -36,8 +36,8 @@ class FilterAccessControlBuilder {
      * Checks whether the user associated with the builder's security
      * context has the given role or not.
      */
-    boolean role(String roleName) {
-        return this.subject.hasRole(roleName)
+    boolean role(roleName) {
+        return this.subject.hasRole(roleName.toString())
     }
 
     /**
