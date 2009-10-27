@@ -9,8 +9,5 @@ Adopted from previous JSecurity plugin.
     <resource>ShiroFilters</resource>
     <resource>ShiroTagLib</resource>
   </resources>
-  <dependencies>
-    <resolvers />
-  </dependencies>
-  <behavior />
+  <dependencies />
 </plugin>
