@@ -9,5 +9,33 @@ Adopted from previous JSecurity plugin.
     <resource>ShiroFilters</resource>
     <resource>ShiroTagLib</resource>
   </resources>
-  <dependencies />
+  <dependencies>
+    <resolvers />
+  </dependencies>
+  <behavior>
+    <method name='getRoleMap' artefact='Filters' type='ShiroFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getPermissionMap' artefact='Filters' type='ShiroFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='groovy.lang.Closure' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='java.util.Map' />
+      <argument type='groovy.lang.Closure' />
+    </method>
+  </behavior>
 </plugin>
