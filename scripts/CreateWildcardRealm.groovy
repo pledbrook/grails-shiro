@@ -22,7 +22,7 @@ includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
 USAGE = """
-    create-db-realm [--prefix=PREFIX]
+    create-wildcard-realm [--prefix=PREFIX]
 
 where
     PREFIX = The prefix to add to the names of the realm and domain classes
