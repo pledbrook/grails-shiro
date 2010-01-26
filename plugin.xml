@@ -1,0 +1,51 @@
+<plugin name='shiro' version='1.1-SNAPSHOT' grailsVersion='1.1 &gt; *'>
+  <author>Peter Ledbrook</author>
+  <title>Apache Shiro Integration for Grails</title>
+  <description>Enables Grails applications to take advantage of the Apache Shiro security layer.
+Adopted from previous JSecurity plugin.
+</description>
+  <documentation>http://grails.org/Shiro+Plugin</documentation>
+  <resources>
+    <resource>ShiroFilters</resource>
+    <resource>ShiroTagLib</resource>
+  </resources>
+  <dependencies>
+    <resolvers>
+      <resolver type='grailsPlugins' name='grailsPlugins' />
+    </resolvers>
+  </dependencies>
+  <behavior>
+    <method name='getRoleMap' artefact='Filters' type='org.codehaus.groovy.grails.web.filters.JavascriptLibraryFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getPermissionMap' artefact='Filters' type='org.codehaus.groovy.grails.web.filters.JavascriptLibraryFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getRoleMap' artefact='Filters' type='ShiroFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getPermissionMap' artefact='Filters' type='ShiroFilters'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='groovy.lang.Closure' />
+    </method>
+    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
+      <description />
+      <argument type='java.util.Map' />
+      <argument type='groovy.lang.Closure' />
+    </method>
+  </behavior>
+</plugin>
