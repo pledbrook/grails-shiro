@@ -81,6 +81,20 @@ class MainFunctionalTests extends org.example.functional.TestSupport {
         logout()
     }
 
+    void testSessionTimeOutOnPost() {
+        post("/book/save") {
+            title "The Shining"
+            author "Stephen King"
+        }
+        login "admin", "admin"
+
+        get "/book/list"
+        assertTitle "Book List"
+        assertEquals 4, byXPath("count(//tbody/tr)").toInteger()
+        assertEquals "The Shining", byXPath("//tbody/tr[4]/td[2]").textContent 
+
+    }
+
     void testPermissions() {
         // Check the JsecBasicPermission access control.
         login "test1", "test1", "/test/create"

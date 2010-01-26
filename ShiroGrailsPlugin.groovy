@@ -257,6 +257,24 @@ Adopted from previous JSecurity plugin.
                     }
                 }
             }
+
+            // Configure an instance of the plugin's "saved request".
+            // This handles unauthenticated POST requests so that the
+            // user doesn't have to manually resubmit data if his
+            // session times out.
+            'filter' {
+                'filter-name'('shiroSavedRequestFilter')
+                'filter-class'('org.apache.shiro.grails.SavedRequestFilter')
+            }
+        }
+
+        // Put the saved request filter first, even ahead of the char
+        // encoding filter.
+        xml.filter[xml.filter.size() - 1] + {
+            'filter-mapping' {
+                'filter-name'('shiroSavedRequestFilter')
+                'url-pattern'('/*')
+            }
         }
         
         // Place the Shiro filter after the Spring character encoding filter, otherwise the latter filter won't work.
@@ -269,7 +287,6 @@ Adopted from previous JSecurity plugin.
         // certain situations, such as no filter mappings at all, or
         // a SiteMesh one but no character encoding filter mapping.
         // Bleh.
-        
         if (!filter) {
             /* Of course, if there is no char encoding filter, the next
              requirement is that we come before the SiteMesh filter.
@@ -413,30 +430,50 @@ Adopted from previous JSecurity plugin.
         // If required, check that the user is authenticated.
         def subject = SecurityUtils.subject
         if (subject.principal == null || (authenticatedUserRequired && !subject.authenticated)) {
-            // User is not authenticated, so deal with it.
+            // User is not authenticated, so deal with it. First, let
+            // the filters class deal with it.
+            boolean doDefault = true
             if (filtersClass.metaClass.respondsTo(filtersClass, "onNotAuthenticated")) {
-                filtersClass.onNotAuthenticated(subject, filter)
+                doDefault = filtersClass.onNotAuthenticated(subject, filter)
             }
-            else {
+            
+            // Continue with the default behaviour of redirecting to
+            // the login page, unless the onNotAuthenticated() method
+            // requests otherwise.
+            if (doDefault) {
                 // Default behaviour is to redirect to the login page.
-                def targetUri = request.forwardURI - request.contextPath
+                // We start by building the target URI from the request's
+                // 'forwardURI', which is the URL specified by the
+                // browser.
+                def targetUri = new StringBuilder(request.forwardURI[request.contextPath.size()..-1])
                 def query = request.queryString
                 if (query) {
                     if (!query.startsWith('?')) {
-                        query = '?' + query
+                        targetUri << '?'
                     }
-                    targetUri += query
+                    targetUri << query
+                }
+
+                // Save the request if this is a POST so we don't lose
+                // the data after a redirect. The other part of the
+                // POST handling is in the ...Filter.
+                if (request.method == "POST") {
+                    filter.session["shiroGrailsSavedRequest"] = new SavedHttpServletRequest(request)
+
+                    if (!query) targetUri << '?'
+                    else targetUri << '&'
+                    targetUri << "shiroPostRedirect=1"
                 }
 
                 def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
                 if (redirectUri) {
-                    filter.redirect(uri: redirectUri + "?targetUri=$targetUri")
+                    filter.redirect(uri: redirectUri + "?targetUri=${targetUri}")
                 }
                 else {
                     filter.redirect(
                             controller: "auth",
                             action: "login",
-                            params: [ targetUri: targetUri ])
+                            params: [ targetUri: targetUri.toString() ])
                 }
             }
             
