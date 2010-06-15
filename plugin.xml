@@ -6,46 +6,10 @@ Adopted from previous JSecurity plugin.
 </description>
   <documentation>http://grails.org/Shiro+Plugin</documentation>
   <resources>
+    <resource>BuildConfig</resource>
     <resource>ShiroFilters</resource>
     <resource>ShiroTagLib</resource>
   </resources>
-  <dependencies>
-    <resolvers>
-      <resolver type='grailsPlugins' name='grailsPlugins' />
-    </resolvers>
-  </dependencies>
-  <behavior>
-    <method name='getRoleMap' artefact='Filters' type='org.codehaus.groovy.grails.web.filters.JavascriptLibraryFilters'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getPermissionMap' artefact='Filters' type='org.codehaus.groovy.grails.web.filters.JavascriptLibraryFilters'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getRoleMap' artefact='Filters' type='ShiroFilters'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getPermissionMap' artefact='Filters' type='ShiroFilters'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
-      <description />
-    </method>
-    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
-      <description />
-      <argument type='groovy.lang.Closure' />
-    </method>
-    <method name='accessControl' artefact='Filters' type='org.codehaus.groovy.grails.plugins.web.filters.FilterConfig'>
-      <description />
-      <argument type='java.util.Map' />
-      <argument type='groovy.lang.Closure' />
-    </method>
-  </behavior>
+  <dependencies />
+  <behavior />
 </plugin>

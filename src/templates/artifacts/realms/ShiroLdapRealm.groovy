@@ -101,7 +101,7 @@ class @realm.name@ {
         if (!urlUsed) {
             def msg = 'No LDAP server available.'
             log.error msg
-            throw new org.jsecurity.authc.AuthenticationException(msg)
+            throw new org.apache.shiro.authc.AuthenticationException(msg)
         }
 
         // Look up the DN for the LDAP entry that has a 'uid' value

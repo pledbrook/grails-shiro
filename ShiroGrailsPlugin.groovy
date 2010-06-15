@@ -30,8 +30,8 @@ import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.mgt.SecurityManager
 import org.apache.shiro.realm.Realm
-import org.apache.shiro.web.DefaultWebSecurityManager
-import org.apache.shiro.web.WebRememberMeManager
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager
+import org.apache.shiro.web.mgt.CookieRememberMeManager
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
@@ -40,6 +40,9 @@ import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
 import org.springframework.aop.framework.ProxyFactoryBean
 import org.springframework.aop.target.HotSwappableTargetSource
+import org.apache.shiro.authc.pam.ModularRealmAuthenticator
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.web.mgt.WebSecurityManager
 
 class ShiroGrailsPlugin {
     // the plugin version
@@ -104,11 +107,14 @@ Adopted from previous JSecurity plugin.
         // instances.
         shiroPermissionResolver(WildcardPermissionResolver)
 
-        // Default authentication strategy.
+        // Default authentication strategy
         shiroAuthenticationStrategy(AtLeastOneSuccessfulStrategy)
-
+        // Default authenticator
+        shiroAuthenticator(ModularRealmAuthenticator) {
+          authenticationStrategy = ref("shiroAuthenticationStrategy")
+        }
         // Default remember-me manager.
-        shiroRememberMeManager(WebRememberMeManager)
+        shiroRememberMeManager(CookieRememberMeManager)
 
         // If we're in development mode, then place the security manager
         // behind a proxy. This allows us to change the security manager
@@ -133,7 +139,7 @@ Adopted from previous JSecurity plugin.
 
             shiroSecurityManagerProxy(ProxyFactoryBean) {
                 targetSource = ref("shiroSecurityManagerTargetSource")
-                proxyInterfaces = [ SecurityManager ]
+                proxyInterfaces = [ WebSecurityManager ]
             }
         }
         
@@ -153,8 +159,12 @@ Adopted from previous JSecurity plugin.
             
             // Allow the user to provide his own versions of these
             // components in resources.xml or resources.groovy.
-            authenticationStrategy = ref("shiroAuthenticationStrategy")
+            authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
+        }
+
+        shiroFilter(ShiroFilterFactoryBean) {
+          securityManager = GrailsUtil.isDevelopmentEnv() ? ref("shiroSecurityManagerProxy") : ref("shiroSecurityManager")
         }
     }
     
@@ -235,16 +245,11 @@ Adopted from previous JSecurity plugin.
         def contextParam = xml.'context-param'
         contextParam[contextParam.size() - 1] + {
             'filter' {
-                'filter-name'('securityContextFilter')
-                'filter-class'('org.apache.shiro.spring.SpringShiroFilter')
+                'filter-name'('shiroFilter')
+                'filter-class'('org.springframework.web.filter.DelegatingFilterProxy')
                 'init-param' {
-                    'param-name'('securityManagerBeanName')
-                    if (GrailsUtil.isDevelopmentEnv()) {
-                        'param-value'('shiroSecurityManagerProxy')
-                    }
-                    else {
-                        'param-value'('shiroSecurityManager')
-                    }
+                    'param-name'('targetFilterLifecycle')
+                        'param-value'('true')
                 }
                 
                 // If a Shiro configuration is available, add it
@@ -326,7 +331,7 @@ Adopted from previous JSecurity plugin.
         // Finally add the Shiro filter mapping after the selected insertion point.
         filter + {
             'filter-mapping' {
-                'filter-name'('securityContextFilter')
+                'filter-name'('shiroFilter')
                 'url-pattern'("/*")
             }
         }
