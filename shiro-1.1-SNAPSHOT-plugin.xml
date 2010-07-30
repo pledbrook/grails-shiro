@@ -1,0 +1,17 @@
+<plugin name='shiro' version='1.1-SNAPSHOT' grailsVersion='1.1 &gt; *'>
+  <author>Peter Ledbrook</author>
+  <title>Apache Shiro Integration for Grails</title>
+  <description>Enables Grails applications to take advantage of the Apache Shiro security layer.
+Adopted from previous JSecurity plugin.
+</description>
+  <documentation>http://grails.org/Shiro+Plugin</documentation>
+  <resources>
+    <resource>BuildConfig</resource>
+    <resource>ShiroFilters</resource>
+    <resource>spring.resources</resource>
+    <resource>org.apache.shiro.grails.ShiroAnnotationHandlerService</resource>
+    <resource>ShiroTagLib</resource>
+  </resources>
+  <dependencies />
+  <behavior />
+</plugin>
