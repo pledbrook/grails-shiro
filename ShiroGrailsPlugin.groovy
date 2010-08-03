@@ -34,9 +34,9 @@ import org.apache.shiro.spring.LifecycleBeanPostProcessor
 import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
-import org.apache.shiro.web.mgt.WebSecurityManager
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.mgt.CookieRememberMeManager
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager
+import org.apache.shiro.web.mgt.WebSecurityManager
 import org.apache.shiro.web.servlet.IniShiroFilter
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -113,10 +113,12 @@ Adopted from previous JSecurity plugin.
 
         // Default authentication strategy
         shiroAuthenticationStrategy(AtLeastOneSuccessfulStrategy)
+
         // Default authenticator
         shiroAuthenticator(ModularRealmAuthenticator) {
-          authenticationStrategy = ref("shiroAuthenticationStrategy")
+            authenticationStrategy = ref("shiroAuthenticationStrategy")
         }
+
         // Default remember-me manager.
         shiroRememberMeManager(CookieRememberMeManager)
 
@@ -262,6 +264,10 @@ Adopted from previous JSecurity plugin.
                     'param-value'('true')
                 }
                 
+                'init-param' {
+                    'param-name'('targetFilterLifecycle')
+                    'param-value'('true')
+                }
             }
 
             // Configure an instance of the plugin's "saved request".
