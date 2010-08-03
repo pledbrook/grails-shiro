@@ -1,4 +1,4 @@
-import org.apache.shiro.crypto.hash.Sha1Hash
+import org.apache.shiro.crypto.hash.Sha256Hash
 
 class BootStrap {
     def init = { servletContext ->
@@ -8,7 +8,7 @@ class BootStrap {
         adminRole.save()
 
         // An admin user.
-        def adminUser = new ShiroUser(username: "admin", passwordHash: new Sha1Hash("admin").toHex()).save()
+        def adminUser = new ShiroUser(username: "admin", passwordHash: new Sha256Hash("admin").toHex()).save()
         adminUser.addToRoles(adminRole)
         adminUser.save()
 
@@ -16,16 +16,17 @@ class BootStrap {
         def userRole = new ShiroRole(name: "User")
         userRole.addToPermissions("book:list,show")
         userRole.addToPermissions("test:*")
+        userRole.save()
 
         // Normal user with the User role. 
-        def normalUser = new ShiroUser(username: "dilbert", passwordHash: new Sha1Hash("password").toHex())
+        def normalUser = new ShiroUser(username: "dilbert", passwordHash: new Sha256Hash("password").toHex())
         normalUser.addToRoles(userRole)
         normalUser.addToPermissions("book:create")
         normalUser.save()
 
         // Users for the TestController.
-        def testUser1 = new ShiroUser(username: "test1", passwordHash: new Sha1Hash("test1").toHex()).save()
-        def testUser2 = new ShiroUser(username: "test2", passwordHash: new Sha1Hash("test2").toHex()).save()
+        def testUser1 = new ShiroUser(username: "test1", passwordHash: new Sha256Hash("test1").toHex()).save()
+        def testUser2 = new ShiroUser(username: "test2", passwordHash: new Sha256Hash("test2").toHex()).save()
 
         // Extra permissions for the last two test users.
         testUser1.addToPermissions("test:index,show,create")
