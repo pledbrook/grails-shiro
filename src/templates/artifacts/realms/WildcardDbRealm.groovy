@@ -98,7 +98,6 @@ class @realm.name@ {
         //
         // Get the permissions from the roles that the user does have.
         def results = @domain.prefix@User.executeQuery("select distinct p from @domain.prefix@User as user join user.roles as role join role.permissions as p where user.username = '$principal'")
-        println "Results: $results"
 
         // There may be some duplicate entries in the results, but
         // at this stage it is not worth trying to remove them. Now,
