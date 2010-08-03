@@ -1,5 +1,8 @@
 package org.apache.shiro.grails;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -14,11 +17,8 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
- * An empty implementation of the Shiro SecurityManager interface. It
+ * An empty implementation of the Shiro WebSecurityManager interface. It
  * is used in a hack to get realm reloading working properly. See the
  * ShiroGrailsPlugin code for more details.
  *

@@ -22,16 +22,22 @@
 import grails.util.GrailsUtil
 
 import org.apache.shiro.SecurityUtils
-import org.apache.shiro.authc.credential.Sha1CredentialsMatcher
+import org.apache.shiro.authc.credential.Sha256CredentialsMatcher
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
+import org.apache.shiro.authc.pam.ModularRealmAuthenticator
 import org.apache.shiro.authz.permission.WildcardPermissionResolver
 import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
-import org.apache.shiro.mgt.SecurityManager
 import org.apache.shiro.realm.Realm
+import org.apache.shiro.spring.LifecycleBeanPostProcessor
+import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.web.mgt.WebSecurityManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.mgt.CookieRememberMeManager
+import org.apache.shiro.web.servlet.IniShiroFilter
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
@@ -40,9 +46,6 @@ import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 
 import org.springframework.aop.framework.ProxyFactoryBean
 import org.springframework.aop.target.HotSwappableTargetSource
-import org.apache.shiro.authc.pam.ModularRealmAuthenticator
-import org.apache.shiro.spring.web.ShiroFilterFactoryBean
-import org.apache.shiro.web.mgt.WebSecurityManager
 
 class ShiroGrailsPlugin {
     // the plugin version
@@ -86,19 +89,20 @@ Adopted from previous JSecurity plugin.
             realmBeans << configureRealm(realmClass)
         }
         
-        /* In jsecurity 0.4  plugin it is written that this does not work
-         I have not yet tested it if it is the case currently or not.
-         Keeping the code commented as in jsecurity plugin till we test it out
-         lifecycleBeanPostProcessor(org.apache.shiro.spring.LifecycleBeanPostProcessor)
-         defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
-         bean.dependsOn = "lifecycleBeanPostProcessor"
-         }
-         authorizationAttributeSourceAdvisor(org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor) {bean ->
-         securityManager = shiroSecurityManager
-         }*/
+        lifecycleBeanPostProcessor(LifecycleBeanPostProcessor)
+
+        // Shiro annotation support for services...
+        defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
+            bean.dependsOn = "lifecycleBeanPostProcessor"
+            proxyTargetClass = true
+        }
+
+        aasa(AuthorizationAttributeSourceAdvisor) { bean ->
+            securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
+        }
         
         // The default credential matcher.
-        credentialMatcher(Sha1CredentialsMatcher) {
+        credentialMatcher(Sha256CredentialsMatcher) {
             storedCredentialsHexEncoded = true
         }
         
@@ -163,8 +167,14 @@ Adopted from previous JSecurity plugin.
             rememberMeManager = ref("shiroRememberMeManager")
         }
 
-        shiroFilter(ShiroFilterFactoryBean) {
-          securityManager = GrailsUtil.isDevelopmentEnv() ? ref("shiroSecurityManagerProxy") : ref("shiroSecurityManager")
+        shiroFilter(ShiroFilterFactoryBean) { bean ->
+            securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
+
+            // If a Shiro configuration is available, add it to the filter.
+            // This config should be in .ini format.
+            if (application.config.security.shiro.filter.config) {
+                filterChainDefinitions = application.config.security.shiro.filter.config
+            }
         }
     }
     
@@ -249,18 +259,9 @@ Adopted from previous JSecurity plugin.
                 'filter-class'('org.springframework.web.filter.DelegatingFilterProxy')
                 'init-param' {
                     'param-name'('targetFilterLifecycle')
-                        'param-value'('true')
+                    'param-value'('true')
                 }
                 
-                // If a Shiro configuration is available, add it
-                // as an 'init-param' of the filter. This config should
-                // be in .ini format.
-                if (application.config.security.shiro.filter.config) {
-                    'init-param' {
-                        'param-name'('config')
-                        'param-value'(application.config.security.shiro.filter.config)
-                    }
-                }
             }
 
             // Configure an instance of the plugin's "saved request".
@@ -333,6 +334,8 @@ Adopted from previous JSecurity plugin.
             'filter-mapping' {
                 'filter-name'('shiroFilter')
                 'url-pattern'("/*")
+                dispatcher('REQUEST')
+                dispatcher('ERROR')
             }
         }
     }

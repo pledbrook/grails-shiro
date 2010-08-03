@@ -20,6 +20,9 @@
  */
 
 import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authz.AuthorizationException
+import org.apache.shiro.authz.UnauthenticatedException
+import org.springframework.web.util.WebUtils
 
 /**
  * <p>A Grails filter that implements the same functionality as the old
@@ -31,74 +34,59 @@ import org.apache.shiro.SecurityUtils
  * property on controllers or via annotations.</p>
  */
 class ShiroFilters {
+    def shiroAnnotationHandlerService
+
     def filters = {
         accessControlCheck(controller: '*', action: '*') {
             before = {
                 if (grailsApplication.config.security.shiro.annotationdriven.enabled) {
-                    // Check that the current user is authenticated and
-                    // has permission to access the current action.
-                    def subject = SecurityUtils.subject
-
-                    // Get the role and permission maps for this controller.
-                    def roleMap = getRoleMap(controllerName)
-                    def permissionMap = getPermissionMap(controllerName)
-
-                    // Is this action configured for access control?
-                    if (!roleMap.containsKey(actionName) && !permissionMap.containsKey(actionName) &&
-                            !roleMap.containsKey('*') && !permissionMap.containsKey('*')) {
-                        // This action has no access control requirements,
-                        // so the user does not need to be logged in to
-                        // access it.
+                    try {
+                        def handlers = shiroAnnotationHandlerService.getHandlersFor(controllerName, actionName)
+                        handlers.each { h -> h.invoke() }
                         return true
                     }
-
-                    // Is the user authenticated?
-                    if (!subject.authenticated) {
-                        // User is not authenticated, so redirect to the login page.
+                    catch (UnauthenticatedException ex) {
                         redirect(
                                 controller: 'auth',
                                 action: 'login',
                                 params: [ targetUri: request.forwardURI - request.contextPath ])
                         return false
                     }
-
-                    // First check any required roles.
-                    def requiredRoles = roleMap[actionName]
-                    if (requiredRoles == null) requiredRoles = []
-                    if (roleMap['*']) {
-                        // Add any roles that apply to all actions. Note
-                        // that a new list is created from merging the
-                        // existing required roles with those for all
-                        // actions ('*'). We shouldn't modify the data in
-                        // the role map itself.
-                        requiredRoles += roleMap['*']
-                    }
-
-                    if (!requiredRoles.isEmpty() && !subject.hasAllRoles(requiredRoles)) {
-                        // User does not have the required roles. Redirect
-                        // to an error page?
+                    catch (AuthorizationException ex) {
                         redirect(controller: 'auth', action: 'unauthorized')
                         return false
                     }
-
-                    // Now check any required permissions.
-                    def requiredPermissions = permissionMap[actionName]
-                    if (requiredPermissions == null) requiredPermissions = []
-                    if (permissionMap['*']) {
-                        // Add any permission that applies to all actions.
-                        requiredPermissions += permissionMap['*']
+                }
+            }
+    
+            // Methods with Shiro @Requires* annotations throw AuthorizationExceptions,
+            // so rather than force the user to catch them himself, we deal with them
+            // in an 'afterView' filter.
+            afterView = { e ->
+                if (grailsApplication.config.security.shiro.annotationdriven.enabled) {
+                    while (e && !(e instanceof AuthorizationException)) {
+                        e = e.cause
                     }
 
-                    if (!requiredPermissions.isEmpty() && !subject.isPermittedAll(requiredPermissions)) {
-                        // User does not have the requisite permissions -
-                        // redirect to an error page?
-                        redirect(controller: 'auth', action: 'unauthorized')
-                        return false
-                    }
+                    // Redirect to the 'unauthorized' page if the cause was an
+                    // AuthorizationException.
+                    if (e instanceof AuthorizationException) {
+                        if (e instanceof UnauthenticatedException) {
+                            // User is not authenticated, so redirect to the login page.
+                            redirect(
+                                    controller: 'auth',
+                                    action: 'login',
+                                    params: [ targetUri: request.forwardURI - request.contextPath ])
+                        }
+                        else {
+                            redirect(controller: 'auth', action: 'unauthorized')
+                        }
 
-                    // User has passed all checks, so they may access the
-                    // action.
-                    return true
+                        // HACK! Even with the redirect, Tomcat will execute
+                        // the error dispatcher unless we remove all the
+                        // javax.servlet.error.* attributes from the request.
+                        WebUtils.clearErrorRequestAttributes(request)
+                    }
                 }
             }
         }
