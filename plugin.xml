@@ -8,6 +8,8 @@ Adopted from previous JSecurity plugin.
   <resources>
     <resource>BuildConfig</resource>
     <resource>ShiroFilters</resource>
+    <resource>spring.resources</resource>
+    <resource>org.apache.shiro.grails.ShiroAnnotationHandlerService</resource>
     <resource>ShiroTagLib</resource>
   </resources>
   <dependencies />

@@ -279,17 +279,8 @@ Adopted from previous JSecurity plugin.
                 'filter-class'('org.apache.shiro.grails.SavedRequestFilter')
             }
         }
-
-        // Put the saved request filter first, even ahead of the char
-        // encoding filter.
-        xml.filter[xml.filter.size() - 1] + {
-            'filter-mapping' {
-                'filter-name'('shiroSavedRequestFilter')
-                'url-pattern'('/*')
-            }
-        }
         
-        // Place the Shiro filter after the Spring character encoding filter, otherwise the latter filter won't work.
+        // Place the Shiro filters after the Spring character encoding filter, otherwise the latter filter won't work.
         def filter = xml.'filter-mapping'.find { it.'filter-name'.text() == "charEncodingFilter" }
         
         // NOTE: The following shenanigans are designed to ensure that
@@ -334,9 +325,14 @@ Adopted from previous JSecurity plugin.
                 filter = filterMappings[filterMappings.size() - 1]
             }
         }
-        
+
         // Finally add the Shiro filter mapping after the selected insertion point.
         filter + {
+            'filter-mapping' {
+                'filter-name'('shiroSavedRequestFilter')
+                'url-pattern'('/*')
+            }
+
             'filter-mapping' {
                 'filter-name'('shiroFilter')
                 'url-pattern'("/*")
