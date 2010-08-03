@@ -1,4 +1,3 @@
-./web-app/
 .settings/
 stacktrace.log
 docs/
@@ -6,3 +5,4 @@ eclipse/
 target/
 test/reports/
 work/
+/web-app/
