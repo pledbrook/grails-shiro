@@ -11,5 +11,8 @@ grails.project.dependency.resolution = {
         grailsCentral()
     }
     dependencies {
+        test "org.seleniumhq.selenium:selenium-htmlunit-driver:latest.integration", {
+            excludes "xml-apis", "commons-logging"
+        }
     }
 }
