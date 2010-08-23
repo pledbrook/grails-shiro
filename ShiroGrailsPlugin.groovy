@@ -169,13 +169,16 @@ Adopted from previous JSecurity plugin.
             rememberMeManager = ref("shiroRememberMeManager")
         }
 
-        shiroFilter(ShiroFilterFactoryBean) { bean ->
-            securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
+        // If the legacy 'shiro.filter.config' setting has a value, then
+        // configuration is done via IniShiroFilter and we don't use the
+        // shiroFilter Spring bean. Otherwise, we create the bean so that
+        // it can be used by the configured DelegatingFilterProxy.
+        if (!application.config.security.shiro.filter.config) {
+            shiroFilter(ShiroFilterFactoryBean) { bean ->
+                securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
 
-            // If a Shiro configuration is available, add it to the filter.
-            // This config should be in .ini format.
-            if (application.config.security.shiro.filter.config) {
-                filterChainDefinitions = application.config.security.shiro.filter.config
+                // Customisation of this bean must be done via Grails'
+                // bean property override configuration.
             }
         }
     }
@@ -258,15 +261,38 @@ Adopted from previous JSecurity plugin.
         contextParam[contextParam.size() - 1] + {
             'filter' {
                 'filter-name'('shiroFilter')
-                'filter-class'('org.springframework.web.filter.DelegatingFilterProxy')
-                'init-param' {
-                    'param-name'('targetFilterLifecycle')
-                    'param-value'('true')
+
+                // If the legacy 'security.shiro.filter.config' option is set,
+                // use the IniShiroFilter...
+                if (application.config.security.shiro.filter.config) {
+                    'filter-class'('org.apache.shiro.web.servlet.IniShiroFilter')
+                    'init-param' {
+                        'param-name'('securityManagerBeanName')
+                        if (GrailsUtil.isDevelopmentEnv()) {
+                            'param-value'('shiroSecurityManagerProxy')
+                        }
+                        else {
+                            'param-value'('shiroSecurityManager')
+                        }
+                    }
+
+                    // If a Shiro configuration is available, add it
+                    // as an 'init-param' of the filter. This config should
+                    // be in .ini format.
+                    'init-param' {
+                        'param-name'('config')
+                        'param-value'(application.config.security.shiro.filter.config)
+                    }
                 }
-                
-                'init-param' {
-                    'param-name'('targetFilterLifecycle')
-                    'param-value'('true')
+                else {
+                    // ...otherwise use a DelagatingFilterProxy with the 'shiroFilter'
+                    // bean, which is now the recommended approach. Configuration is
+                    // done via Grails' bean property override configuration.
+                    'filter-class'('org.springframework.web.filter.DelegatingFilterProxy')
+                    'init-param' {
+                        'param-name'('targetFilterLifecycle')
+                        'param-value'('true')
+                    }
                 }
             }
 
