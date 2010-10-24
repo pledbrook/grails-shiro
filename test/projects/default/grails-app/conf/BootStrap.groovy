@@ -1,18 +1,18 @@
-import org.apache.shiro.crypto.hash.Sha1Hash
+import org.apache.shiro.crypto.hash.Sha256Hash
 
 class BootStrap {
     def init = { servletContext ->
         def adminRole = Role.findByName("Administrator")
         if (!adminRole) {
             adminRole = new Role(name: "Administrator").save()
-            def adminUser = new User(username: "admin", passwordHash: new Sha1Hash("admin").toHex()).save()
+            def adminUser = new User(username: "admin", passwordHash: new Sha256Hash("admin").toHex()).save()
             new UserRoleRel(user: adminUser, role: adminRole).save()
 
-            def normalUser = new User(username: "dilbert", passwordHash: new Sha1Hash("password").toHex()).save()
+            def normalUser = new User(username: "dilbert", passwordHash: new Sha256Hash("password").toHex()).save()
 
             // Users for the TestController.
-            def testUser1 = new User(username: "test1", passwordHash: new Sha1Hash("test1").toHex()).save()
-            def testUser2 = new User(username: "test2", passwordHash: new Sha1Hash("test2").toHex()).save()
+            def testUser1 = new User(username: "test1", passwordHash: new Sha256Hash("test1").toHex()).save()
+            def testUser2 = new User(username: "test2", passwordHash: new Sha256Hash("test2").toHex()).save()
 
             // First user has access to index, show, create.
             def wildcardPermission = new Permission(type: "org.apache.shiro.authz.permission.WildcardPermission", possibleActions: "*").save()
