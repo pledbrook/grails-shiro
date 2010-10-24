@@ -1,5 +1,6 @@
 .settings/
 stacktrace.log
+build/
 eclipse/
 target/
 test/reports/
