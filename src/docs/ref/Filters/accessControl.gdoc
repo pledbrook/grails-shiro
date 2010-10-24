@@ -1,0 +1,20 @@
+
+h1. accessControl
+
+h2. Purpose
+
+
+
+h2. Examples
+
+{code:java}
+foo.accessControl()
+{code}
+
+h2. Description
+
+
+
+Arguments:
+
+[]

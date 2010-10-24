@@ -1,0 +1,19 @@
+
+h1. example
+
+h2. Purpose
+
+This is an example reference item.
+
+h2. Examples
+
+You can use code snippets:
+
+{code}
+def example = new Example()
+{code}
+
+h2. Description
+
+And provide a detailed description
+        
