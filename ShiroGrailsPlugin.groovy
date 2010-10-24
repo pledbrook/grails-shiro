@@ -37,7 +37,6 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.mgt.WebSecurityManager
-import org.apache.shiro.web.servlet.IniShiroFilter
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
@@ -98,7 +97,7 @@ Adopted from previous JSecurity plugin.
         }
 
         aasa(AuthorizationAttributeSourceAdvisor) { bean ->
-            securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
+            securityManager = ref("shiroSecurityManager")
         }
         
         // The default credential matcher.
@@ -121,33 +120,6 @@ Adopted from previous JSecurity plugin.
 
         // Default remember-me manager.
         shiroRememberMeManager(CookieRememberMeManager)
-
-        // If we're in development mode, then place the security manager
-        // behind a proxy. This allows us to change the security manager
-        // without adversely affecting the Shiro servlet filter (which
-        // holds a reference to the proxy). Without the proxy, realm
-        // reloading doesn't work.
-        if (GrailsUtil.isDevelopmentEnv()) {
-            // HACK! Ideally, we would configure the target source to
-            // use the proper security manager. However, if we do that,
-            // the target source itself will be reloaded when a realm
-            // changes. To avoid that, we register a dummy security
-            // manager. This ensures that the target source does not
-            // reload when a realm changes. We can then swap in the new
-            // security manager at will.
-            //
-            // The other part of the hack is in doWithApplicationContext,
-            // where the real security manager is swapped into the target
-            // source.
-            shiroDummySecurityManager(DummySecurityManager)
-
-            shiroSecurityManagerTargetSource(HotSwappableTargetSource, ref("shiroDummySecurityManager"))
-
-            shiroSecurityManagerProxy(ProxyFactoryBean) {
-                targetSource = ref("shiroSecurityManagerTargetSource")
-                proxyInterfaces = [ WebSecurityManager ]
-            }
-        }
         
         // The real security manager instance.
         shiroSecurityManager(DefaultWebSecurityManager) { bean ->
@@ -175,7 +147,7 @@ Adopted from previous JSecurity plugin.
         // it can be used by the configured DelegatingFilterProxy.
         if (!application.config.security.shiro.filter.config) {
             shiroFilter(ShiroFilterFactoryBean) { bean ->
-                securityManager = ref(GrailsUtil.isDevelopmentEnv() ? "shiroSecurityManagerProxy" : "shiroSecurityManager")
+                securityManager = ref("shiroSecurityManager")
 
                 // Customisation of this bean must be done via Grails'
                 // bean property override configuration.
@@ -185,13 +157,6 @@ Adopted from previous JSecurity plugin.
     
     def doWithApplicationContext = { applicationContext ->
         def mgr = applicationContext.getBean("shiroSecurityManager")
-        if (GrailsUtil.isDevelopmentEnv()) {
-            // HACK! Because we configure the target source with a dummy
-            // security manager in doWithSpring, we have to provide the
-            // real one now.
-            def targetSource = applicationContext.getBean("shiroSecurityManagerTargetSource")
-            targetSource.swap(mgr)
-        }
 
         // Add any extra realms that might have been defined in the project
         def beans = applicationContext.getBeanNamesForType(Realm) as List
@@ -263,17 +228,14 @@ Adopted from previous JSecurity plugin.
                 'filter-name'('shiroFilter')
 
                 // If the legacy 'security.shiro.filter.config' option is set,
-                // use the IniShiroFilter...
+                // use our custom INI-based filter...
                 if (application.config.security.shiro.filter.config) {
-                    'filter-class'('org.apache.shiro.web.servlet.IniShiroFilter')
+                    log.warn "security.shiro.filter.config option is deprecated. Use Grails' bean property override mechanism instead."
+
+                    'filter-class'('org.apache.shiro.grails.LegacyShiroFilter')
                     'init-param' {
                         'param-name'('securityManagerBeanName')
-                        if (GrailsUtil.isDevelopmentEnv()) {
-                            'param-value'('shiroSecurityManagerProxy')
-                        }
-                        else {
-                            'param-value'('shiroSecurityManager')
-                        }
+                        'param-value'('shiroSecurityManager')
                     }
 
                     // If a Shiro configuration is available, add it
@@ -399,12 +361,6 @@ Adopted from previous JSecurity plugin.
             // the delegate.
             def beans = beans(configureRealm.curry(realmClass))
             beans.registerBeans(context)
-
-            // Update the proxy so that it's using the new security
-            // manager. Otherwise Shiro's servlet filter will continue
-            // to use the old one.
-            def targetSource = context.getBean("shiroSecurityManagerTargetSource")
-            targetSource.swap(context.getBean("shiroSecurityManager"))
         }
     }
 
