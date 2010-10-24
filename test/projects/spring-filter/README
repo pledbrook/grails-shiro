@@ -1,0 +1,2 @@
+This test project ensures that the standard Shiro Spring filter can be
+configured via the security.shiro.filter.* settings.
