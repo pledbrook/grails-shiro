@@ -301,7 +301,7 @@ class ShiroTagLib {
                 throwTagError("Tag [$tagname] must have either a [type] attribute or a [permission] one.")
             }
 
-            if (!(permission instanceof org.apache.shiro.authz.Permission) && !(permission instanceof String)) {
+            if (!(permission instanceof org.apache.shiro.authz.Permission) && !(permission instanceof CharSequence)) {
                 throwTagError("Attribute [permission] must be a string or an instance of org.apache.shiro.authz.Permission.")
             }
         }

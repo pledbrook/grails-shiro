@@ -48,7 +48,8 @@ class ShiroTagLibTests extends GroovyTestCase {
 
         // A map that backs the mock Subject instance.
         this.mockSubject = [
-          isAuthenticated: {-> false }
+            isAuthenticated: {-> false },
+            isPermitted: {Object -> true }
         ]
 
         // Mock the 'getSubject()' method on SecurityUtils by overriding
@@ -234,6 +235,18 @@ class ShiroTagLibTests extends GroovyTestCase {
 //        assertEquals principal, this.tagDelegate.output
     }
 
+    void testHasPermissionWithGString() {
+        def id = "1"
+        def testPermission = "user:manage:${id}"
+        def testBody = "I can manage this user!"
+
+        this.tagLib.hasPermission.delegate = this.tagDelegate
+        this.mockSubject["hasPermission"] = { String name -> assertEquals testPermission, name; true }
+
+        this.tagLib.hasPermission(permission: testPermission) {-> testBody }
+        assertEquals testBody, this.tagDelegate.output
+    }
+    
     void testHasRole() {
         String testBody = "I am an administrator!"
         String testRole = "Administrator"
