@@ -34,6 +34,7 @@ import org.apache.shiro.spring.LifecycleBeanPostProcessor
 import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.mgt.WebSecurityManager
@@ -78,6 +79,8 @@ Adopted from previous JSecurity plugin.
     def permMaps = [:]
     
     def doWithSpring = {
+        def securityConfig = application.config.security.shiro
+
         // Configure realms defined in the project.
         def realmBeans = []
         def realmClasses = application.realmClasses
@@ -131,8 +134,8 @@ Adopted from previous JSecurity plugin.
             
             // Allow the user to customise the session type: 'http' or
             // 'shiro'.
-            if (application.config.security.shiro.session.mode) {
-                sessionMode = application.config.security.shiro.session.mode
+            if (securityConfig.session.mode) {
+                sessionMode = securityConfig.session.mode
             }
             
             // Allow the user to provide his own versions of these
@@ -145,12 +148,29 @@ Adopted from previous JSecurity plugin.
         // configuration is done via IniShiroFilter and we don't use the
         // shiroFilter Spring bean. Otherwise, we create the bean so that
         // it can be used by the configured DelegatingFilterProxy.
-        if (!application.config.security.shiro.filter.config) {
+        if (!securityConfig.filter.config) {
+            // Create a basic authentication filter bean if the relevant
+            // configuration setting is used.
+            if (securityConfig.filter.basicAppName) {
+                authcBasicFilter(BasicHttpAuthenticationFilter) {
+                    applicationName = securityConfig.filter.basicAppName
+                }
+            }
+
+            // Create the main security filter.
             shiroFilter(ShiroFilterFactoryBean) { bean ->
                 securityManager = ref("shiroSecurityManager")
 
-                // Customisation of this bean must be done via Grails'
-                // bean property override configuration.
+                loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
+                unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
+
+                if (securityConfig.filter.filterChainDefinitions) {
+                    filterChainDefinitions = securityConfig.filter.filterChainDefinitions
+                }
+
+                if (securityConfig.filter.basicAppName) {
+                    filters = [ authcBasic: ref("authcBasicFilter") ]
+                }
             }
         }
     }
