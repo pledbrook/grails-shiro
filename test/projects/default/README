@@ -1,0 +1,2 @@
+Test project that uses the security.shiro.filter.config setting and the
+old database realm (that uses Rel linking tables).
