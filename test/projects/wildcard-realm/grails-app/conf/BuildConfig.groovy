@@ -14,5 +14,8 @@ grails.project.dependency.resolution = {
         test "org.seleniumhq.selenium:selenium-htmlunit-driver:latest.integration", {
             excludes "xml-apis", "commons-logging"
         }
+        test "net.sourceforge.htmlunit:htmlunit:2.8", {
+            excludes "xml-apis", "commons-logging"
+        }
     }
 }
