@@ -3,6 +3,7 @@ docs/
 eclipse/
 AuthController.groovy
 /grails-app/views/auth/
+/grails-app/realms/
 test/reports/
 web-app/plugins/
 work/
