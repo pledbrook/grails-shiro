@@ -5,10 +5,7 @@ grails.project.test.reports.dir	= "target/test-reports"
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
-    inherits( "global" ) {
-        // uncomment to disable ehcache
-        // excludes 'ehcache'
-    }
+    inherits "global"
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         grailsPlugins()
@@ -27,3 +24,14 @@ grails.project.dependency.resolution = {
         }
     }
 }
+
+grails.project.dependency.distribution = {
+    portal id: "beta", url: "http://beta.grails.org/"
+
+    remoteRepository(id: "snapshots", url: "http://myserver:8081/artifactory/libs-snapshots-local")
+
+    remoteRepository(id: "releases", url: "http://myserver:8081/artifactory/libs-releases-local") {
+        authentication username: "admin", password: "password"
+    }
+}
+
