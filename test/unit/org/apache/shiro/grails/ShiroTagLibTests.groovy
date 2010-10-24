@@ -1,27 +1,30 @@
 /*
-* Copyright 2007 Peter Ledbrook.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2007 Peter Ledbrook.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.shiro.grails
 
+import grails.test.GrailsUnitTestCase
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.subject.Subject
+import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
 /**
  * Test case for {@link ShiroTagLib}.
  */
-class ShiroTagLibTests extends GroovyTestCase {
+class ShiroTagLibTests extends GrailsUnitTestCase {
     private ShiroTagLib tagLib
     private Map mockSubject
     private TagDelegate tagDelegate = new TagDelegate()
@@ -29,6 +32,8 @@ class ShiroTagLibTests extends GroovyTestCase {
     private Map savedMetaClasses
 
     void setUp() {
+        super.setUp()
+
         // Save the old meta classes for classes we will modify.
         def registry = GroovySystem.metaClassRegistry
         this.savedMetaClasses = [
@@ -58,6 +63,8 @@ class ShiroTagLibTests extends GroovyTestCase {
         // registry cache.
         SecurityUtils.metaClass.static.getSubject = {-> mockSubject as Subject }
 
+        loadCodec(HTMLCodec)
+
         // Create the test tag library.
         this.tagLib = new ShiroTagLib()
     }
@@ -67,6 +74,8 @@ class ShiroTagLibTests extends GroovyTestCase {
         this.savedMetaClasses.each { Class cls, MetaClass mc ->
             GroovySystem.metaClassRegistry.setMetaClass(cls, mc)
         }
+
+        super.tearDown()
     }
 
     void testIsLoggedIn() {
@@ -215,6 +224,24 @@ class ShiroTagLibTests extends GroovyTestCase {
         this.tagDelegate.reset()
         this.tagLib.principal([:])
         assertEquals principal, this.tagDelegate.output
+    }
+
+    void testPrincipalEncoding() {
+        // Local setup.
+        def principal = "<admin>"
+        this.mockSubject["getPrincipal"] = {-> null}
+        this.tagLib.principal.delegate = this.tagDelegate
+
+        // Now execute the tag and check the output that it generates.
+        this.tagLib.principal([:])
+        assertEquals "", this.tagDelegate.output
+
+        // Now try with a 'remembered' user, i.e. the principal is not
+        // null, but the user is not authenticated.
+        this.mockSubject["getPrincipal"] = {-> principal}
+        this.tagDelegate.reset()
+        this.tagLib.principal([:])
+        assertEquals "&lt;admin&gt;", this.tagDelegate.output
     }
 
     void testPrincipalWithType() {

@@ -18,6 +18,7 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
+package org.apache.shiro.grails
 
 import org.apache.shiro.SecurityUtils
 
@@ -136,10 +137,10 @@ class ShiroTagLib {
                 // just use the string representation of the principal
                 // itself.
                 if (attrs["property"]) {
-                    out << principal."${attrs['property']}"
+                    out << principal."${attrs['property']}".toString().encodeAsHTML()
                 }
                 else {
-                    out << principal.toString()
+                    out << principal.toString().encodeAsHTML()
                 }
             }
         }
