@@ -22,6 +22,7 @@
 import grails.util.GrailsUtil
 
 import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authc.credential.PasswordHashAdapter
 import org.apache.shiro.authc.credential.Sha256CredentialsMatcher
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator
@@ -102,10 +103,16 @@ Adopted from previous JSecurity plugin.
         aasa(AuthorizationAttributeSourceAdvisor) { bean ->
             securityManager = ref("shiroSecurityManager")
         }
-        
+
         // The default credential matcher.
         credentialMatcher(Sha256CredentialsMatcher) {
             storedCredentialsHexEncoded = true
+        }
+
+        // This bean allows you to use the credential matcher to encode
+        // passwords.
+        passwordHashAdapter(PasswordHashAdapter) {
+            credentialMatcher = ref("credentialMatcher")
         }
         
         // Default permission resolver: WildcardPermissionResolver.

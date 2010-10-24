@@ -1,19 +1,29 @@
 import org.apache.shiro.crypto.hash.Sha256Hash
 
 class BootStrap {
+    def shiroSecurityService
+
     def init = { servletContext ->
         def adminRole = ShiroRole.findByName("Administrator")
         if (!adminRole) {
             adminRole = new ShiroRole(name: "Administrator").save()
-            def adminUser = new ShiroUser(username: "admin", passwordHash: new Sha256Hash("admin").toHex())
+            def adminUser = new ShiroUser(
+                    username: "admin", 
+                    passwordHash: shiroSecurityService.encodePassword("admin", "admin"))
             adminUser.addToRoles(adminRole)
             adminUser.save()
 
-            def normalUser = new ShiroUser(username: "dilbert", passwordHash: new Sha256Hash("password").toHex()).save()
+            def normalUser = new ShiroUser(
+                    username: "dilbert",
+                    passwordHash: shiroSecurityService.encodePassword("password", "dilbert")).save()
 
             // Users for the TestController.
-            def testUser1 = new ShiroUser(username: "test1", passwordHash: new Sha256Hash("test1").toHex())
-            def testUser2 = new ShiroUser(username: "test2", passwordHash: new Sha256Hash("test2").toHex())
+            def testUser1 = new ShiroUser(
+                    username: "test1",
+                    passwordHash: shiroSecurityService.encodePassword("test1", "test1"))
+            def testUser2 = new ShiroUser(
+                    username: "test2",
+                    passwordHash: shiroSecurityService.encodePassword("test2", "test2"))
 
             // First user has access to index, show, create.
             testUser1.addToPermissions("test:index,show,create")
