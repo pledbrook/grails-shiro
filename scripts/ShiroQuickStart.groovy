@@ -26,8 +26,8 @@ USAGE = """
     quick-start [--prefix=PREFIX]
 
 where
-    PREFIX = The prefix to add to the names of the realm and domain classes
-             (default: "Shiro").
+    PREFIX = The prefix to add to the names of the realm and domain classes.
+             This may include a package. (default: "Shiro").
 """
 
 target(default: "Sets up a basic security system with a wildcard realm, auth controller, etc.") {
