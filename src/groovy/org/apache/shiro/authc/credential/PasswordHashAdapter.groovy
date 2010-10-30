@@ -2,6 +2,7 @@ package org.apache.shiro.authc.credential
 
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.apache.shiro.crypto.hash.Hash
+import org.apache.shiro.crypto.hash.SimpleHash
 
 /**
  * Bit of a hack: the sole purpose of this class is to work around the
@@ -23,15 +24,19 @@ class PasswordHashAdapter {
             throw new IllegalStateException("Credential matcher must be of type HashedCredentialMatcher")
         }
 
-        def credentials = credentialMatcher.getCredentials(new UsernamePasswordToken(username?.toString(), password.toString()))
+        def hash = new SimpleHash(
+                credentialMatcher.hashAlgorithmName,
+                password.toString(),
+                null,
+                credentialMatcher.hashIterations)
 
         // We either need the password base64-encoded or hex-encoded
         // depending on how the credential matcher is configured.
         if (credentialMatcher.storedCredentialsHexEncoded) {
-            return credentials.toHex()
+            return hash.toHex()
         }
         else {
-            return credentials.toBase64()
+            return hash.toBase64()
         }
     }
 }

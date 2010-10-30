@@ -4,9 +4,8 @@ grails.project.test.reports.dir	= "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
 grails.project.dependency.resolution = {
-    // inherit Grails' default dependencies
     inherits "global"
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" 
     repositories {
         grailsPlugins()
         grailsHome()
@@ -15,12 +14,12 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-        compile 'org.apache.shiro:shiro-core:1.0.0-incubating',
-                'org.apache.shiro:shiro-web:1.0.0-incubating',
-                'org.apache.shiro:shiro-ehcache:1.0.0-incubating',
-                'org.apache.shiro:shiro-quartz:1.0.0-incubating',
-                'org.apache.shiro:shiro-spring:1.0.0-incubating', {
-            excludes 'ejb', 'jsf-api', 'jms', 'connector-api'
+        compile 'org.apache.shiro:shiro-core:1.1.0',
+                'org.apache.shiro:shiro-web:1.1.0',
+                'org.apache.shiro:shiro-ehcache:1.1.0',
+                'org.apache.shiro:shiro-quartz:1.1.0',
+                'org.apache.shiro:shiro-spring:1.1.0', {
+            excludes 'ejb', 'jsf-api', 'jms', 'connector-api', 'ehcache-core'
         }
     }
 }

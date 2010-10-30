@@ -111,7 +111,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#checkPermission(Object, org.apache.shiro.authz.Permission)
+     * @see org.apache.shiro.authz.Authorizer#checkPermission(Object, org.apache.shiro.authz.Permission)
      */
     void checkPermission(PrincipalCollection principal, Permission permission) throws AuthorizationException {
         if (!isPermitted(principal, permission)) {
@@ -120,7 +120,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#checkPermissions(Object, java.util.Collection)
+     * @see org.apache.shiro.authz.Authorizer#checkPermissions(Object, java.util.Collection)
      */
     void checkPermissions(PrincipalCollection principal, Collection<Permission> permissions) throws AuthorizationException {
         if (!isPermittedAll(principal, permissions)) {
@@ -129,7 +129,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#checkRole(Object, java.lang.String)
+     * @see org.apache.shiro.authz.Authorizer#checkRole(Object, java.lang.String)
      */
     void checkRole(PrincipalCollection principal, String role) throws AuthorizationException {
         if (!hasRole(principal, role)) {
@@ -138,7 +138,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#checkRoles(Object, java.util.Collection)
+     * @see org.apache.shiro.authz.Authorizer#checkRoles(Object, java.util.Collection)
      */
     void checkRoles(PrincipalCollection principal, Collection<String> roles) throws AuthorizationException {
         if (!hasAllRoles(principal, roles)) {
@@ -147,7 +147,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#hasAllRoles(Object, java.util.Collection)
+     * @see org.apache.shiro.authz.Authorizer#hasAllRoles(Object, java.util.Collection)
      */
     boolean hasAllRoles(PrincipalCollection principal, Collection<String> roles) {
         // First try the 'hasAllRoles' method on the realm.
@@ -175,7 +175,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#hasRole(Object, java.lang.String)
+     * @see org.apache.shiro.authz.Authorizer#hasRole(Object, java.lang.String)
      */
     boolean hasRole(PrincipalCollection principal, String role) {
         // Try the 'hasRole' method on the realm.
@@ -188,7 +188,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#hasRoles(Object, java.util.List)
+     * @see org.apache.shiro.authz.Authorizer#hasRoles(Object, java.util.List)
      */
     boolean[] hasRoles(PrincipalCollection principal, List<String> roles) {
         // First try the 'hasRoles' method on the realm.
@@ -219,7 +219,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#isPermitted(Object, org.apache.shiro.authz.Permission)
+     * @see org.apache.shiro.authz.Authorizer#isPermitted(Object, org.apache.shiro.authz.Permission)
      */
     boolean isPermitted(PrincipalCollection principal, Permission permission) {
         // Try the 'isPermitted' method on the realm.
@@ -233,7 +233,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#isPermitted(Object, java.util.List)
+     * @see org.apache.shiro.authz.Authorizer#isPermitted(Object, java.util.List)
      */
     boolean[] isPermitted(PrincipalCollection principal, List<Permission> permissions) {
         boolean[] retval = new boolean[permissions.size()]
@@ -257,7 +257,7 @@ class RealmWrapper extends RealmAdapter {
     }
 
     /* (non-Javadoc)
-     * @see org.apache.shiro.authz.AuthorizationOperations#isPermittedAll(Object, java.util.Collection)
+     * @see org.apache.shiro.authz.Authorizer#isPermittedAll(Object, java.util.Collection)
      */
     boolean isPermittedAll(PrincipalCollection principal, Collection<Permission> permissions) {
         // Try the 'isPermittedAll' method on the realm.

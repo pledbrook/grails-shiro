@@ -31,6 +31,7 @@ import org.apache.shiro.authz.permission.WildcardPermission;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -63,6 +64,10 @@ public abstract class RealmAdapter implements Realm, PermissionResolverAware {
 
     public boolean isPermittedAll(PrincipalCollection principal, String... strings) {
         return isPermittedAll(principal, toPermissionList(strings));
+    }
+
+    public void checkRoles(PrincipalCollection principal, String... roles) throws AuthorizationException {
+        checkRoles(principal, Arrays.asList(roles));
     }
 
     /**
