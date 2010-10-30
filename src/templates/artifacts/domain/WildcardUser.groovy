@@ -1,4 +1,4 @@
-class @domain.prefix@User {
+@package.line@class @domain.prefix@User {
     String username
     String passwordHash
     

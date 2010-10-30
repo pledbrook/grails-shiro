@@ -1,4 +1,4 @@
-class @domain.prefix@Role {
+@package.line@class @domain.prefix@Role {
     String name
 
     static hasMany = [ users: @domain.prefix@User, permissions: String ]

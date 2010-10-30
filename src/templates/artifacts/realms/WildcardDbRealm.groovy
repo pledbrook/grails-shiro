@@ -1,4 +1,4 @@
-import org.apache.shiro.authc.AccountException
+@package.line@import org.apache.shiro.authc.AccountException
 import org.apache.shiro.authc.IncorrectCredentialsException
 import org.apache.shiro.authc.UnknownAccountException
 import org.apache.shiro.authc.SimpleAccount

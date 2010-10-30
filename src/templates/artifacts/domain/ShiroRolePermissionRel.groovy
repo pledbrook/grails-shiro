@@ -1,4 +1,4 @@
-class @domain.prefix@RolePermissionRel {
+@package.line@class @domain.prefix@RolePermissionRel {
     @domain.prefix@Role role
     @domain.prefix@Permission permission
     String target

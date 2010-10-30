@@ -26,7 +26,8 @@ USAGE = """
     create-db-realm [--prefix=PREFIX]
 
 where
-    PREFIX = The prefix to add to the name of the realm (default: "Shiro").
+    PREFIX = The prefix to add to the name of the realm. This may include a
+             package. (default: "Shiro").
 """
 
 target (default: "Creates a LDAP Shiro realm") {

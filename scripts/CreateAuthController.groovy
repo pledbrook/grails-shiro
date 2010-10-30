@@ -25,8 +25,13 @@ includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
 
 USAGE = """
-    create-auth-controller
+    create-auth-controller [--prefix=PREFIX]
+
+where
+    PREFIX = The prefix to add to the names of the realm and domain classes
+             This may include a package. (default: "Shiro").
 """
+
 
 target(default: "Installs the base auth controller and associated views in this project") {
     // Make sure any arguments have been parsed.

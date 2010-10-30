@@ -26,7 +26,7 @@ USAGE = """
 
 where
     PREFIX = The prefix to add to the names of the realm and domain classes
-             (default: "Shiro").
+             This may include a package. (default: "Shiro").
 """
 
 target (default: "Creates a database Shiro realm (and domain classes) that only supports wildcard permissions.") {

@@ -84,8 +84,16 @@ installTemplateEx = { String artefactName, String artefactPath, String templateP
  * Creates a new authentication controller from a template.
  */
 target(createAuthController: "Creates a standard authentication controller and associated views.") {
-    // Copy over the standard auth controller.
-    installTemplate("AuthController.groovy", "grails-app/controllers", "controllers")
+    def (pkg, prefix) = parsePrefix()
+
+    // Copy over the standard filters class.
+    def className = "AuthController"
+    installTemplateEx("${className}.groovy", "grails-app/controllers${packageToPath(pkg)}", "controllers", "AuthController.groovy") {
+        ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
+            ant.replacefilter(token: '@controller.name@', value: className)
+        }
+    }
 
     // Now copy over the views for the controller.
     installTemplate("login.gsp", "grails-app/views/auth", "views/auth")
@@ -95,11 +103,7 @@ target(createAuthController: "Creates a standard authentication controller and a
  * Creates a new database realm from a template.
  */
 target(createDbRealm: 'Creates a basic, but flexible database-backed realm.') {
-    // Get the prefix for the realm name. Default is "Shiro" to avoid name conflicts.
-    def prefix = "Shiro"
-    if (argsMap['prefix'] != null) {
-        prefix = argsMap['prefix']
-    }
+    def (pkg, prefix) = parsePrefix()
 
     // First create the domain objects: ShiroUser, ShiroRole, etc.
     def domainClasses = [
@@ -110,12 +114,13 @@ target(createDbRealm: 'Creates a basic, but flexible database-backed realm.') {
         'UserRoleRel',
         'UserPermissionRel' ]
 
-    def artefactPath = "grails-app/domain"
+    def artefactPath = "grails-app/domain${packageToPath(pkg)}"
     ant.mkdir(dir: "${basedir}/${artefactPath}")
 
     domainClasses.each { domainClass ->
         installTemplateEx("${prefix}${domainClass}.groovy", artefactPath, "domain", "Shiro${domainClass}.groovy") {
             ant.replace(file: artefactFile) {
+                ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
                 ant.replacefilter(token: '@domain.prefix@', value: prefix)
             }
         }
@@ -124,8 +129,9 @@ target(createDbRealm: 'Creates a basic, but flexible database-backed realm.') {
 
     // Copy over the standard DB realm.
     def className = "${prefix}DbRealm"
-    installTemplateEx("${className}.groovy", "grails-app/realms", "realms", "ShiroDbRealm.groovy") {
+    installTemplateEx("${className}.groovy", "grails-app/realms${packageToPath(pkg)}", "realms", "ShiroDbRealm.groovy") {
         ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
             ant.replacefilter(token: '@realm.name@', value: className)
             ant.replacefilter(token: '@domain.prefix@', value: prefix)
         }
@@ -139,21 +145,18 @@ target(createDbRealm: 'Creates a basic, but flexible database-backed realm.') {
  * wildcard permissions. Other types of permission are not supported.
  */
 target(createWildcardRealm: 'Creates a basic, but flexible database-backed realm that uses wildcard permissions.') {
-    // Get the prefix for the realm name. Default is "Shiro" to avoid name conflicts.
-    def prefix = "Shiro"
-    if (argsMap['prefix'] != null) {
-        prefix = argsMap['prefix']
-    }
+    def (pkg, prefix) = parsePrefix()
 
     // First create the domain objects: ShiroUser, ShiroRole, etc.
     def domainClasses = [ 'User', 'Role' ]
 
-    def artefactPath = "grails-app/domain"
+    def artefactPath = "grails-app/domain${packageToPath(pkg)}"
     ant.mkdir(dir: "${basedir}/${artefactPath}")
 
     domainClasses.each { domainClass ->
         installTemplateEx("${prefix}${domainClass}.groovy", artefactPath, "domain", "Wildcard${domainClass}.groovy") {
             ant.replace(file: artefactFile) {
+                ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
                 ant.replacefilter(token: '@domain.prefix@', value: prefix)
             }
         }
@@ -162,8 +165,9 @@ target(createWildcardRealm: 'Creates a basic, but flexible database-backed realm
 
     // Copy over the standard DB realm.
     def className = "${prefix}DbRealm"
-    installTemplateEx("${className}.groovy", "grails-app/realms", "realms", "WildcardDbRealm.groovy") {
+    installTemplateEx("${className}.groovy", "grails-app/realms${packageToPath(pkg)}", "realms", "WildcardDbRealm.groovy") {
         ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
             ant.replacefilter(token: '@realm.name@', value: className)
             ant.replacefilter(token: '@domain.prefix@', value: prefix)
         }
@@ -173,39 +177,17 @@ target(createWildcardRealm: 'Creates a basic, but flexible database-backed realm
 }
 
 target(createLdapRealm: "Creates a new LDAP realm.") {
-    //Get the prefix for the realm name. Default is "Shiro" to avoid name conflicts.
-    def prefix = "Shiro"
-    if (argsMap['prefix'] != null) {
-        prefix = argsMap['prefix']
-    }
-    
-    //Copy over the standard LDAP realm.
-    def className = "${prefix}LdapRealm".toString()
-    def artefactPath = 'grails-app/realms'
-    def artefactFile = "${basedir}/${artefactPath}/${className}.groovy"
-    if (new File(artefactFile).exists()) {
-        ant.input(
-                addProperty: "${args}.${className}.overwrite",
-                message: "${className} already exists. Overwrite? [y/n]")
-        
-        if (ant.antProject.properties."${args}.${className}.overwrite" == "n") {
-            return
+    def (pkg, prefix) = parsePrefix()
+
+    // Copy over the template LDAP realm.
+    def className = "${prefix}LdapRealm"
+    installTemplateEx("${className}.groovy", "grails-app/realms${packageToPath(pkg)}", "realms", "ShiroLdapRealm.groovy") {
+        ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
+            ant.replacefilter(token: '@realm.name@', value: className)
         }
     }
     
-    //Copy the template file to the 'grails-app/realms' directory.
-    templateFile = "${shiroPluginDir}/src/templates/artifacts/realms/ShiroLdapRealm.groovy"
-    if (!new File(templateFile).exists()) {
-        ant.echo("[Shiro plugin] Error: src/templates/artifacts/realms/ShiroLdapRealm.groovy does not exist!")
-        return
-    }
-    
-    ant.copy(file: templateFile, tofile: artefactFile, overwrite: true)
-    ant.replace(file: artefactFile) {
-        ant.replacefilter(token: '@realm.name@', value: className)
-    }
-    
-    event("CreatedFile", [artefactFile])
     event("CreatedArtefact", ['Realm', className])
 }
 
@@ -214,6 +196,35 @@ target(createLdapRealm: "Creates a new LDAP realm.") {
  * all URLs by default using access control by convention.
  */
 target(createSecurityFilters: "Creates a standard Grails filters class implementing access control by convention.") {
+    def (pkg, prefix) = parsePrefix()
+
     // Copy over the standard filters class.
-    installTemplate("SecurityFilters.groovy", "grails-app/conf", "filters")
+    def className = "${prefix}SecurityFilters"
+    installTemplateEx("${className}.groovy", "grails-app/conf${packageToPath(pkg)}", "filters", "SecurityFilters.groovy") {
+        ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
+            ant.replacefilter(token: '@filters.name@', value: className)
+        }
+    }
+}
+
+private parsePrefix() {
+    def prefix = "Shiro"
+    def pkg = ""
+    if (argsMap["prefix"]) {
+        def givenValue = argsMap["prefix"].split(/\./, -1)
+        prefix = givenValue[-1]
+        pkg = givenValue.size() > 1 ? givenValue[0..-2].join('.') : ""
+    }
+
+    return [ pkg, prefix ]
+}
+
+/**
+ * Converts a package name (with '.' separators) to a file path (with
+ * '/' separators). If the package is <tt>null</tt>, this returns an
+ * empty string.
+ */
+private packageToPath(String pkg) {
+    return pkg ? '/' + pkg.replace('.' as char, '/' as char) : ''
 }

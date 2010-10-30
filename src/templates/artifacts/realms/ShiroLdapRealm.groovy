@@ -1,4 +1,4 @@
-import javax.naming.AuthenticationException
+@package.line@import javax.naming.AuthenticationException
 import javax.naming.Context
 import javax.naming.NamingException
 import javax.naming.directory.BasicAttribute
