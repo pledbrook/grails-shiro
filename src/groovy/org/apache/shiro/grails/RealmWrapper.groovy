@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.authc.AuthenticationToken
 import org.apache.shiro.authc.AuthenticationException
+import org.apache.shiro.authc.LogoutAware
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.apache.shiro.subject.SimplePrincipalCollection
 import org.apache.shiro.subject.PrincipalCollection
@@ -38,7 +39,7 @@ import org.apache.shiro.authz.UnauthorizedException
  * the Shiro world.
  * @author Peter Ledbrook
  */
-class RealmWrapper extends RealmAdapter {
+class RealmWrapper extends RealmAdapter implements LogoutAware {
     private static final LOGGER = LogFactory.getLog('grails.app.realm')
 
     Object realm
@@ -107,6 +108,15 @@ class RealmWrapper extends RealmAdapter {
         }
         else {
             return false
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.shiro.authc.LogoutAware#onLogout(PrincipalCollection)
+     */
+    void onLogout(PrincipalCollection principal) {
+        if (this.realm instanceof LogoutAware) {
+            this.realm.onLogout(principal)
         }
     }
 
