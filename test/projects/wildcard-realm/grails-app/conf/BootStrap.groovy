@@ -1,3 +1,5 @@
+import org.example.*
+
 class BootStrap {
     def shiroSecurityService
 

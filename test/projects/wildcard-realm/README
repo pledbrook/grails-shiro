@@ -1,1 +1,14 @@
-Test project for the provided wildcard realm.
+Test project for the provided wildcard realm. You should generate the required
+artifacts first by running
+
+    grails shiro-quick-start
+
+It would be a good idea to remove ShiroSecurityFilters.groovy from grails-app/conf
+at this point. You can then run the tests.
+
+The tests should also be run against
+
+  grails shiro-quick-start --prefix=org.example.Shiro
+
+to ensure that the package handling is working. The BootStrap class is already
+set up for the 'org.example' package so you don't need to do anything there.
