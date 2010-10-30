@@ -15,7 +15,7 @@ class BasicAuthenticationSpec extends Specification {
 
     def "Test basic authentication response"() {
         when: "I access the basic list page"
-        http.get path: "/property-override/basic/list"
+        http.get path: "/spring-filter/basic/list"
 
         then: "I get a 401 response"
         HttpResponseException e = thrown()
@@ -25,7 +25,7 @@ class BasicAuthenticationSpec extends Specification {
     def "Test basic authentication with empty password"() {
         when: "I access the basic list page"
         http.request GET, { req ->
-            uri.path = "/property-override/basic/list" 
+            uri.path = "/spring-filter/basic/list" 
             headers.'Authorization' = createAuthorizationHeader("dilbert", "")
         }
 
@@ -38,7 +38,7 @@ class BasicAuthenticationSpec extends Specification {
     def "Test basic authentication with invalid password"() {
         when: "I access the basic list page"
         http.request GET, { req ->
-            uri.path = "/property-override/basic/list" 
+            uri.path = "/spring-filter/basic/list" 
             headers.'Authorization' = createAuthorizationHeader("dilbert", "teatimex")
         }
 
@@ -50,7 +50,7 @@ class BasicAuthenticationSpec extends Specification {
 
     def "Test basic authentication with valid password"() {
         when: "I access the basic list page with a valid username and password"
-        def page = http.get(path: "/property-override/basic/list", headers: [Authorization: createAuthorizationHeader("dilbert", "password")])
+        def page = http.get(path: "/spring-filter/basic/list", headers: [Authorization: createAuthorizationHeader("dilbert", "password")])
 
         then: "it's displayed"
         page.HEAD.TITLE.text() == "Basic List"

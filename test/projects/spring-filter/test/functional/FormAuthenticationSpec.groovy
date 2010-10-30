@@ -64,12 +64,12 @@ class FormAuthenticationSpec extends GebSpec {
     def "Test authentication with query parameters"() {
         given:
         def http = new HTTPBuilder("http://localhost:8080")
-        http.post path: "/property-override/auth/signIn", body: [username: "dilbert", password: "password"]
-        http.post path: "/property-override/form/save", body: [name: "One"]
-        http.post path: "/property-override/form/save", body: [name: "Two"]
-        http.post path: "/property-override/form/save", body: [name: "Three"]
-        http.post path: "/property-override/form/save", body: [name: "Four"]
-        http.post path: "/property-override/form/save", body: [name: "Five"]
+        http.post path: "/spring-filter/auth/signIn", body: [username: "dilbert", password: "password"]
+        http.post path: "/spring-filter/form/save", body: [name: "One"]
+        http.post path: "/spring-filter/form/save", body: [name: "Two"]
+        http.post path: "/spring-filter/form/save", body: [name: "Three"]
+        http.post path: "/spring-filter/form/save", body: [name: "Four"]
+        http.post path: "/spring-filter/form/save", body: [name: "Five"]
         go "auth/signOut"
 
         when: "I go to the form list page with some query parameters and log in"

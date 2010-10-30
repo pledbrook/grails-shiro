@@ -1,5 +1,3 @@
-import org.apache.shiro.crypto.hash.Sha256Hash
-
 class BootStrap {
     def shiroSecurityService
 
