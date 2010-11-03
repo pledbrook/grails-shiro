@@ -211,7 +211,7 @@ target(createSecurityFilters: "Creates a standard Grails filters class implement
 private parsePrefix() {
     def prefix = "Shiro"
     def pkg = ""
-    if (argsMap["prefix"]) {
+    if (argsMap["prefix"] != null) {
         def givenValue = argsMap["prefix"].split(/\./, -1)
         prefix = givenValue[-1]
         pkg = givenValue.size() > 1 ? givenValue[0..-2].join('.') : ""
