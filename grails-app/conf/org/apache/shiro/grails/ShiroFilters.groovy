@@ -18,6 +18,7 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
+package org.apache.shiro.grails
 
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authz.AuthorizationException
