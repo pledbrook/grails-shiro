@@ -31,10 +31,8 @@ import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
-import org.apache.shiro.spring.LifecycleBeanPostProcessor
-import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor
-import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.aspectj.ShiroAnnotationAuthorizingAspect
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
@@ -50,7 +48,7 @@ import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.1.3"
+    def version = "1.1.4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1 > *"
     // the other plugins this plugin depends on
@@ -92,17 +90,7 @@ Adopted from previous JSecurity plugin.
             realmBeans << configureRealm(realmClass)
         }
         
-        lifecycleBeanPostProcessor(LifecycleBeanPostProcessor)
-
-        // Shiro annotation support for services...
-        defaultAdvisorAutoProxyCreator(org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator) { bean ->
-            bean.dependsOn = "lifecycleBeanPostProcessor"
-            proxyTargetClass = true
-        }
-
-        aasa(AuthorizationAttributeSourceAdvisor) { bean ->
-            securityManager = ref("shiroSecurityManager")
-        }
+	shiroAnnotationAuthorizingAspect(ShiroAnnotationAuthorizingAspect)
 
         // The default credential matcher.
         credentialMatcher(Sha256CredentialsMatcher) {
