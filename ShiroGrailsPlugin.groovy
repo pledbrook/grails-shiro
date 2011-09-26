@@ -32,7 +32,7 @@ import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
-import org.apache.shiro.aspectj.ShiroAnnotationAuthorizingAspect
+import org.apache.shiro.aspectj.ShiroAnnotationAspect
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
@@ -90,7 +90,7 @@ Adopted from previous JSecurity plugin.
             realmBeans << configureRealm(realmClass)
         }
         
-	shiroAnnotationAuthorizingAspect(ShiroAnnotationAuthorizingAspect)
+	shiroAnnotationAspect(ShiroAnnotationAspect)
 
         // The default credential matcher.
         credentialMatcher(Sha256CredentialsMatcher) {
