@@ -8,9 +8,9 @@ import org.springframework.beans.factory.InitializingBean
 class ShiroAnnotationHandlerService implements InitializingBean {
     def grailsApplication
 
-    private authcHandlers
-    private authzHandlers
-    private handlerMap
+    protected authcHandlers
+    protected authzHandlers
+    protected handlerMap
 
     /**
      * Loads all the controller classes in the application and scans them for
@@ -39,7 +39,7 @@ class ShiroAnnotationHandlerService implements InitializingBean {
     }
 
 
-    private void processController(controllerClass) {
+    protected void processController(controllerClass) {
         def authcAnnotations = authcHandlers.keySet()
         def authzAnnotations = authzHandlers.keySet()
 
