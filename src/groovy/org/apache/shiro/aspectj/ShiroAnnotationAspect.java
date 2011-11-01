@@ -8,11 +8,11 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public class ShiroAnnotationAspect {
 	
-	private static final String pointCupExpression = "execution(@org.apache.shiro.authz.annotation.RequiresAuthentication * *(..)) || "
-        + "execution(@org.apache.shiro.authz.annotation.RequiresGuest * *(..)) || "
-        + "execution(@org.apache.shiro.authz.annotation.RequiresPermissions * *(..)) || "
-        + "execution(@org.apache.shiro.authz.annotation.RequiresRoles * *(..)) || "
-        + "execution(@org.apache.shiro.authz.annotation.RequiresUser * *(..))";
+	private static final String pointCupExpression = "@annotation(org.apache.shiro.authz.annotation.RequiresAuthentication) || "
+        + "@annotation(org.apache.shiro.authz.annotation.RequiresGuest) || "
+        + "@annotation(org.apache.shiro.authz.annotation.RequiresPermissions) || "
+        + "@annotation(org.apache.shiro.authz.annotation.RequiresRoles) || "
+        + "@annotation(org.apache.shiro.authz.annotation.RequiresUser)";
 
 	@Pointcut(pointCupExpression)
 	void anyShiroAnnotatedMethodCall() {}
