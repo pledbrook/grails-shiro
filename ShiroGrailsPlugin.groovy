@@ -486,7 +486,7 @@ Adopted from previous JSecurity plugin.
 
                 def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
                 if (redirectUri) {
-                    filter.redirect(uri: redirectUri + "?targetUri=${targetUri}")
+                    filter.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
                 }
                 else {
                     filter.redirect(
