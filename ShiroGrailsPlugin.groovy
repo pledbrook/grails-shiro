@@ -140,7 +140,7 @@ Adopted from previous JSecurity plugin.
             }
             
             // Allow the user to customise the session type: 'http' or
-            // 'shiro'.
+            // 'native'.
             if (securityConfig.session.mode) {
                 sessionMode = securityConfig.session.mode
             }
