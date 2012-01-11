@@ -2,5 +2,5 @@ The Shiro Security plugin simplifies the integration of  [Apache Shiro|http://sh
 This plugin provides a default configuration to get your application protected by Apache Shrio with minimal configuration and sensible defaults.
  All the power of Apache Shiro is available through this plugin.
 
-This guide illustrates the configuration options available with the plugin and some sample application of Shiro to common use cases.
+This guide illustrates the configuration options available with the plugin and some sample applications of Shiro to common use cases.
 

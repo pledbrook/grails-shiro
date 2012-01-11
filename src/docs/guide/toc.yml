@@ -1,0 +1,17 @@
+introductionToTheGrailsShiroSecurityPlugin: 
+  title: Introduction to the Grails Shiro Security Plugin
+  gettingStarted: Getting Started
+  bootStrappingUsers: Boot Strapping Users
+coreConcepts: Core Concepts
+domainObjects: 
+  title: Domain Objects
+  shiroUser: ShiroUser
+  shiroRole: ShiroRole
+  movingOrRenaming: Moving or Renaming
+securityFilters: Security Filters
+authenticationContoller: Authentication Contoller
+shiroRealms: ShiroRealms
+permissions: Permissions
+accessControl: Access Control
+rememberMe: Remember Me
+shiroTaglibs: Shiro Taglibs
