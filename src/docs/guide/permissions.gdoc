@@ -1,0 +1,80 @@
+The default Shiro setup provided by the shiro-quick-start command is very flexible and powerful. It's based on permission strings known as "wildcard permissions" that are simple to use, but in some ways difficult to understand because they are also very flexible.
+
+
+h2. Wildcard Permissions
+
+Let's start with an example. Say you want to protect access to your company's printers such that some people can print to particular printers, while others can find out what jobs are currently in the queue. The basic type of permission is therefore "printer", while we have two sub-types: "query" and "print". We also want to restrict access on a per-printer basis, so we then have a second sub-type that is the printer name. In wildcard permission format, the permission requirements are
+
+bc.
+printer:query:lp7200
+printer:print:epsoncolor
+
+Notice how each part is separated by a colon? That's how the wildcard permission format separates what it calls "parts". It's also worth pointing out at this stage that Apache Shiro has no understanding of printer permissions - they are used and interpreted by the application.
+So those are permission requirements. They state what permission is required to do something. In the above example, the first permission says that a user must have the right to query the "lp7200" printer. That's just the application's interpretation of the string, though. You still need to code the permission requirement into your application. A simple way to do this is in a condition:
+
+bc.
+if (SecurityUtils.subject.isPermitted("printer:query:lp7200")) {
+    // Return the current jobs on printer lp7200
+}
+
+On the other side of the coin, you have permission assignments where you say what rights particular users have. In the quick start example, you saw a permission assignment in the BootStrap class.
+Assignments look a lot like permission requirements, but they also support syntax for wildcards and specifying multiple types or sub-types. What do I mean by that? Well, imagine you want a user to have print access to all the printers in a company. You could assign all the permissions manually:
+
+bc.
+printer:print:lp7200
+printer:print:epsoncolor
+
+but this doesn't scale well, particularly when new printers are added. You can instead use a wildcard:
+
+bc.
+printer:print:\*
+
+This does scale, because it covers any new printers as well. You could even allow access to all actions on all printers:
+
+bc.
+printer:\*:\*
+
+
+or all actions on a single printer:
+
+bc.
+printer:\*:lp7200
+
+or even specific actions:
+
+bc.
+printer:query,print:lp7200
+
+The '\*' wildcard and ',' sub-type separator can be used in any part of the permission, even the first part as you saw in the BootStrap example.
+One final thing to note about permission assignments: missing parts imply that the user has access to all values corresponding to that part. In other words,
+
+bc.
+printer:print
+
+is equivalent to
+
+bc.
+printer:print:\*
+
+and
+
+bc.
+printer
+
+is equivalent to
+
+bc.
+printer:\*:\*
+
+However, you can only leave off parts from the end of the string, so this:
+
+bc.
+printer:lp7200
+
+is not equivalent to
+
+bc.
+printer:\*:lp7200
+
+Permission assignments like these are typically done at the database level, although it depends on your realm implementation.
+With the default realm installed by quick-start you can assign permissions directly to users or via roles.

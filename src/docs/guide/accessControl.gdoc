@@ -1,0 +1,25 @@
+Access control is a primary concept of the Shiro plugin.  The plugin leverages the built in permissioning mechanisms of Shiro
+and the convention over configuration behavior of Grails to provide a powerful access control by convention capability.
+
+h2. Access control by convention
+
+The plugin enables access control via standard Grails filters. In fact, the quick-start command created one for you: see grails-app/conf/SecurityFilters.groovy . It's contents will look something like this:
+
+bc.
+class SecurityFilters {
+    def filters = {
+        all(uri: "/**") {
+            before = {
+                // Ignore direct views (e.g. the default main index page).
+                if (!controllerName) return true
+                // Access control by convention.
+                accessControl()
+            }
+        }
+    }
+}
+
+This adds a before interceptor to all URLs. Don't worry too much about the first part of the interceptor - it's there to exclude the default home page from being protected. You can remove it if you like. The more important bit is the accessControl() method call. This one line automatically protects all your controller actions by implicitly adding a permission requirement to each one.
+For example, say you have a scaffolded BookController . A user can only access an action of that controller if he or she has the corresponding permission of the form book:<action> . So the list action requires the book:list permission, while show requires the book:show permission. As you've seen, you can make all actions available to a user by assigning the book:* or book permissions to him or her.
+
+In other words, every controller action is protected by a permission requirement of the form <controller>:<action> . That said, the plugin does treat the AuthController in such a way that it's impossible to protect it. That's because it makes no sense to require an authenticated user for the login page!

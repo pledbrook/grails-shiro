@@ -65,7 +65,7 @@ class ShiroGrailsPlugin {
     def title = "Apache Shiro Integration for Grails"
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer.
-Adopted from previous JSecurity plugin.
+Adapted from previous JSecurity plugin.
 """
     
     // URL to the plugin's documentation

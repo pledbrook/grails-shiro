@@ -1,0 +1,12 @@
+The plugin uses two domain objects.
+* ShiroUser
+* ShiroRole
+
+These are regular GORM domain objects that you can use within your application using the same mechanisms you would for any
+other domain object within your application
+
+
+The ShiroUser is the principal your application will use. It represents the user that logs into your application, hence why
+it contains a username and a password hash. It stores a hash of the password so that even if someone hacks into the database
+and gets the user details, he or she can't log in as that user.
+

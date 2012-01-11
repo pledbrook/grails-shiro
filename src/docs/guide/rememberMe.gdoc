@@ -1,0 +1,12 @@
+
+By default the plugin only grants access to a fully authenticated user, i.e. one that has explicitly logged in during the current session.
+You can allow access to both authenticated users and remembered users by setting @security.shiro.authc.required = false@
+ in your Config.groovy file or by changing the line in @grails-app/conf/SecurityFilters.groovy@ to @accessControl(auth: false)@ .
+
+{code}
+//grails=app/conf/Config.groovy
+security.shiro.authc.required = false
+{code}
+
+The tags <shiro:isLoggedIn> and <shiro:authenticated> check for an authenticated user, the tag <shiro:user> checks for a known user
+(authenticated or remembered) and the tag <shiro:remembered> checks only for a remembered user.

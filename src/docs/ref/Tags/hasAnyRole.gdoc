@@ -1,0 +1,21 @@
+h1. shiro:hasAnyRole
+
+h2. Purpose
+Conditionally render the contents of the tag if the currently logged in user has at least one role in a provided list.
+
+h2. Examples
+{code}
+<shiro:hasRole in="['APP_ADMIN', 'APP_USER']">
+    <span>
+           Welcome: You have APP_ADMIN and/or TIMESHEET_ADMIN
+    </span>
+    ...
+</shiro:hasRole>
+{code}
+
+h2. Description
+This tag only writes its body to the output if the current user
+has any of the given roles (inversion of [lacksAllRoles|Tags])
+Attributes
+* @in@ (Required) - A list of roles of which the user must have at least one to view the contents of the tag
+

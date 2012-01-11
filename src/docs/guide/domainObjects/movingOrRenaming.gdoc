@@ -1,0 +1,2 @@
+Since the domain objects are just basic GORM objects you can safely rename them or move them into a sensible package.
+When you rename or move them be sure to refactor the ShiroRealm to reflect this new name.

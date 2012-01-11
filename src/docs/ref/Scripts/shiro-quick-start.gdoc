@@ -1,0 +1,39 @@
+h1. shiro-quick-start
+
+h2. Purpose
+
+A one-stop-shop command to get yourself up and running, creates a ShiroDbRealm class under grails-app/realms and
+also some related domain classes, which you can distinguish by their optional "Shiro" prefix.
+
+bc.
+grails shiro-quick-start [\-\-prefix=PREFIX]
+
+h2. Examples
+
+bc.
+grails shiro-quick-start
+
+
+bc.
+grails shiro-quick-start \-\-prefix=Security
+
+This example will put the domain classes in the default package but use the @Security@ prefix instead of the @Shiro@ prefix.
+
+
+bc.
+grails shiro-quick-start \-\-prefix=org.mydomain.Security
+
+This example will put the domain classes in the @org.mydomain@ package and use the @Security@ prefix instead of the @Shiro@ prefix.
+
+
+h2. Description
+
+* creates domain classes
+** @grails-app/domain/ShiroUser.groovy@
+** @grails-app/domain/ShiroRole.groovy@
+* creates login GSP:
+** @grails-app/views/auth/login.gsp@ - shows a standard username/password login page
+* creates default Shiro DB Realm
+** @grails-app/realms/ShiroDbRealm.groovy@
+* creates Shiro application filter class
+** @grails-app/conf/ShiroSecurityFilters.groovy@
