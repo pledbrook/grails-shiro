@@ -17,7 +17,13 @@ grails shiro-quick-start
 bc.
 grails shiro-quick-start \-\-prefix=Security
 
-This example will put the domain classes in the default package but user the @Security@ prefix instead of the @Shiro@ prefix.
+This example will put the domain classes in the default package but use the @Security@ prefix instead of the @Shiro@ prefix.
+
+
+bc.
+grails shiro-quick-start \-\-prefix=org.mydomain.Security
+
+This example will put the domain classes in the @org.mydomain@ package and use the @Security@ prefix instead of the @Shiro@ prefix.
 
 
 h2. Description
