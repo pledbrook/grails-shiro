@@ -1,1 +1,21 @@
-TODO
+h1. shiro:lacksAnyRole
+
+h2. Purpose
+Conditionally render the contents of the tag if the currently logged in user DOES NOT have ANY role in a provided list.
+
+
+h2. Examples
+{code}
+<shiro:lackAnyRoles in="['APP_ADMIN', 'TIMESHEET_ADMIN']">
+    <span>
+       Welcome: You don't have APP_ADMIN, or TIMESHEET_ADMIN
+    </span>
+    ...
+</shiro:lackAnyRoles>
+{code}
+
+h2. Description
+This tag only writes its body to the output if the current user
+has none of the given roles (inversion of [hasAllRoles|Tags]).
+Attributes
+* @in@ (Required) - A list of roles of which the user must every one to view the contents of the tag
