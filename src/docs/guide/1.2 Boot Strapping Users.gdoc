@@ -1,0 +1,18 @@
+Once the plugin is installed and you have run the [shiro-quick-start|Scripts] script you will soon discover that it is working,
+you will discover this when you execute @grails run-app@ and find that you cannot access any controllers*.  We examine the details
+ of why and how this happened later but for now lets create a user within the application BootStrap so we can use the application.
+
+bc.
+import org.apache.shiro.crypto.hash.Sha256Hash
+class BootStrap {
+    def init = { servletContext ->
+        def user = new ShiroUser(username: "user123", passwordHash: new Sha256Hash("password").toHex())
+        user.addToPermissions("\*:\*:\*")
+        user.save()
+    }
+}
+
+{note}
+\* The default configuration does not protect anything other than controllers, do not be surprised if you were able to view
+non-controller resources without logging in.
+{note}

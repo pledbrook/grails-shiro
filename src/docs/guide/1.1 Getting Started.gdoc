@@ -1,0 +1,9 @@
+
+h2. Installation
+bc.
+grails install shiro
+
+h2. Initial setup.
+The first thing you will need to do is run the  [shiro-quick-start|Scripts] script.  This script will create the artifacts
+necessary for the shiro plugin to function.  By default this script will prefix the domain classes it creates with @Shiro@,
+you may override this behavior by providing @/-/-prefix=<YOUR_PREFIX>@.

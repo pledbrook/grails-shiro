@@ -1,0 +1,23 @@
+
+The ShiroRole is used to store what Roles exist within your application.  This is mapped as a many-to-many GORM relationship.
+Roles are covered in more detail later.
+
+Roles are basically a name, such as "Administrator" or "Guest" that can be assigned to a user. The default realm allows
+users to have multiple roles. One approach to security is to simply check whether a user has a particular role, for example
+via SecurityUtils.subject.hasRole(roleName) . Although simple, this approach fails to scale well and makes life more
+complicated as application requirements evolve. A far better way of using roles is to assign permissions to them:
+bc.
+def adminRole = new ShiroRole(name: "Administrator")
+adminRole.addToPermissions("printer:\*:\*")
+adminRole.addToPermissions("admin")
+…
+adminRole.save()
+
+When you assign such a role to a user, the user automatically gains all those permissions assigned to the role:
+bc.
+user.addToRoles(adminRole)
+user.save()
+// 'user' now has all administrator rights
+
+It's then very easy to grant and revoke access rights to and from roles and the changes immediately apply to all users with the affected role(s).
+
