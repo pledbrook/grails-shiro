@@ -13,5 +13,7 @@ authenticationContoller: Authentication Contoller
 shiroRealms: ShiroRealms
 permissions: Permissions
 accessControl: Access Control
-rememberMe: Remember Me
+rememberMe:
+  title: Remember Me Support
+  cutomizingTheRememberMeCookie: Customizing
 shiroTaglibs: Shiro Taglibs

@@ -1,0 +1,18 @@
+If you want to change the default behavior of the remember-me cookie simply create a @shiroRememberMeManager@ manager
+bean in your local @resources.groovy@ with the settings you want.
+
+
+{code}
+//grails-app/conf/spring/resources.groovy
+import org.apache.shiro.web.mgt.CookieRememberMeManager
+   beans = {
+       int TWO_WEEKS = 2 * 7 * 24 * 60 * 60 //In seconds
+       shiroRememberMeCookieTemplate(org.apache.shiro.web.servlet.SimpleCookie){
+           name = 'shiroExtendedSession'
+           maxAge = TWO_WEEKS
+       }
+       shiroRememberMeManager(CookieRememberMeManager){
+           cookie = shiroRememberMeCookieTemplate
+       }
+   }
+{code}

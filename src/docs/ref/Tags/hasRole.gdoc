@@ -1,0 +1,24 @@
+h2. Purpose
+Tests to see if the currently logged in user has a given role or has at least one role in a provided list.
+
+h2. Examples
+{code}
+<shiro:hasRole name='APP_ADMIN'>
+    <g:link controller='cleanUp' action='deleteEverything'>
+        Remove Every Record
+    </g:link>
+</shiro>
+
+
+<shiro:hasRole in='[APP_ADMIN, APP_USER]'>
+    <g:link controller='timeSheet' action='view'>
+        View Your Time Sheet
+    </g:link>
+</shiro>
+{code}
+
+h2. Description
+Attribute
+* @name@ (optional) - The name of the role the user MUST have to view the contents of the tag
+* @in@ (optional) - A list of roles of which the user must have at least one to view the contents of the tag
+
