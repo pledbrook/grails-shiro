@@ -14,11 +14,13 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-        compile 'org.apache.shiro:shiro-core:1.1.0',
-                'org.apache.shiro:shiro-web:1.1.0',
-                'org.apache.shiro:shiro-ehcache:1.1.0',
-                'org.apache.shiro:shiro-quartz:1.1.0',
-                'org.apache.shiro:shiro-spring:1.1.0', {
+        compile 'org.apache.shiro:shiro-core:1.2.0',
+                'org.apache.shiro:shiro-web:1.2.0',
+                'org.apache.shiro:shiro-ehcache:1.2.0',
+                'org.apache.shiro:shiro-quartz:1.2.0',
+                'org.apache.shiro:shiro-spring:1.2.0',
+                'org.jasig.cas.client:cas-client-core:3.2.1',
+                'org.apache.shiro:shiro-cas:1.2.0', {
             excludes 'ejb', 'jsf-api', 'jms', 'connector-api', 'ehcache-core', 'slf4j-api'
         }
     }
