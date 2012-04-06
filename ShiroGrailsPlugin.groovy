@@ -50,9 +50,9 @@ import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.1.3"
+    def version = "1.1.4-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1 > *"
+    def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
@@ -149,6 +149,9 @@ Adopted from previous JSecurity plugin.
             // components in resources.xml or resources.groovy.
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
+            if (securityConfig.cas.enable) {
+                subjectFactory = {org.apache.shiro.cas.CasSubjectFactory factory->}
+            }
         }
 
         // If the legacy 'shiro.filter.config' setting has a value, then
@@ -293,6 +296,19 @@ Adopted from previous JSecurity plugin.
                 'filter-name'('shiroSavedRequestFilter')
                 'filter-class'('org.apache.shiro.grails.SavedRequestFilter')
             }
+            if (application.config.security.shiro.cas.enable) {
+                'filter' {
+                    'filter-name'('casFilter')
+                    'filter-class'('org.apache.shiro.cas.CasFilter')
+                    if (application.config.security.cas.failureUrl) {
+                        'init-param' {
+                            'param-name'('failureUrl')
+                            'param-value'(application.config.security.cas.failureUrl)
+                        }
+                    }
+                }
+            }
+            
         }
         
         // Place the Shiro filters after the Spring character encoding filter, otherwise the latter filter won't work.
@@ -353,6 +369,12 @@ Adopted from previous JSecurity plugin.
                 'url-pattern'("/*")
                 dispatcher('REQUEST')
                 dispatcher('ERROR')
+            }
+            if (application.config.security.shiro.cas.enable) {
+                'filter-mapping' {
+                    'filter-name'('casFilter')
+                    'url-pattern'('/shiro-cas')
+                }
             }
         }
     }
