@@ -166,7 +166,13 @@ Adopted from previous JSecurity plugin.
                     applicationName = securityConfig.filter.basicAppName
                 }
             }
-
+            if (securityConfig.cas.enable) {
+                casFilter(org.apache.shiro.cas.CasFilter) {bean->
+                    if (securityConfig.cas.failureUrl) {
+                        failureUrl = securityConfig.cas.failureUrl
+                    }
+                }
+            }
             // Create the main security filter.
             shiroFilter(ShiroFilterFactoryBean) { bean ->
                 securityManager = ref("shiroSecurityManager")
@@ -176,6 +182,13 @@ Adopted from previous JSecurity plugin.
 
                 if (securityConfig.filter.filterChainDefinitions) {
                     filterChainDefinitions = securityConfig.filter.filterChainDefinitions
+                }
+                if (securityConfig.cas.enable) {
+                    filterChainDefinitions = "/shiro-cas=casFilter\n" + filterChainDefinitions?:''
+                    def serverUrl = securityConfig.cas.serverUrl
+                    if (!securityConfig.filter.loginUrl && serverUrl) {
+                        loginUrl = serverUrl.endsWith("/") ? serverUrl : (serverUrl+"/") +"/login?service="+securityConfig.cas.serviceUrl
+                    }
                 }
 
                 if (securityConfig.filter.basicAppName) {
@@ -296,19 +309,6 @@ Adopted from previous JSecurity plugin.
                 'filter-name'('shiroSavedRequestFilter')
                 'filter-class'('org.apache.shiro.grails.SavedRequestFilter')
             }
-            if (application.config.security.shiro.cas.enable) {
-                'filter' {
-                    'filter-name'('casFilter')
-                    'filter-class'('org.apache.shiro.cas.CasFilter')
-                    if (application.config.security.cas.failureUrl) {
-                        'init-param' {
-                            'param-name'('failureUrl')
-                            'param-value'(application.config.security.cas.failureUrl)
-                        }
-                    }
-                }
-            }
-            
         }
         
         // Place the Shiro filters after the Spring character encoding filter, otherwise the latter filter won't work.
@@ -369,12 +369,6 @@ Adopted from previous JSecurity plugin.
                 'url-pattern'("/*")
                 dispatcher('REQUEST')
                 dispatcher('ERROR')
-            }
-            if (application.config.security.shiro.cas.enable) {
-                'filter-mapping' {
-                    'filter-name'('casFilter')
-                    'url-pattern'('/shiro-cas')
-                }
             }
         }
     }

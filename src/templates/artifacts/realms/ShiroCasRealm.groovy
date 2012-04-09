@@ -20,11 +20,14 @@ class @realm.name@ {
         log.info "Attempting to authenticate ${authToken.userId} in CAS realm..."
 
         def appConfig = grailsApplication.config
-        def serverUrl = appConfig.security.shiro.cas.serverUrl ?: [ "https://localhost:8443/cas" ]
+        def serverUrl = appConfig.security.shiro.cas.serverUrl
+        if (!serverUrl) {
+            log.error(" the security.shiro.cas.serverUrl can not be empty.it should be https://host:port/cas")
+        }
         def serviceUrl = appConfig.security.shiro.cas.serviceUrl
         
         if (!serviceUrl) {
-            log.err(" the serviceUrl can not be empty.it should be http://host:port/mycontextpath/shiro-cas")
+            log.error(" the security.shiro.cas.serviceUrl can not be empty.it should be http://host:port/mycontextpath/shiro-cas")
         }
         
         if (authToken == null) {
@@ -46,9 +49,7 @@ class @realm.name@ {
             AttributePrincipal casPrincipal = casAssertion.principal
             String userId = casPrincipal.name
             if (log.debugEnabled) {
-                log.debug("Validate ticket : {} in CAS server : {} to retrieve user : {}", new Object[]{
-                        ticket, serverUrl, userId
-                })
+                log.debug("Validate ticket : ${ticket} in CAS server : ${serverUrl} to retrieve user : ${userId}")
             }
 
             Map<String, Object> attributes = casPrincipal.attributes
