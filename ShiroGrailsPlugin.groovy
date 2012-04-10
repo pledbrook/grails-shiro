@@ -184,7 +184,7 @@ Adopted from previous JSecurity plugin.
                     filterChainDefinitions = securityConfig.filter.filterChainDefinitions
                 }
                 if (securityConfig.cas.enable) {
-                    filterChainDefinitions = "/shiro-cas=casFilter\n" + filterChainDefinitions?:''
+                    filterChainDefinitions = "/shiro-cas=casFilter\n" + securityConfig.filter.filterChainDefinitions?:''
                     def serverUrl = securityConfig.cas.serverUrl
                     if (!securityConfig.filter.loginUrl && serverUrl) {
                         loginUrl = serverUrl.endsWith("/") ? serverUrl : (serverUrl+"/") +"/login?service="+securityConfig.cas.serviceUrl
