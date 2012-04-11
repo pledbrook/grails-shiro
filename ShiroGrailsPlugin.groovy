@@ -48,6 +48,8 @@ import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 import org.springframework.aop.framework.ProxyFactoryBean
 import org.springframework.aop.target.HotSwappableTargetSource
 
+import org.apache.shiro.grails.ConfigUtils
+
 class ShiroGrailsPlugin {
     // the plugin version
     def version = "1.1.4-SNAPSHOT"
@@ -149,7 +151,7 @@ Adopted from previous JSecurity plugin.
             // components in resources.xml or resources.groovy.
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
-            if (securityConfig.cas.enable) {
+            if (ConfigUtils.casEnable) {
                 subjectFactory = {org.apache.shiro.cas.CasSubjectFactory factory->}
             }
         }
@@ -166,7 +168,7 @@ Adopted from previous JSecurity plugin.
                     applicationName = securityConfig.filter.basicAppName
                 }
             }
-            if (securityConfig.cas.enable) {
+            if (ConfigUtils.casEnable) {
                 casFilter(org.apache.shiro.cas.CasFilter) {bean->
                     if (securityConfig.cas.failureUrl) {
                         failureUrl = securityConfig.cas.failureUrl
@@ -183,11 +185,10 @@ Adopted from previous JSecurity plugin.
                 if (securityConfig.filter.filterChainDefinitions) {
                     filterChainDefinitions = securityConfig.filter.filterChainDefinitions
                 }
-                if (securityConfig.cas.enable) {
-                    filterChainDefinitions = "/shiro-cas=casFilter\n" + securityConfig.filter.filterChainDefinitions?:''
-                    def serverUrl = securityConfig.cas.serverUrl
-                    if (!securityConfig.filter.loginUrl && serverUrl) {
-                        loginUrl = serverUrl.endsWith("/") ? serverUrl : (serverUrl+"/") +"/login?service="+securityConfig.cas.serviceUrl
+                if (ConfigUtils.casEnable) {
+                    filterChainDefinitions = ConfigUtils.shiroCasFilter
+                    if (!securityConfig.filter.loginUrl) {
+                        loginUrl = ConfigUtils.loginUrl
                     }
                 }
 
@@ -503,6 +504,12 @@ Adopted from previous JSecurity plugin.
                 def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
                 if (redirectUri) {
                     filter.redirect(uri: redirectUri + "?targetUri=${targetUri}")
+                }else if (ConfigUtils.casEnable){
+                    if (redirectUri) {
+                        filter.redirect(uri: redirectUri)
+                    }else{
+                        filter.redirect(uri: ConfigUtils.loginUrl)
+                    }
                 }
                 else {
                     filter.redirect(

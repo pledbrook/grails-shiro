@@ -33,6 +33,8 @@ import org.apache.shiro.authz.Permission
 import org.apache.shiro.authz.AuthorizationException
 import org.apache.shiro.authz.UnauthorizedException
 
+import org.apache.shiro.grails.ConfigUtils
+
 /**
  * Simple implementation of the Shiro Realm that wraps a 'Realm'
  * artefact. It is basically an adapter between the Grails world and
@@ -57,7 +59,7 @@ class RealmWrapper extends RealmAdapter implements LogoutAware {
         // If the target realm has an 'authenticate' method, we use that.
         try {
             def account = this.realm.authenticate(authenticationToken)
-
+            ConfigUtils.putPrincipal(authenticationToken)
             if (account instanceof AuthenticationInfo) {
                 return account
             }

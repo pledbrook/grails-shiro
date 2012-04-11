@@ -2,11 +2,14 @@
 import org.apache.shiro.authc.AccountException
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.apache.shiro.util.StringUtils
+import org.apache.shiro.util.CollectionUtils
 import org.apache.shiro.subject.PrincipalCollection
 import org.apache.shiro.subject.SimplePrincipalCollection
 
 import org.jasig.cas.client.authentication.AttributePrincipal
 import org.jasig.cas.client.validation.*
+
+import org.apache.shiro.grails.ConfigUtils
 
 /**
  * Simple realm that authenticates users against an CAS server.
@@ -54,11 +57,11 @@ class @realm.name@ {
 
             Map<String, Object> attributes = casPrincipal.attributes
             // refresh authentication token (user id + remember me)
-            casToken.setUserId(userId)
+            authToken.setUserId(userId)
             String rememberMeStringValue = (String)attributes.get('longTermAuthenticationRequestTokenUsed')
             boolean isRemembered = rememberMeStringValue?.toBoolean()
             if (isRemembered) {
-                casToken.setRememberMe(true)
+                authToken.setRememberMe(true)
             }
             // create simple authentication info
             List<Object> principals = CollectionUtils.asList(userId, attributes)
@@ -67,6 +70,5 @@ class @realm.name@ {
         } catch (TicketValidationException e) { 
             throw new CasAuthenticationException("Unable to validate ticket [" + ticket + "]", e);
         }
-        
     }
 }
