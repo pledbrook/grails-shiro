@@ -57,7 +57,7 @@ class RealmWrapper extends RealmAdapter implements LogoutAware {
         // If the target realm has an 'authenticate' method, we use that.
         try {
             def account = this.realm.authenticate(authenticationToken)
-
+            ConfigUtils.putPrincipal(authenticationToken)
             if (account instanceof AuthenticationInfo) {
                 return account
             }

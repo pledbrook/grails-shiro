@@ -6,3 +6,4 @@ target/
 test/reports/
 work/
 /web-app/
+grails-shiro*.zip

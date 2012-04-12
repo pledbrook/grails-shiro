@@ -191,6 +191,21 @@ target(createLdapRealm: "Creates a new LDAP realm.") {
     event("CreatedArtefact", ['Realm', className])
 }
 
+target(createCasRealm: "Creates a new CAS realm.") {
+    def (pkg, prefix) = parsePrefix()
+
+    // Copy over the template LDAP realm.
+    def className = "${prefix}CasRealm"
+    installTemplateEx("${className}.groovy", "grails-app/realms${packageToPath(pkg)}", "realms", "ShiroCasRealm.groovy") {
+        ant.replace(file: artefactFile) {
+            ant.replacefilter(token: "@package.line@", value: (pkg ? "package ${pkg}\n\n" : ""))
+            ant.replacefilter(token: '@realm.name@', value: className)
+        }
+    }
+    
+    event("CreatedArtefact", ['Realm', className])
+}
+
 /**
  * Creates a SecurityFilters class from a template. This class protects
  * all URLs by default using access control by convention.
