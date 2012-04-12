@@ -3,6 +3,7 @@ import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.apache.shiro.web.util.SavedRequest
 import org.apache.shiro.web.util.WebUtils
+import org.apache.shiro.grails.ConfigUtils
 
 class AuthController {
     def shiroSecurityManager
@@ -66,10 +67,15 @@ class AuthController {
 
     def signOut = {
         // Log the user out of the application.
+        def principal = SecurityUtils.subject?.principal
         SecurityUtils.subject?.logout()
-
         // For now, redirect back to the home page.
-        redirect(uri: "/")
+        if (ConfigUtils.getCasEnable() && ConfigUtils.isFromCas(principal)) {
+            redirect(uri:ConfigUtils.getLogoutUrl())
+        }else {
+            redirect(uri: "/")
+        }
+        ConfigUtils.removePrincipal(principal)
     }
 
     def unauthorized = {

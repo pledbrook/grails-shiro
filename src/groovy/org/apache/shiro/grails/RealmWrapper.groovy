@@ -33,8 +33,6 @@ import org.apache.shiro.authz.Permission
 import org.apache.shiro.authz.AuthorizationException
 import org.apache.shiro.authz.UnauthorizedException
 
-import org.apache.shiro.grails.ConfigUtils
-
 /**
  * Simple implementation of the Shiro Realm that wraps a 'Realm'
  * artefact. It is basically an adapter between the Grails world and

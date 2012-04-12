@@ -52,7 +52,7 @@ import org.apache.shiro.grails.ConfigUtils
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.1.4-SNAPSHOT"
+    def version = "1.1.4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
@@ -151,7 +151,7 @@ Adopted from previous JSecurity plugin.
             // components in resources.xml or resources.groovy.
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
-            if (ConfigUtils.casEnable) {
+            if (ConfigUtils.getCasEnable()) {
                 subjectFactory = {org.apache.shiro.cas.CasSubjectFactory factory->}
             }
         }
@@ -168,7 +168,7 @@ Adopted from previous JSecurity plugin.
                     applicationName = securityConfig.filter.basicAppName
                 }
             }
-            if (ConfigUtils.casEnable) {
+            if (ConfigUtils.getCasEnable()) {
                 casFilter(org.apache.shiro.cas.CasFilter) {bean->
                     if (securityConfig.cas.failureUrl) {
                         failureUrl = securityConfig.cas.failureUrl
@@ -185,10 +185,10 @@ Adopted from previous JSecurity plugin.
                 if (securityConfig.filter.filterChainDefinitions) {
                     filterChainDefinitions = securityConfig.filter.filterChainDefinitions
                 }
-                if (ConfigUtils.casEnable) {
-                    filterChainDefinitions = ConfigUtils.shiroCasFilter
+                if (ConfigUtils.getCasEnable()) {
+                    filterChainDefinitions = ConfigUtils.getShiroCasFilter()
                     if (!securityConfig.filter.loginUrl) {
-                        loginUrl = ConfigUtils.loginUrl
+                        loginUrl = ConfigUtils.getLoginUrl()
                     }
                 }
 
@@ -504,11 +504,11 @@ Adopted from previous JSecurity plugin.
                 def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
                 if (redirectUri) {
                     filter.redirect(uri: redirectUri + "?targetUri=${targetUri}")
-                }else if (ConfigUtils.casEnable){
+                }else if (ConfigUtils.getCasEnable()){
                     if (redirectUri) {
                         filter.redirect(uri: redirectUri)
                     }else{
-                        filter.redirect(uri: ConfigUtils.loginUrl)
+                        filter.redirect(uri: ConfigUtils.getLoginUrl())
                     }
                 }
                 else {
