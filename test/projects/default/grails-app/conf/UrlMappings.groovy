@@ -5,7 +5,7 @@ class UrlMappings {
                 // apply constraints here
             }
         }
-        "/"(view: "index.gsp")
+        "/"(view: "index")
         "500"(view:'/error')
 
         "/books" {

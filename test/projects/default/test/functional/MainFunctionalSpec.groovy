@@ -1,8 +1,8 @@
-import grails.plugin.geb.GebSpec
+import geb.spock.GebReportingSpec
 import pages.*
 import spock.lang.Specification
 
-class MainFunctionalSpec extends GebSpec {
+class MainFunctionalSpec extends GebReportingSpec {
     def "Test login page"() {
         when:
         to LoginPage

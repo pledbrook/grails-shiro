@@ -11,6 +11,7 @@ grails.project.dependency.resolution = {
         grailsCentral()
     }
     dependencies {
+        test "hsqldb:hsqldb:1.8.0.10", "org.codehaus.geb:geb-spock:0.6.3"
         test "org.codehaus.groovy.modules.http-builder:http-builder:0.5.0", {
             excludes "commons-logging", "httpclient", "groovy", "xml-apis"
         }
