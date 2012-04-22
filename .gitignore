@@ -2,6 +2,7 @@
 stacktrace.log
 build/
 eclipse/
+plugin.xml
 target/
 test/reports/
 work/
