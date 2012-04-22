@@ -476,7 +476,11 @@ Adopted from previous JSecurity plugin.
                 // Save the request if this is a POST so we don't lose
                 // the data after a redirect. The other part of the
                 // POST handling is in the ...Filter.
-                if (request.method == "POST") {
+                def enableSavedRequests = ConfigurationHolder.config.security.shiro.redirect.enableSavedRequests
+                if (enableSavedRequests instanceof ConfigObject) {
+                    enableSavedRequests = true
+                }
+                if (request.method == "POST" && enableSavedRequests) {
                     filter.session["shiroGrailsSavedRequest"] = new SavedHttpServletRequest(request)
 
                     if (!query) targetUri << '?'
