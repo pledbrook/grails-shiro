@@ -29,8 +29,8 @@ import org.apache.shiro.authc.LogoutAware
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.apache.shiro.subject.SimplePrincipalCollection
 import org.apache.shiro.subject.PrincipalCollection
-import org.apache.shiro.authz.Permission
 import org.apache.shiro.authz.AuthorizationException
+import org.apache.shiro.authz.Permission
 import org.apache.shiro.authz.UnauthorizedException
 
 /**

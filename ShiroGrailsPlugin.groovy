@@ -50,7 +50,7 @@ import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.2.0.BUILD-SNAPSHOT"
+    def version = "1.2.0-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
