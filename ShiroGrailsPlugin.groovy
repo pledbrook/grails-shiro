@@ -50,9 +50,9 @@ import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.1.3"
+    def version = "1.2.0.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1 > *"
+    def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
@@ -64,12 +64,11 @@ class ShiroGrailsPlugin {
     def authorEmail = ""
     def title = "Apache Shiro Integration for Grails"
     def description = """\
-Enables Grails applications to take advantage of the Apache Shiro security layer.
-Adopted from previous JSecurity plugin.
+Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
     
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/Shiro+Plugin"
+    def documentation = "http://grails.org/plugin/shiro"
     
     def loadAfter = [ "controllers", "services" ]
     def observe = [ "controllers" ]
