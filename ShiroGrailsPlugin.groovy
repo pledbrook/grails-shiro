@@ -473,17 +473,6 @@ Adopted from previous JSecurity plugin.
                     targetUri << query
                 }
 
-                // Save the request if this is a POST so we don't lose
-                // the data after a redirect. The other part of the
-                // POST handling is in the ...Filter.
-                if (request.method == "POST") {
-                    filter.session["shiroGrailsSavedRequest"] = new SavedHttpServletRequest(request)
-
-                    if (!query) targetUri << '?'
-                    else targetUri << '&'
-                    targetUri << "shiroPostRedirect=1"
-                }
-
                 def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
                 if (redirectUri) {
                     filter.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
