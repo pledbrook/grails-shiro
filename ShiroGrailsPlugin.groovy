@@ -284,15 +284,6 @@ Adopted from previous JSecurity plugin.
                     }
                 }
             }
-
-            // Configure an instance of the plugin's "saved request".
-            // This handles unauthenticated POST requests so that the
-            // user doesn't have to manually resubmit data if his
-            // session times out.
-            'filter' {
-                'filter-name'('shiroSavedRequestFilter')
-                'filter-class'('org.apache.shiro.grails.SavedRequestFilter')
-            }
         }
         
         // Place the Shiro filters after the Spring character encoding filter, otherwise the latter filter won't work.
@@ -343,11 +334,6 @@ Adopted from previous JSecurity plugin.
 
         // Finally add the Shiro filter mapping after the selected insertion point.
         filter + {
-            'filter-mapping' {
-                'filter-name'('shiroSavedRequestFilter')
-                'url-pattern'('/*')
-            }
-
             'filter-mapping' {
                 'filter-name'('shiroFilter')
                 'url-pattern'("/*")
