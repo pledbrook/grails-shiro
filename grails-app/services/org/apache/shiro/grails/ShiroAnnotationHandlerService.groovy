@@ -6,6 +6,8 @@ import org.apache.shiro.grails.annotations.*
 import org.springframework.beans.factory.InitializingBean
 
 class ShiroAnnotationHandlerService implements InitializingBean {
+    static transactional = false
+
     def grailsApplication
 
     private authcHandlers

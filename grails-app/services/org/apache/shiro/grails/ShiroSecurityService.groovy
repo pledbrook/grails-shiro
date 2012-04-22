@@ -1,6 +1,8 @@
 package org.apache.shiro.grails
 
 class ShiroSecurityService {
+    static transactional = false
+
     def passwordHashAdapter
 
     /**
