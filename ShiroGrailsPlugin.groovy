@@ -69,6 +69,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
     
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/shiro"
+
+    def license = "APACHE"
+    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPSHIRO" ]
+    def scm = [url: "https://github.com/pledbrook/grails-shiro"]
     
     def loadAfter = [ "controllers", "services" ]
     def observe = [ "controllers" ]
