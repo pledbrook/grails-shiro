@@ -6,8 +6,8 @@ class BookCreatePage extends Page {
     static url = "book/create"
 
     static at = {
-        assert title == "Book Create"
-        assert $("h1", text: "Book Create").size() > 0
+        assert title == "Create Book"
+        assert $("h1", text: "Create Book").size() > 0
         assert $("a", text: "sign out").size() > 0
         return true
     }

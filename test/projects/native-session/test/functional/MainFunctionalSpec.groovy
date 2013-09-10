@@ -1,8 +1,7 @@
-import grails.plugin.geb.GebSpec
+import geb.spock.GebReportingSpec
 import pages.*
-import spock.lang.Specification
 
-class MainFunctionalSpec extends GebSpec {
+class MainFunctionalSpec extends GebReportingSpec {
     def "Test login page"() {
         when:
         to LoginPage
@@ -109,11 +108,10 @@ class MainFunctionalSpec extends GebSpec {
     }
 
     def "Test unauthenticated access to page secured via permissions"() {
-        when:
-        to BookListPage
-        page LoginPage
+        given:
+        go "books"
 
-        then:
+        expect:
         at LoginPage
 
         when:
@@ -197,7 +195,7 @@ class MainFunctionalSpec extends GebSpec {
         go "test/index"
 
         then: "The comments are displayed, but not the tags"
-        $("div.list h2")*.text() == [ "Comments", "Edit a user comment" ]
+        $("h2")*.text() == [ "Comments", "Edit a user comment" ]
     }
 
     def "Test user has access to JsecBasicPermission protected pages - different user"() {
@@ -226,7 +224,7 @@ class MainFunctionalSpec extends GebSpec {
         go "test/index"
 
         then: "The comments and tags are displayed, but not the comment editing"
-        $("div.list h2")*.text() == [ "Comments", "Tags" ]
+        $("h2")*.text() == [ "Comments", "Tags" ]
     }
 
     def "Test tag errors display correctly"() {
@@ -237,15 +235,12 @@ class MainFunctionalSpec extends GebSpec {
         go "test/hasRole"
 
         then: "The error page is displayed with the correct name of the tag"
-        // Only works with HtmlUnit driver
-        browser.driver.lastPage().webResponse.statusCode == 500
         $().text().contains("Tag [hasRole]")
 
         when: "User accesses page with an error in 'lacksRole' tag"
         go "test/lacksRole"
 
         then: "The error page is displayed with the correct name of the tag"
-        browser.driver.lastPage().webResponse.statusCode == 500
         $().text().contains("Tag [lacksRole]")
     }
 
@@ -319,7 +314,7 @@ class MainFunctionalSpec extends GebSpec {
      */
     private login(username, password, targetPage = null, params = [:]) {
         if (targetPage) {
-            to([*:params], targetPage)
+            go([*:params], targetPage.url)
             page LoginPage
         }
         else {

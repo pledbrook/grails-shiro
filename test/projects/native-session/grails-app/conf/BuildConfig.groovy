@@ -29,12 +29,23 @@ grails.project.dependency.resolution = {
         test "org.codehaus.groovy.modules.http-builder:http-builder:0.5.0", {
             excludes "commons-logging", "httpclient", "groovy", "xml-apis"
         }
-        test "org.seleniumhq.selenium:selenium-htmlunit-driver:2.0a5", {
-            excludes "htmlunit"
+        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
+        test "org.gebish:geb-spock:0.9.1"
+
+        test "org.seleniumhq.selenium:selenium-support:2.35.0"
+
+        test "org.seleniumhq.selenium:selenium-chrome-driver:2.35.0"
+        test "org.seleniumhq.selenium:selenium-firefox-driver:2.35.0"
+
+    }
+    plugins {
+        build ":tomcat:$grailsVersion"
+        runtime ":hibernate:$grailsVersion"
+
+        test(":spock:0.7") {
+            exclude "spock-grails-support"
         }
-        test "net.sourceforge.htmlunit:htmlunit:2.8", {
-            excludes "xml-apis", "commons-logging"
-        }
+        test ":geb:0.9.1"
     }
 
 }

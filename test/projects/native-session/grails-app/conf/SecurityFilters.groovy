@@ -4,6 +4,13 @@
  */
 class SecurityFilters {
     def filters = {
+        base(uri: "/") {
+            before = {
+                // Ignore direct views (e.g. the default main index page).
+                if (!controllerName) return true
+            }
+        }
+
         auth(controller: /\b(?!(item|book|basic|form)\b)\w+/, action: "*") {
             before = {
                 accessControl(auth: true) { true }

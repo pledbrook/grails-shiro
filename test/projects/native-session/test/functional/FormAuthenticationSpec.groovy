@@ -1,9 +1,9 @@
-import grails.plugin.geb.GebSpec
+import geb.spock.GebReportingSpec
 import groovyx.net.http.HTTPBuilder
 import pages.*
 import spock.lang.Specification
 
-class FormAuthenticationSpec extends GebSpec {
+class FormAuthenticationSpec extends GebReportingSpec {
     def "Test form page requires authentication"() {
         when: "I access the form list page"
         go "form/list"
@@ -77,7 +77,7 @@ class FormAuthenticationSpec extends GebSpec {
 
         then: "the form list page is displayed with the items in the correct order"
         at FormListPage
-        $("tbody").find("tr")*.find("td", 1)*.text() == [ "Five", "Four", "One" ]
+        $("td")*.text() == [ "Five", "Four", "One" ]
     }
 
     /**
@@ -86,7 +86,7 @@ class FormAuthenticationSpec extends GebSpec {
      */
     private login(username, password, targetPage = null, params = [:]) {
         if (targetPage) {
-            to([*:params], targetPage)
+            go([*:params], targetPage.url)
             page LoginPage
         }
         else {
