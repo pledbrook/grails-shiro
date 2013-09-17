@@ -86,6 +86,7 @@ class ShiroFilters {
                         // HACK! Even with the redirect, Tomcat will execute
                         // the error dispatcher unless we remove all the
                         // javax.servlet.error.* attributes from the request.
+                        //todo is this still the case, or just for old versions??
                         WebUtils.clearErrorRequestAttributes(request)
                     }
                 }

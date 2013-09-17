@@ -1,0 +1,240 @@
+h1. Quick Start
+
+Installing the plugin is only the first step to securing your application. It tries not to force a security model upon you, so you have to create your own. Fortunately, it's easy to set up a model that will satisfy the vast majority of user requirements. This is your one-stop-shop command to get yourself up and running:
+
+{code}
+grails shiro-quick-start
+{code}
+
+The shiro-quick-start command takes a 'prefix' argument:
+
+{code}
+grails shiro-quick-start --prefix=org.example.
+{code}
+
+This will create org.example.User and org.example.Role classes. If you want to include a package and the 'Shiro' prefix, just specify {code}--prefix=org.example.Shiro{code}
+
+This will create a ShiroDbRealm class under grails-app/realms and also some related domain classes, which you can distinguish by their "Shiro" prefix. The realm is the repository of access control information; it decides whether a particular user has the rights to do something.
+
+The above command also creates a controller, grails-app/controllers/AuthController.groovy , that provides a login screen, an action for signing into the application, and another one for signing out.
+
+Finally, it create a Grails filters class, grails-app/conf/SecurityFilters.groovy , that enables access control on all your controllers and actions. Try it out! When you attempt to navigate to one of your controller pages, you will be redirected to a login screen. Of course, there are no users in the system yet, so you can't successfully log in. Let's rectify that now by adding an example user to the application in grails-app/conf/BootStrap.groovy :
+
+{code}
+import org.apache.shiro.crypto.hash.Sha256Hash
+
+class BootStrap {
+
+    def init = { servletContext ->
+            def user = new ShiroUser(username: "user123", passwordHash: new Sha256Hash("password").toHex())
+            user.addToPermissions("*:*") user.save()
+        }
+
+    def destroy = { }
+}
+{code}
+
+The above code will create a user user123 that can access all controller actions. You can add as many or as few users as you like in the same way.
+
+Your application is now secure!
+
+h2. Fine-tuning the access control
+
+The default Shiro setup provided by the shiro-quick-start command is very flexible and powerful. It's based on permission strings known as "wildcard permissions" that are simple to use, but in some ways difficult to understand because they are also very flexible.
+
+h3. About wildcard permissions
+
+Let's start with an example. Say you want to protect access to your company's printers such that some people can print to particular printers, while others can find out what jobs are currently in the queue. The basic type of permission is therefore "printer", while we have two sub-types: "query" and "print". We also want to restrict access on a per-printer basis, so we then have a second sub-type that is the printer name. In wildcard permission format, the permission requirements are
+
+{code}
+printer:query:lp7200
+printer:print:epsoncolor
+{code}
+
+Notice how each part is separated by a colon? That's how the wildcard permission format separates what it calls "parts". It's also worth pointing out at this stage that Apache Shiro has no understanding of printer permissions - they are used and interpreted by the application.
+
+So those are permission requirements. They state what permission is required to do something. In the above example, the first permission says that a user must have the right to query the "lp7200" printer. That's just the application's interpretation of the string, though. You still need to code the permission requirement into your application. A simple way to do this is in a condition:
+
+{code}
+if (SecurityUtils.subject.isPermitted("printer:query:lp7200")) {
+    // Return the current jobs on printer lp7200
+}
+{code}
+
+On the other side of the coin, you have permission assignments where you say what rights particular users have. In the quick start example, you saw a permission assignment in the BootStrap class.
+
+Assignments look a lot like permission requirements, but they also support syntax for wildcards and specifying multiple types or sub-types. What do I mean by that? Well, imagine you want a user to have print access to all the printers in a company. You could assign all the permissions manually:
+
+{code}
+printer:print:lp7200
+printer:print:epsoncolor
+...
+{code}
+
+but this doesn't scale well, particularly when new printers are added. You can instead use a wildcard:
+
+{code}
+printer:print:*
+{code}
+
+This does scale, because it covers any new printers as well. You could even allow access to all actions on all printers:
+
+{code}
+printer:*:*
+{code}
+
+or all actions on a single printer:
+
+{code}
+printer:*:lp7200
+{code}
+
+or even specific actions:
+
+{code}
+printer:query,print:lp7200
+{code}
+
+The '*' wildcard and ',' sub-type separator can be used in any part of the permission, even the first part as you saw in the BootStrap example.
+
+One final thing to note about permission assignments: missing parts imply that the user has access to all values corresponding to that part. In other words,
+
+{code}
+printer:print
+{code}
+
+is equivalent to
+
+{code}
+printer:print:*
+{code}
+
+and
+
+{code}
+printer
+{code}
+
+is equivalent to
+
+{code}
+printer:*:*
+{code}
+
+However, you can only leave off parts from the end of the string, so this:
+
+{code}
+printer:lp7200
+{code}
+
+is not equivalent to
+
+{code}
+printer:*:lp7200
+{code}
+
+Permission assignments like these are typically done at the database level, although it depends on your realm implementation. With the default realm installed by quick-start you can assign permissions directly to users or via roles.
+
+h2. Of users, roles, and permissions
+
+When you run quick-start , it creates a realm under grails-app/realms and domain classes representing a user and a role.
+
+You can probably guess what the user domain class is for: it represents the user that logs into your application, hence why it contains a username and a password hash. It stores a hash of the password so that even if someone hacks into the database and gets the user details, he or she can't log in as that user. So how does the application check whether a user has entered the correct password for a given username?
+
+Your application should at this point have an AuthController under grails-app/controllers . This has a signIn action that logs a user into the application via SecurityUtils.subject.login(authToken) . When that login() method is called, a request is made to all the realms that support the particular type of authentication token (usually a UsernamePasswordToken ) to check whether the credentials (the password in this case) match those stored by the realm.
+
+The default realm basically hashes the password provided in the authentication token using SHA256 and then compares the hash to the password hash stored in the user domain instance. If the hashes are the same, the user is authenticated. Now, SHA256 has known vulnerabilities, so you may want to use something a little more secure. If that's the case, you need to do two things. First, when you create a user (such as in BootStrap ) you need to hash the password using the alternative algorithm, for example:
+
+{code}
+import org.apache.shiro.crypto.hash.Sha512Hash
+…
+    def user = new ShiroUser(username: "user123", passwordHash: new Sha512Hash("password").toHex())
+    user.save()
+{code}
+
+Second, you need to override the credentialMatcher bean, for example by adding the following to your grails-app/conf/spring/resources.groovy file:
+
+{code}
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher
+
+beans = {
+        credentialMatcher(HashedCredentialsMatcher) { bean ->
+                    hashAlgorithmName = 'SHA-256'
+                    storedCredentialsHexEncoded = true
+                }
+        ...
+    }
+{code}
+
+Make sure that your credentials matcher is configured for hex-encoded passwords if you store hex-encoded hashes in your user domain objects. Also beware that the bean name is credentialMatcher (no 's'), whereas there is an 's' in the names of the matcher classes.
+
+The other domain class of interest is ShiroRole . Roles are basically a name, such as "Administrator" or "Guest" that can be assigned to a user. The default realm allows users to have multiple roles. One approach to security is to simply check whether a user has a particular role, for example via SecurityUtils.subject.hasRole(roleName) . Although simple, this approach fails to scale well and makes life more complicated as application requirements evolve. A far better way of using roles is to assign permissions to them:
+
+{code}
+def adminRole = new ShiroRole(name: "Administrator")
+adminRole.addToPermissions("printer:*:*")
+adminRole.addToPermissions("admin")
+…
+adminRole.save()
+{code}
+
+When you assign such a role to a user, the user automatically gains all those permissions assigned to the role:
+
+{code}
+user.addToRoles(adminRole)
+user.save()
+// 'user' now has all administrator rights
+{code}
+
+It's then very easy to grant and revoke access rights to and from roles and the changes immediately apply to all users with the affected role(s). Very powerful and surprisingly easy.
+
+You can even modify the rights for an individual by assigning permissions directly to users:
+
+{code}
+user.addToPermissions("printer:print:lp7200,epsoncolor")
+user.save()
+{code}
+
+There's only one more thing to say about users, roles, and permissions. Although quick-start creates the domain classes and realm with a "Shiro" prefix, you can change that by passing a {code}--prefix{code} argument to the command:
+
+{code}
+grails quick-start --prefix="Sec"
+{code}
+
+For non-Windows users, you can even pass an empty string as the prefix, so you end up with the domain classes User and Role . Windows users are currently affected by a bug that means an empty string cannot be passed as an argument.
+
+Once you have set up your permission assignments, your thoughts might turn to how you can protect your application's URLs. Not to worry, they're already protected if you've used quick-start !
+
+h2. Access control by convention
+
+The plugin enables access control via standard Grails filters. In fact, the quick-start command created one for you: see grails-app/conf/SecurityFilters.groovy . It's contents will look something like this:
+
+{code}
+class SecurityFilters {
+    def filters = {
+        all(uri: "/**") {
+            before = {
+                // Ignore direct views (e.g. the default main index page).
+                if (!controllerName) {
+                    return true
+                }
+
+                // Access control by convention.
+                accessControl()
+            }
+        }
+    }
+}
+{code}
+
+This adds a before interceptor to all URLs. Don't worry too much about the first part of the interceptor - it's there to exclude the default home page from being protected. You can remove it if you like. The more important bit is the accessControl() method call. This one line automatically protects all your controller actions by implicitly adding a permission requirement to each one.
+
+For example, say you have a scaffolded BookController . A user can only access an action of that controller if he or she has the corresponding permission of the form book:<action> . So the list action requires the book:list permission, while show requires the book:show permission. As you've seen, you can make all actions available to a user by assigning the book:* or book permissions to him or her.
+
+In other words, every controller action is protected by a permission requirement of the form <controller>:<action> . That said, the plugin does treat the AuthController in such a way that it's impossible to protect it. That's because it makes no sense to require an authenticated user for the login page!
+
+h2. Remember me?
+
+By default the plugin only grants access to an authenticated user, i.e. one that has explicitly logged in during the current session. You can allow access to both authenticated users and remembered users by setting security.shiro.authc.required = false in your Config.groovy file or by changing the line in grails-app/conf/SecurityFilters.groovy to accessControl(auth: false) .
+
+The tags <shiro:isLoggedIn> and <shiro:authenticated> check for an authenticated user, the tag <shiro:user> checks for a known user (authenticated or remembered) and the tag <shiro:remembered> checks only for a remembered user.

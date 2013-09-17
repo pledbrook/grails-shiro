@@ -1,0 +1,19 @@
+h1. Summary
+Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access
+control via roles and permissions.
+
+h1. Installation
+Simply execute
+
+{code}
+grails install-plugin shiro
+{code}
+
+This will install the plugin and create a grails-app/realms directory. Your application won't be immediately protected,
+but that is easily rectified: just read the quick start on the description tab.
+
+h1. Description
+Secure your Grails application quickly and easily using the Apache Shiro security framework. Although easy to get started
+with, this framework gives you a great deal of flexibility and will support your application as it grows.
+
+To find out what's new with each version of the plugin, check out the release notes.

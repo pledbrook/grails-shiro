@@ -22,6 +22,14 @@ grails.project.dependency.resolution = {
             excludes 'ejb', 'jsf-api', 'jms', 'connector-api', 'ehcache-core', 'slf4j-api', 'commons-logging'
         }
     }
+    plugins {
+        runtime ":hibernate:$grailsVersion"
+        build(":tomcat:$grailsVersion",
+                ":release:2.2.1",
+                ":rest-client-builder:1.0.3") {
+            export = false
+        }
+    }
 }
 
 grails.project.dependency.distribution = {

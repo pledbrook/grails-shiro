@@ -63,7 +63,7 @@ class AuthController {
         }
     }
 
-    def signOut() {
+    def signOut = {
         // Log the user out of the application.
 
         try {
