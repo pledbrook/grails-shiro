@@ -91,7 +91,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // Configure realms defined in the project.
         def realmBeans = []
         def realmClasses = application.realmClasses
-        application.realmClasses.each { realmClass ->
+        realmClasses.each { realmClass ->
             log.info "Registering realm: ${realmClass.fullName}"
             configureRealm.delegate = delegate
 

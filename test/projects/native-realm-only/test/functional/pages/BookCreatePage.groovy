@@ -11,4 +11,8 @@ class BookCreatePage extends Page {
         assert $("a", text: "sign out").size() > 0
         return true
     }
+    
+    static content = {
+        createButton(to: BookShowPage) { $("input", value: "Create") }
+    }
 }

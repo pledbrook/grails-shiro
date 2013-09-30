@@ -1,11 +1,63 @@
 
 h1. accessControl
 
+This is the accessControl() method in used in the filter config.
+
 h2. Purpose
 
+This allows you to set up accessControl in a filter. By default accessControl uses a convention of permissions based on
+the controller and the action. The default permission for an action is:
 
+controllerName:action:id
+
+So if the URL is book/list the permission is book:list, if it is book/view/1 the permission is book:view:1. With shiro
+the permission the user may have could be book:view:* meaning they can view all books, * is a wildcard.
+
+h2. Usage
+
+The accessControl method takes up to three parameters:
+
+ * boolean authcRequired
+ * Map args
+ * Closure FilterAccessControlBuilder DSL
+
+authcRequired when true requires authentication, this means the user must have logged in during the current session, a
+remembered user will be asked to log in before continuing. If authcRequired is false then a remembered user is allowed
+to continue if permissions are met. Anonymous users are always required to log in if accessControl() is called.
+
+Currently the only Map argument recognised is "auth" which has the same effect as setting authcRequired.
+
+The closure is interpreted as a FilterAccessControl DSL. This DSL basically allows you to check if the subject has the
+given permission. For example { permission('book:view') }
 
 h2. Examples
+
+accessControl(true)
+
+or
+
+accessControl(auth: true)
+
+mc.accessControl << {-> return accessControlMethod(delegate, authcRequired) }
+        mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
+        mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
+        mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
+
+  * Implementation of the "accessControl()" dynamic method available
+     * to filters. It requires a reference to the filter so that it can
+     * access the dynamic properties and methods, such as "request" and
+     * "redirect()".
+     * @param filter The filter instance that the "accessControl()"
+     * method is called from.
+     * @param authcRequired Specifies whether the default behaviour is
+     * to only allow access if the user is authenticated. If
+     * <code>false</code>, remembered users are also allowed unless this
+     * setting is overridden in the arguments of the method.
+     * @param args An argument map as passed to the "accessControl()"
+     * method. Only the "auth" argument is supported at the moment.
+     * @param c The closure to execute if the user has not been blocked
+     * by the authentication requirement. The closure should return
+     * <code>true</code> to allow access, or <code>false</code> otherwise.
 
 {code:java}
 foo.accessControl()

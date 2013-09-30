@@ -1,6 +1,5 @@
 import geb.spock.GebReportingSpec
 import pages.*
-import spock.lang.Specification
 
 class MainFunctionalSpec extends GebReportingSpec {
     def "Test login page"() {
@@ -50,7 +49,7 @@ class MainFunctionalSpec extends GebReportingSpec {
         when:
         loginForm.username = "admin"
         loginForm.password = "admin"
-        signIn.click(HomePage)
+        signIn.click()
 
         then:
         at HomePage
@@ -60,7 +59,6 @@ class MainFunctionalSpec extends GebReportingSpec {
     def "Test access to page that just requires authentication"() {
         when: "I go to the secured item page"
         go "itemSecured"
-        page LoginPage
 
         then: "I am redirected to the login page"
         at LoginPage
@@ -110,8 +108,7 @@ class MainFunctionalSpec extends GebReportingSpec {
 
     def "Test unauthenticated access to page secured via permissions"() {
         when:
-        to BookListPage
-        page LoginPage
+        go BookListPage.url
 
         then:
         at LoginPage
@@ -119,7 +116,7 @@ class MainFunctionalSpec extends GebReportingSpec {
         when:
         loginForm.username = "admin"
         loginForm.password = "admin"
-        signIn.click(BookListPage)
+        signIn.click()
 
         then:
         at BookListPage
@@ -129,8 +126,19 @@ class MainFunctionalSpec extends GebReportingSpec {
     }
 
     def "Test sign out link"() {
-        given:
-        login "admin", "admin", BookListPage
+        when:
+        go BookListPage.url
+
+        then:
+        at LoginPage
+
+        when:
+        loginForm.username = "admin"
+        loginForm.password = "admin"
+        signIn.click()
+
+        then:
+        at BookListPage
 
         when:
         $("a", text: "sign out").click()
@@ -143,7 +151,16 @@ class MainFunctionalSpec extends GebReportingSpec {
 
     def "Test authentication redirect with query string"() {
         when: "I access the book list page with a sort query string"
-        login "admin", "admin", BookListPage, [sort: 'title', order: 'desc']
+        go BookListPage.url + "/?sort=title&order=desc"
+
+        then:
+        at LoginPage
+
+        when:
+        loginForm.username = "admin"
+        loginForm.password = "admin"
+        signIn.click()
+
 
         then: "The list of books is displayed in the correct order"
         at BookListPage
@@ -197,7 +214,7 @@ class MainFunctionalSpec extends GebReportingSpec {
         go "test/index"
 
         then: "The comments are displayed, but not the tags"
-        $("div.list h2")*.text() == [ "Comments", "Edit a user comment" ]
+        $("h2")*.text() == [ "Comments", "Edit a user comment" ]
     }
 
     def "Test user has access to JsecBasicPermission protected pages - different user"() {
@@ -226,7 +243,7 @@ class MainFunctionalSpec extends GebReportingSpec {
         go "test/index"
 
         then: "The comments and tags are displayed, but not the comment editing"
-        $("div.list h2")*.text() == [ "Comments", "Tags" ]
+        $("h2")*.text() == [ "Comments", "Tags" ]
     }
 
     def "Test tag errors display correctly"() {
@@ -237,15 +254,13 @@ class MainFunctionalSpec extends GebReportingSpec {
         go "test/hasRole"
 
         then: "The error page is displayed with the correct name of the tag"
-        // Only works with HtmlUnit driver
-        browser.driver.lastPage().webResponse.statusCode == 500
+        println $().text()
         $().text().contains("Tag [hasRole]")
 
         when: "User accesses page with an error in 'lacksRole' tag"
         go "test/lacksRole"
 
         then: "The error page is displayed with the correct name of the tag"
-        browser.driver.lastPage().webResponse.statusCode == 500
         $().text().contains("Tag [lacksRole]")
     }
 
@@ -299,8 +314,19 @@ class MainFunctionalSpec extends GebReportingSpec {
      * Test for GRAILSPLUGINS-2355.
      */
     def "UTF-8 characters should be posted without being corrupted"() {
-        given:
-        login "admin", "admin", BookCreatePage
+        when:
+        go BookCreatePage.url
+
+        then:
+        at LoginPage
+
+        when:
+        loginForm.username = "admin"
+        loginForm.password = "admin"
+        signIn.click()
+
+        then:
+        at BookCreatePage
 
         when: "User creates a new book with a title containing UTF-8 only characters"
         $("form").title = "Tick ✔"

@@ -1,5 +1,16 @@
 Test project that uses the security.shiro.filter.config setting and the old database realm (that uses Rel linking tables).
 
-Before running the tests you *must* execute
+Before running the tests you must execute:
 
-    grails shiro-quick-start --prefix="org.example.auth."
+    grails shiro-old-realm-quick-start --prefix="org.example.auth."
+
+Why?
+
+This sets up the older style db model with
+
+- 'User',
+- 'Role',
+- 'Permission',
+- 'RolePermissionRel',
+- 'UserRoleRel',
+- 'UserPermissionRel'

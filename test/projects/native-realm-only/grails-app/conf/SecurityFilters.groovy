@@ -1,7 +1,9 @@
 class SecurityFilters {
     def filters = {
+
         auth(uri: "/**") {
             before = {
+                if (!controllerName) return true
                 accessControl { true }
             }
         }
