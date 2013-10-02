@@ -50,43 +50,30 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
-    // the plugin version
     def version = "1.2.0-SNAPSHOT"
-    // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
-    // the other plugins this plugin depends on
-    def dependsOn = [:]
-    // resources that are excluded from plugin packaging
-    def pluginExcludes = [
-            "grails-app/views/error.gsp"
-    ]
-
     def author = "Peter Ledbrook, Peter McNeil"
     def authorEmail = "pmcneil@nerderg.com"
     def title = "Apache Shiro Integration for Grails"
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
-
-    // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/shiro"
-
-    def license = "APACHE"
     def issueManagement = [system: "JIRA", url: "http://jira.grails.org/browse/GPSHIRO"]
     def scm = [url: "https://github.com/pledbrook/grails-shiro"]
-
+	 def license = "APACHE"
+	 
     def loadAfter = ["controllers", "services"]
     def observe = ["controllers"]
     def watchedResources = "file:./grails-app/realms/**/*Realm.groovy"
-    def artefacts = [RealmArtefactHandler]
+   
+	  def artefacts = [RealmArtefactHandler]
 
     def roleMaps = [:]
     def permMaps = [:]
 
     def doWithSpring = {
         def securityConfig = application.config.security.shiro
-
-        println '\nConfiguring Shiro ...'
 
         // Configure realms defined in the project.
         def realmBeans = []
