@@ -51,7 +51,7 @@ import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
     // the plugin version
-    def version = "1.2.0-SNAPSHOT"
+    def version = "1.2.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2 > *"
     // the other plugins this plugin depends on
@@ -61,12 +61,17 @@ class ShiroGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
-    def author = "Peter Ledbrook, Peter McNeil"
-    def authorEmail = "pmcneil@nerderg.com"
+    def author = "Peter Ledbrook"
+    def authorEmail = "peter@cacoethes.co.uk"
     def title = "Apache Shiro Integration for Grails"
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
+    // Details of company behind the plugin (if there is one)
+    def organization = [ name: "nerdErg", url: "http://nerdErg.com/" ]
+
+    // Any additional developers beyond the author specified above.
+    def developers = [ [ name: "Peter Ledbrook", email: "peter@cacoethes.co.uk" ],[ name: "Peter McNeil", email: "pmcneil@nerderg.com" ]]
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/shiro"
