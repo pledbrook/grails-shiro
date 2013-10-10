@@ -40,7 +40,6 @@ import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.mgt.WebSecurityManager
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
@@ -252,10 +251,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // available from Grails filters).
         def mc = FilterConfig.metaClass
 
-        mc.accessControl << {-> return accessControlMethod(delegate, authcRequired) }
-        mc.accessControl << { Map args -> return accessControlMethod(delegate, authcRequired, args) }
-        mc.accessControl << { Closure c -> return accessControlMethod(delegate, authcRequired, [:], c) }
-        mc.accessControl << { Map args, Closure c -> return accessControlMethod(delegate, authcRequired, args, c) }
+        mc.accessControl << {-> return accessControlMethod(application, delegate, authcRequired) }
+        mc.accessControl << { Map args -> return accessControlMethod(application, delegate, authcRequired, args) }
+        mc.accessControl << { Closure c -> return accessControlMethod(application, delegate, authcRequired, [:], c) }
+        mc.accessControl << { Map args, Closure c -> return accessControlMethod(application, delegate, authcRequired, args, c) }
     }
 
     def doWithWebDescriptor = { xml ->
@@ -420,7 +419,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
      * by the authentication requirement. The closure should return
      * <code>true</code> to allow access, or <code>false</code> otherwise.
      */
-    boolean accessControlMethod(filter, boolean authcRequired, Map args = [:], Closure c = null) {
+    boolean accessControlMethod(application, filter, boolean authcRequired, Map args = [:], Closure c = null) {
         // If we're accessing the auth controller itself, we don't
         // want to check whether the user is authenticated, otherwise
         // we end up in an infinite loop of redirects.
@@ -465,7 +464,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     targetUri << query
                 }
 
-                def redirectUri = ConfigurationHolder.config.security.shiro.redirect.uri
+                def redirectUri = application.config.security.shiro.redirect.uri
                 if (redirectUri) {
                     filter.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
                 } else {
