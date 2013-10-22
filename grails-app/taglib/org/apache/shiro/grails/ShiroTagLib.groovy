@@ -123,7 +123,7 @@ class ShiroTagLib {
             if (attrs["type"]) {
                 // A principal of a particular type/class has been
                 // requested.
-                principal = subject.principals.oneByType(attrs["type"])
+                principal = subject.principals.oneByType(Class.forName(attrs["type"]))
             }
             else {
                 principal = subject.principal
