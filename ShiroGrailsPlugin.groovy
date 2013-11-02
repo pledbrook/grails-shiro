@@ -49,32 +49,18 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
-    // the plugin version
-    def version = "1.2.0"
-    // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.2 > *"
-    // the other plugins this plugin depends on
-    def dependsOn = [:]
-    // resources that are excluded from plugin packaging
-    def pluginExcludes = [
-            "grails-app/views/error.gsp"
-    ]
 
+    def version = "1.2.1-SNAPSHOT"
+    def grailsVersion = "1.2 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
     def title = "Apache Shiro Integration for Grails"
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
-    // Details of company behind the plugin (if there is one)
     def organization = [ name: "nerdErg", url: "http://nerdErg.com/" ]
-
-    // Any additional developers beyond the author specified above.
     def developers = [ [ name: "Peter Ledbrook", email: "peter@cacoethes.co.uk" ],[ name: "Peter McNeil", email: "pmcneil@nerderg.com" ]]
-
-    // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/shiro"
-
     def license = "APACHE"
     def issueManagement = [system: "JIRA", url: "http://jira.grails.org/browse/GPSHIRO"]
     def scm = [url: "https://github.com/pledbrook/grails-shiro"]
