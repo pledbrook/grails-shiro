@@ -17,8 +17,7 @@ grails.project.dependency.resolution = {
                 'org.apache.shiro:shiro-web:1.2.2',
                 'org.apache.shiro:shiro-spring:1.2.2',
                 'org.apache.shiro:shiro-ehcache:1.2.2',
-                'org.apache.shiro:shiro-quartz:1.2.2',
-                'org.apache.shiro:shiro-cas:1.2.2') {
+                'org.apache.shiro:shiro-quartz:1.2.2') {
             excludes 'ejb', 'jsf-api', 'servlet-api', 'jsp-api', 'jstl', 'jms',
                     'connector-api', 'ehcache-core', 'slf4j-api', 'commons-logging'
 
