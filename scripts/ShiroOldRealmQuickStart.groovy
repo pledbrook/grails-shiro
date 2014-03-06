@@ -20,7 +20,7 @@
  */
 
 includeTargets << grailsScript("_GrailsArgParsing")
-includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
+includeTargets << new File (shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
     quick-start [--prefix=PREFIX]
@@ -30,7 +30,9 @@ where
              This may include a package. (default: "Shiro").
 """
 
-target(default: "Sets up a basic security system with a wildcard realm, auth controller, etc.") {
+target(shiroOldRealmQuickStart: "Sets up a basic security system with a wildcard realm, auth controller, etc.") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createDbRealm, createAuthController, createSecurityFilters)
 }
+
+setDefaultTarget 'shiroOldRealmQuickStart'

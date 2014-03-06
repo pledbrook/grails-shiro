@@ -20,7 +20,7 @@
  */
 
 includeTargets << grailsScript("_GrailsArgParsing")
-includeTargets << new File("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
+includeTargets << new File(shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
     create-db-realm [--prefix=PREFIX]
@@ -30,7 +30,9 @@ where
              package. (default: "Shiro").
 """
 
-target (default: "Creates a LDAP Shiro realm") {
+target (createLdapRealm: "Creates a LDAP Shiro realm") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createLdapRealm)
 }
+
+setDefaultTarget 'createLdapRealm'

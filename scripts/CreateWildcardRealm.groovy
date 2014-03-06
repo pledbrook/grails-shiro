@@ -19,7 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
 includeTargets << grailsScript("_GrailsArgParsing")
-includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
+includeTargets << new File (shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
     create-wildcard-realm [--prefix=PREFIX]
@@ -29,7 +29,9 @@ where
              This may include a package. (default: "Shiro").
 """
 
-target (default: "Creates a database Shiro realm (and domain classes) that only supports wildcard permissions.") {
+target (createWildcardRealm: "Creates a database Shiro realm (and domain classes) that only supports wildcard permissions.") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createWildcardRealm)
 }
+
+setDefaultTarget 'createWildcardRealm'
