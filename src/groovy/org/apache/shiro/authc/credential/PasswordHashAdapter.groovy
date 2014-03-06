@@ -1,7 +1,5 @@
 package org.apache.shiro.authc.credential
 
-import org.apache.shiro.authc.UsernamePasswordToken
-import org.apache.shiro.crypto.hash.Hash
 import org.apache.shiro.crypto.hash.SimpleHash
 
 /**

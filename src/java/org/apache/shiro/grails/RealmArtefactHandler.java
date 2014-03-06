@@ -29,7 +29,7 @@ public final class RealmArtefactHandler extends ArtefactHandlerAdapter {
         super(TYPE, RealmGrailsClass.class, DefaultRealmGrailsClass.class, null);
     }
 
-    public boolean isArtefactClass(Class clazz) {
+    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
         return clazz != null && clazz.getName().endsWith(TYPE);
     }
 }

@@ -23,7 +23,7 @@ package org.apache.shiro.grails;
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass;
 
 public class DefaultRealmGrailsClass extends AbstractInjectableGrailsClass implements RealmGrailsClass {
-    public DefaultRealmGrailsClass(Class wrappedClass) {
+    public DefaultRealmGrailsClass(Class<?> wrappedClass) {
         super(wrappedClass, RealmArtefactHandler.TYPE);
     }
 }

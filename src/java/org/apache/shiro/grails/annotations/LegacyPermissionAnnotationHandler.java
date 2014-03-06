@@ -28,7 +28,7 @@ public class LegacyPermissionAnnotationHandler extends AuthorizingAnnotationHand
         PermissionRequired ann = (PermissionRequired)a;
 
         try {
-            Constructor constructor = ann.type().getConstructor(new Class[] { String.class, String.class });
+            Constructor<?> constructor = ann.type().getConstructor(new Class[] { String.class, String.class });
             Object permission = constructor.newInstance(new Object[] { ann.target(), ann.actions() });
 
             if (!getSubject().isPermitted((Permission) permission)) {

@@ -20,7 +20,6 @@
  */
 package org.apache.shiro.grails
 
-import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authz.AuthorizationException
 import org.apache.shiro.authz.UnauthenticatedException
 import org.springframework.web.util.WebUtils

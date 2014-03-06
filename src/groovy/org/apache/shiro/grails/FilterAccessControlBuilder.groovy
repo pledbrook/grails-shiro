@@ -23,7 +23,6 @@ package org.apache.shiro.grails
 
 import org.apache.shiro.subject.Subject
 import org.apache.shiro.authz.Permission
-import org.apache.shiro.authz.permission.WildcardPermission
 
 class FilterAccessControlBuilder {
     private Subject subject
