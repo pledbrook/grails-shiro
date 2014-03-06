@@ -20,7 +20,6 @@
  */
 package org.apache.shiro.grails;
 
-
 import org.apache.shiro.authz.Permission;
 
 import java.util.*;
@@ -29,6 +28,7 @@ import java.util.*;
  * A basic permission class that can be used with the default DB realm
  * provided with the plugin.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ShiroBasicPermission implements Permission {
     public static final String WILDCARD = "*";
 

@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
 /**
  * Adapter for the RealmWrapper which has problems implementing the
  * "String..." methods under JDK 1.5. So, these methods automatically
  * convert the strings into WildcardPermission instances.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class RealmAdapter implements Realm, Authorizer, PermissionResolverAware {
     PermissionResolver permResolver = null;
 

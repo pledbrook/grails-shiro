@@ -22,7 +22,7 @@
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 
 includeTargets << grailsScript("_GrailsArgParsing")
-includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
+includeTargets << new File (shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
     create-auth-controller [--prefix=PREFIX]
@@ -33,7 +33,9 @@ where
 """
 
 
-target(default: "Installs the base auth controller and associated views in this project") {
+target(createAuthController: "Installs the base auth controller and associated views in this project") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createAuthController)
 }
+
+setDefaultTarget 'createAuthController'

@@ -1,12 +1,7 @@
 package org.apache.shiro.grails;
 
-import java.util.Collection;
-
-import org.apache.shiro.config.ConfigurationException;
 import org.apache.shiro.config.Ini;
-import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.realm.Realm;
 import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -24,7 +19,6 @@ public class LegacyIniSecurityManagerFactory extends WebIniSecurityManagerFactor
      * @param beanName The name of the security manager bean.
      */
     public LegacyIniSecurityManagerFactory(ApplicationContext context, String beanName) {
-        super();
         this.applicationContext = context;
         this.smBeanName = beanName;
     }

@@ -22,7 +22,7 @@ import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 
 
 includeTargets << grailsScript("_GrailsArgParsing")
-includeTargets << new File ("${shiroPluginDir}/scripts/_ShiroInternal.groovy")
+includeTargets << new File (shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
     create-db-realm [--prefix=PREFIX]
@@ -32,7 +32,9 @@ where
              This may include a package. (default: "Shiro").
 """
 
-target (default: "Creates a database Shiro realm with associated domain classes.") {
+target (createDbRealm: "Creates a database Shiro realm with associated domain classes.") {
     // Make sure any arguments have been parsed.
     depends(parseArguments, createDbRealm)
 }
+
+setDefaultTarget 'createDbRealm'

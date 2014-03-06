@@ -31,7 +31,7 @@ class ShiroTagLibTests extends GrailsUnitTestCase {
 
     private Map savedMetaClasses
 
-    void setUp() {
+    protected void setUp() {
         super.setUp()
 
         // Save the old meta classes for classes we will modify.
@@ -69,7 +69,7 @@ class ShiroTagLibTests extends GrailsUnitTestCase {
         this.tagLib = new ShiroTagLib()
     }
     
-    void tearDown() {
+    protected void tearDown() {
         // Restore the old meta classes.
         this.savedMetaClasses.each { Class cls, MetaClass mc ->
             GroovySystem.metaClassRegistry.setMetaClass(cls, mc)

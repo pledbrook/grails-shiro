@@ -10,6 +10,9 @@ import java.lang.reflect.Method;
  */
 public class AuthorizationAttributeSourceAdvisor extends org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor {
 
+    private static final long serialVersionUID = 1;
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public boolean matches(Method method, Class targetClass) {
         return ((method.getAnnotation(RequiresPermissions.class) != null) ||
