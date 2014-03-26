@@ -24,11 +24,10 @@ grails.project.dependency.resolution = {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
         test "org.gebish:geb-spock:0.9.1"
 
-        test "org.seleniumhq.selenium:selenium-support:2.35.0"
+        test "org.seleniumhq.selenium:selenium-support:2.40.0"
 
-        test "org.seleniumhq.selenium:selenium-chrome-driver:2.35.0"
-        test "org.seleniumhq.selenium:selenium-firefox-driver:2.35.0"
-
+        test "org.seleniumhq.selenium:selenium-chrome-driver:2.40.0"
+        test "org.seleniumhq.selenium:selenium-firefox-driver:2.40.0"
     }
     plugins {
         build ":tomcat:$grailsVersion"

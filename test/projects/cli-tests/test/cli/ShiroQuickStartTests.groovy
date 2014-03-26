@@ -6,21 +6,36 @@ import org.apache.commons.codec.digest.DigestUtils
  * plugin.
  */
 class ShiroQuickStartTests extends AbstractCliTestCase {
-    private realmFile
-    private userFile
-    private roleFile
-    private authFile
-    private viewFile
-    private filterFile
+    private File realmFile
+    private File userFile
+    private File roleFile
+    private File authFile
+    private File viewFile
+    private File filterFile
+    private File realmsDir
 
     protected void setUp() {
         super.setUp()
+        realmFile = new File(workDir, "grails-app/realms/ShiroDbRealm.groovy")
+        userFile = new File(workDir, "grails-app/domain/ShiroUser.groovy")
+        roleFile = new File(workDir, "grails-app/domain/ShiroRole.groovy")
+        authFile = new File(workDir, "grails-app/controllers/AuthController.groovy")
+        viewFile = new File(workDir, "grails-app/views/auth/login.gsp")
+        filterFile = new File(workDir, "grails-app/conf/ShiroSecurityFilters.groovy")
+        realmsDir = new File(workDir, "grails-app/realms")
+
+        userFile.delete()
+        roleFile.delete()
+        authFile.delete()
+        viewFile.parentFile.deleteDir()
+        filterFile.delete()
+        realmsDir.deleteDir()
     }
 
     protected void tearDown() {
         super.tearDown()
 
-        new File(workDir, "grails-app/realms").deleteDir()
+        realmsDir.deleteDir()
         userFile.delete()
         roleFile.delete()
         authFile.delete()
@@ -34,12 +49,13 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
      * in the default package with a Shiro prefix.
      */
     void testNoArgs() {
-        realmFile = new File(workDir, "grails-app/realms/ShiroDbRealm.groovy")
-        userFile = new File(workDir, "grails-app/domain/ShiroUser.groovy")
-        roleFile = new File(workDir, "grails-app/domain/ShiroRole.groovy")
-        authFile = new File(workDir, "grails-app/controllers/AuthController.groovy")
-        viewFile = new File(workDir, "grails-app/views/auth/login.gsp")
-        filterFile = new File(workDir, "grails-app/conf/ShiroSecurityFilters.groovy")
+        assert !realmFile.exists()
+        assert !userFile.exists()
+        assert !roleFile.exists()
+        assert !authFile.exists()
+        assert !viewFile.exists()
+        assert !filterFile.exists()
+        assert !realmsDir.exists()
 
         execute([ "shiro-quick-start" ])
 

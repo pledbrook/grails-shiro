@@ -18,9 +18,6 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
-
-import grails.util.GrailsUtil
-
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
 import org.apache.shiro.authc.credential.PasswordHashAdapter
@@ -31,22 +28,18 @@ import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
+import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.spring.LifecycleBeanPostProcessor
-import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor
-import org.apache.shiro.grails.AuthorizationAttributeSourceAdvisor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
-import org.apache.shiro.web.mgt.WebSecurityManager
-
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager
+import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import org.codehaus.groovy.grails.commons.ControllerArtefactHandler
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
-
-import org.springframework.aop.framework.ProxyFactoryBean
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
-import org.springframework.aop.target.HotSwappableTargetSource
 
 class ShiroGrailsPlugin {
 
@@ -58,8 +51,8 @@ class ShiroGrailsPlugin {
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
-    def organization = [ name: "nerdErg", url: "http://nerdErg.com/" ]
-    def developers = [ [ name: "Peter Ledbrook", email: "peter@cacoethes.co.uk" ],[ name: "Peter McNeil", email: "pmcneil@nerderg.com" ]]
+    def organization = [name: "nerdErg", url: "http://nerdErg.com/"]
+    def developers = [[name: "Peter Ledbrook", email: "peter@cacoethes.co.uk"], [name: "Peter McNeil", email: "pmcneil@nerderg.com"]]
     def documentation = "http://grails.org/plugin/shiro"
     def license = "APACHE"
     def issueManagement = [system: "JIRA", url: "http://jira.grails.org/browse/GPSHIRO"]
@@ -139,7 +132,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             // Allow the user to customise the session type: 'http' or
             // 'native'.
             if (securityConfig.session.mode) {
-                sessionMode = securityConfig.session.mode
+                sessionManager = createSessionManager(securityConfig.session.mode)
             }
 
             // Allow the user to provide his own versions of these
@@ -177,6 +170,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                 }
             }
         }
+        println '\nShiro Configured'
     }
 
     def doWithApplicationContext = { applicationContext ->
@@ -237,7 +231,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // available from Grails filters).
         def mc = FilterConfig.metaClass
 
-        mc.accessControl << {-> return accessControlMethod(application, delegate, authcRequired) }
+        mc.accessControl << { -> return accessControlMethod(application, delegate, authcRequired) }
         mc.accessControl << { Map args -> return accessControlMethod(application, delegate, authcRequired, args) }
         mc.accessControl << { Closure c -> return accessControlMethod(application, delegate, authcRequired, [:], c) }
         mc.accessControl << { Map args, Closure c -> return accessControlMethod(application, delegate, authcRequired, args, c) }
@@ -539,11 +533,11 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         }
 
         // Inject the role and permission maps into the controller.
-        controllerClass.metaClass.getRoleMap = {->
+        controllerClass.metaClass.getRoleMap = { ->
             return roleMap
         }
 
-        controllerClass.metaClass.getPermissionMap = {->
+        controllerClass.metaClass.getPermissionMap = { ->
             return permissionMap
         }
     }
@@ -589,6 +583,14 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                 def constructor = ann.type().getConstructor([String, String] as Class[])
                 permissions << constructor.newInstance([ann.target(), ann.actions()] as Object[])
             }
+        }
+    }
+
+    private static SessionManager createSessionManager(String sessionMode) {
+        if (sessionMode == null || !sessionMode.equalsIgnoreCase('native')) {
+            return new ServletContainerSessionManager();
+        } else {
+            return new DefaultWebSessionManager();
         }
     }
 }
