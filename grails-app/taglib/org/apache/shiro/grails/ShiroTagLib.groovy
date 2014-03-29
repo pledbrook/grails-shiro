@@ -21,6 +21,8 @@
 package org.apache.shiro.grails
 
 import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authz.Permission
+import org.apache.shiro.subject.Subject
 
 class ShiroTagLib {
     static namespace = "shiro"
@@ -115,7 +117,7 @@ class ShiroTagLib {
      * </ul>
      */
     def principal = { attrs ->
-        def subject = SecurityUtils.subject
+        Subject subject = SecurityUtils.subject
 
         if (subject != null) {
             // Get the principal to print out.
@@ -123,7 +125,9 @@ class ShiroTagLib {
             if (attrs["type"]) {
                 // A principal of a particular type/class has been
                 // requested.
-                principal = subject.principals.oneByType(Class.forName(attrs["type"]))
+                String type = attrs["type"]
+                Class clazz = Class.forName(type)
+                principal = subject.principals.oneByType(clazz)
             }
             else {
                 principal = subject.principal
@@ -191,7 +195,7 @@ class ShiroTagLib {
      */
     def lacksAnyRole = { attrs, body ->
         // Extract the name of the role from the attributes.
-        def inList = attrs["in"]
+        List<String> inList = attrs["in"]
         if (!inList)
             throwTagError("Tag [lacksAnyRole] must have [in] attribute.")
         if (!SecurityUtils.subject.hasAllRoles(inList)) {
@@ -206,7 +210,7 @@ class ShiroTagLib {
      */
     def hasAnyRole = { attrs, body ->
         // Extract the name of the role from the attributes.
-        def inList = attrs["in"]
+        List<String> inList = attrs["in"]
         if (!inList)
             throwTagError("Tag [hasAnyRole] must have [in] attribute.")
         if (SecurityUtils.subject.hasRoles(inList).any()) {
@@ -221,7 +225,7 @@ class ShiroTagLib {
      */
     def lacksAllRoles = { attrs, body ->
         // Extract the name of the role from the attributes.
-        def inList = attrs["in"]
+        List<String> inList = attrs["in"]
         if (!inList)
             throwTagError("Tag [lacksAllRoles] must have [in] attribute.")
         if (!SecurityUtils.subject.hasRoles(inList).any()) {
@@ -291,12 +295,13 @@ class ShiroTagLib {
      * has the permission, otherwise <code>false</code>.
      */
     private boolean checkPermission(attrs, tagname) {
-        def permission
-        def permClass = attrs["type"]
+
+        String permClass = attrs["type"]
+
         if (!permClass) {
             // If 'type' is not set, then the permission itself must
             // be specified.
-            permission = attrs["permission"]
+            String permission = attrs["permission"]
 
             if (!permission) {
                 throwTagError("Tag [$tagname] must have either a [type] attribute or a [permission] one.")
@@ -305,6 +310,7 @@ class ShiroTagLib {
             if (!(permission instanceof org.apache.shiro.authz.Permission) && !(permission instanceof CharSequence)) {
                 throwTagError("Attribute [permission] must be a string or an instance of org.apache.shiro.authz.Permission.")
             }
+            return SecurityUtils.subject.isPermitted(permission)
         }
         else {
             // If 'type' is given, then 'actions' must also be set.
@@ -321,14 +327,12 @@ class ShiroTagLib {
             try {
                 def clazz = Class.forName(permClass)
                 def constructor = clazz.getConstructor([ String, String ] as Class[])
-                permission = constructor.newInstance([ target, actions ] as Object[])
+                def permission = constructor.newInstance([target, actions] as Object[])
+                return SecurityUtils.subject.isPermitted(permission)
             }
             catch (ClassNotFoundException ex) {
                 throwTagError("Cannot find class [$permClass] from attribute [permission] in tag [$tagname].")
             }
         }
-
-        // Now we have the permission, check whether the user has it.
-        return SecurityUtils.subject.isPermitted(permission)
     }
 }

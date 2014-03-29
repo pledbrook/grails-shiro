@@ -2,7 +2,7 @@
  * Copyright 2007 Peter Ledbrook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -15,286 +15,182 @@
  */
 package org.apache.shiro.grails
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestFor
 import org.apache.shiro.SecurityUtils
+import org.apache.shiro.subject.PrincipalCollection
 import org.apache.shiro.subject.Subject
-import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 
 /**
  * Test case for {@link ShiroTagLib}.
  */
-class ShiroTagLibTests extends GrailsUnitTestCase {
-    private ShiroTagLib tagLib
+@TestFor(ShiroTagLib)
+class ShiroTagLibTests {
     private Map mockSubject
-    private TagDelegate tagDelegate = new TagDelegate()
-
     private Map savedMetaClasses
 
-    protected void setUp() {
-        super.setUp()
-
-        // Save the old meta classes for classes we will modify.
-        def registry = GroovySystem.metaClassRegistry
-        this.savedMetaClasses = [
-                (SecurityUtils): registry.getMetaClass(SecurityUtils),
-                (ShiroTagLib): registry.getMetaClass(ShiroTagLib)]
-
-        // Now remove the meta classes from the registry so that our
-        // additions do not affect the old meta classes.
-        this.savedMetaClasses.each { Class cls, MetaClass mc ->
-            registry.removeMetaClass(cls)
-        }
-
-        // Add the "throwTagError" method to the tag lib.
-        ShiroTagLib.metaClass.throwTagError = { String message ->
-            throw new GrailsTagException(message)
-        }
+    void setUp() {
 
         // A map that backs the mock Subject instance.
-        this.mockSubject = [
-            isAuthenticated: {-> false },
-            isPermitted: {Object -> true }
+        mockSubject = [
+                isAuthenticated: { -> false },
+                isPermitted    : { Object -> true }
         ]
 
-        // Mock the 'getSubject()' method on SecurityUtils by overriding
-        // it via ExpandoMetaClass. Note that this will create a new
-        // ExpandoMetaClass because we have removed the old one from the
-        // registry cache.
-        SecurityUtils.metaClass.static.getSubject = {-> mockSubject as Subject }
+        SecurityUtils.metaClass.static.getSubject = { -> mockSubject as Subject }
 
-        loadCodec(HTMLCodec)
-
-        // Create the test tag library.
-        this.tagLib = new ShiroTagLib()
-    }
-    
-    protected void tearDown() {
-        // Restore the old meta classes.
-        this.savedMetaClasses.each { Class cls, MetaClass mc ->
-            GroovySystem.metaClassRegistry.setMetaClass(cls, mc)
-        }
-
-        super.tearDown()
     }
 
     void testIsLoggedIn() {
-        // Local setup.
-        def testBody = "You are logged in!"
-        this.tagLib.isLoggedIn.delegate = this.tagDelegate
 
-        // Now execute the tag and check the output that it generates.
-        this.tagLib.isLoggedIn([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:isLoggedIn>You are logged in!</shiro:isLoggedIn>')
 
-        // Clear the output buffer and execute the tag again, but with
-        // and 'authenticated' user.
-        this.tagDelegate.reset()
-        this.mockSubject["isAuthenticated"] = {-> true }
-        this.tagLib.isLoggedIn([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "You are logged in!" == applyTemplate('<shiro:isLoggedIn>You are logged in!</shiro:isLoggedIn>')
     }
 
     void testIsNotLoggedIn() {
-        // Local setup.
-        def testBody = "You are not logged in!"
-        this.tagLib.isNotLoggedIn.delegate = this.tagDelegate
 
-        // Now execute the tag and check the output that it generates.
-        this.tagLib.isNotLoggedIn([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        assert "You are not logged in!" == applyTemplate('<shiro:isNotLoggedIn>You are not logged in!</shiro:isNotLoggedIn>')
 
-        // Clear the output buffer and execute the tag again, but with
-        // and 'authenticated' user.
-        this.tagDelegate.reset()
-        this.mockSubject["isAuthenticated"] = {-> true }
-        this.tagLib.isNotLoggedIn([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "" == applyTemplate('<shiro:isNotLoggedIn>You are not logged in!</shiro:isNotLoggedIn>')
     }
 
     void testUser() {
         // Local setup.
-        def testBody = "Some output or other"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.user.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.user([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:user>blah</shiro:user>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> "admin"}
-        this.tagDelegate.reset()
-        this.tagLib.user([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> "admin" }
+        assert "blah" == applyTemplate('<shiro:user>blah</shiro:user>')
 
         // Finally try with an authenticated user.
-        this.mockSubject["isAuthenticated"] = {-> true}
-        this.tagDelegate.reset()
-        this.tagLib.user([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        // TODO this doesn't really test anything more that the previous test. Remove?
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "blah" == applyTemplate('<shiro:user>blah</shiro:user>')
     }
 
     void testNotUser() {
-        // Local setup.
-        def testBody = "Some output or other"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.notUser.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.notUser([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        assert "blah" == applyTemplate('<shiro:notUser>blah</shiro:notUser>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> "admin"}
-        this.tagDelegate.reset()
-        this.tagLib.notUser([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> "admin" }
+        assert "" == applyTemplate('<shiro:notUser>blah</shiro:notUser>')
 
         // Finally try with an authenticated user.
-        this.mockSubject["isAuthenticated"] = {-> true}
-        this.tagDelegate.reset()
-        this.tagLib.notUser([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        // TODO this doesn't really test anything more that the previous test. Remove?
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "" == applyTemplate('<shiro:notUser>blah</shiro:notUser>')
     }
 
     void testRemembered() {
-        // Local setup.
-        def testBody = "Some output or other"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.remembered.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.remembered([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:remembered>blah</shiro:remembered>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> "admin"}
-        this.tagDelegate.reset()
-        this.tagLib.remembered([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> "admin" }
+        assert "blah" == applyTemplate('<shiro:remembered>blah</shiro:remembered>')
 
         // Finally try with an authenticated user.
-        this.mockSubject["isAuthenticated"] = {-> true}
-        this.tagDelegate.reset()
-        this.tagLib.remembered([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "" == applyTemplate('<shiro:remembered>blah</shiro:remembered>')
     }
 
     void testNotRemembered() {
         // Local setup.
-        def testBody = "Some output or other"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.notRemembered.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.notRemembered([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        assert "blah" == applyTemplate('<shiro:notRemembered>blah</shiro:notRemembered>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> "admin"}
-        this.tagDelegate.reset()
-        this.tagLib.notRemembered([:], {-> testBody})
-        assertEquals "", this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> "admin" }
+        assert "" == applyTemplate('<shiro:notRemembered>blah</shiro:notRemembered>')
 
         // Finally try with an authenticated user.
-        this.mockSubject["isAuthenticated"] = {-> true}
-        this.tagDelegate.reset()
-        this.tagLib.notRemembered([:], {-> testBody})
-        assertEquals testBody, this.tagDelegate.output
+        mockSubject["isAuthenticated"] = { -> true }
+        assert "blah" == applyTemplate('<shiro:notRemembered>blah</shiro:notRemembered>')
     }
 
     void testPrincipal() {
-        // Local setup.
-        def principal = "admin"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.principal.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.principal([:])
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:principal/>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> principal}
-        this.tagDelegate.reset()
-        this.tagLib.principal([:])
-        assertEquals principal, this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> 'admin' }
+        assert "admin" == applyTemplate('<shiro:principal/>')
     }
 
     void testPrincipalEncoding() {
         // Local setup.
-        def principal = "<admin>"
-        this.mockSubject["getPrincipal"] = {-> null}
-        this.tagLib.principal.delegate = this.tagDelegate
+        mockSubject["getPrincipal"] = { -> null }
 
         // Now execute the tag and check the output that it generates.
-        this.tagLib.principal([:])
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:principal/>')
 
         // Now try with a 'remembered' user, i.e. the principal is not
         // null, but the user is not authenticated.
-        this.mockSubject["getPrincipal"] = {-> principal}
-        this.tagDelegate.reset()
-        this.tagLib.principal([:])
-        assertEquals "&lt;admin&gt;", this.tagDelegate.output
+        mockSubject["getPrincipal"] = { -> "<admin>" }
+        assert "&lt;admin&gt;" == applyTemplate('<shiro:principal/>')
     }
 
     void testPrincipalWithType() {
         // Local setup.
-        def principal = "admin"
-        this.mockSubject["getPrincipalByType"] = {Class clazz -> null}
-        this.tagLib.principal.delegate = this.tagDelegate
+        def subjectControl = mockFor(Subject, true)
+        def principalCollectionControl = mockFor(PrincipalCollection, true)
 
-        // Now execute the tag and check the output that it generates.
-//        this.tagLib.principal([:])
-//        assertEquals "", this.tagDelegate.output
+        subjectControl.demand.getPrincipal(0..4) { -> null }
+        principalCollectionControl.demand.oneByType(0..2) { Class clazz ->
+            //we only have a String type
+            if (clazz == String) return "admin"
+            return null
+        }
+        subjectControl.demand.getPrincipals(0..4) { -> principalCollectionControl.createMock() }
+        SecurityUtils.metaClass.static.getSubject = { -> subjectControl.createMock() }
 
-        // Now try with a 'remembered' user, i.e. the principal is not
-        // null, but the user is not authenticated.
-//        this.mockSubject["getPrincipal"] = {-> principal}
-//        this.tagDelegate.reset()
-//        this.tagLib.principal([:])
-//        assertEquals principal, this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:principal type="java.lang.Integer"/>')
+        assert "admin" == applyTemplate('<shiro:principal type="java.lang.String"/>')
     }
 
     void testHasPermissionWithGString() {
         def id = "1"
         def testPermission = "user:manage:${id}"
-        def testBody = "I can manage this user!"
 
-        this.tagLib.hasPermission.delegate = this.tagDelegate
-        this.mockSubject["hasPermission"] = { String name -> assertEquals testPermission, name; true }
+        mockSubject["isPermitted"] = { String permName -> testPermission == permName }
 
-        this.tagLib.hasPermission(permission: testPermission) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        assert "yup" == applyTemplate('<shiro:hasPermission permission="user:manage:1">yup</shiro:hasPermission>')
+        assert "" == applyTemplate('<shiro:hasPermission permission="user:manage:10">yup</shiro:hasPermission>')
     }
-    
+
     void testHasRole() {
-        String testBody = "I am an administrator!"
-        String testRole = "Administrator"
+        //User has role User
+        mockSubject["hasRole"] = { String name -> name == "User" }
 
-        // First test the case where the user does not have the role.
-        this.tagLib.hasRole.delegate = this.tagDelegate
-        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; false }
+        //Does user have Administrator role? no.
+        assert "" == applyTemplate('<shiro:hasRole name="Administrator">yup</shiro:hasRole>')
 
-        this.tagLib.hasRole(name: testRole) {-> testBody }
-        assertEquals "", this.tagDelegate.output
-
-        // Now try the case where the user *does* have it.
-        testRole = "User"
-        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; true }
-
-        this.tagLib.hasRole(name: testRole) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        //Does user have User role? yes.
+        assert "yup" == applyTemplate('<shiro:hasRole name="User">yup</shiro:hasRole>')
 
         // Check that the 'name' attribute is required.
         try {
-            this.tagLib.hasRole(dummy: "Administrator") {-> testBody }
+            applyTemplate('<shiro:hasRole>yup</shiro:hasRole>')
             fail("Should have thrown a tag exception.")
         }
         catch (GrailsTagException ex) {
@@ -304,26 +200,18 @@ class ShiroTagLibTests extends GrailsUnitTestCase {
     }
 
     void testLacksRole() {
-        String testBody = "I am an administrator!"
-        String testRole = "Administrator"
+        //User has role Administrator
+        mockSubject["hasRole"] = { String name -> name == "Administrator" }
 
-        // First test the case where the user does not have the role.
-        this.tagLib.lacksRole.delegate = this.tagDelegate
-        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; true }
+        //Does user lack Administrator role? no.
+        assert "" == applyTemplate('<shiro:lacksRole name="Administrator">yup</shiro:lacksRole>')
 
-        this.tagLib.lacksRole(name: testRole) {-> testBody }
-        assertEquals "", this.tagDelegate.output
-
-        // Now try the case where the user *does* have it.
-        testRole = "User"
-        this.mockSubject["hasRole"] = { String name -> assertEquals testRole, name; false }
-
-        this.tagLib.lacksRole(name: testRole) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        //Does user lack User role? yes.
+        assert "yup" == applyTemplate('<shiro:lacksRole name="User">yup</shiro:lacksRole>')
 
         // Check that the 'name' attribute is required.
         try {
-            this.tagLib.lacksRole(dummy: "Administrator") {-> testBody }
+            applyTemplate('<shiro:lacksRole>yup</shiro:lacksRole>')
             fail("Should have thrown a tag exception.")
         }
         catch (GrailsTagException ex) {
@@ -333,124 +221,71 @@ class ShiroTagLibTests extends GrailsUnitTestCase {
     }
 
     void testHasAllRoles() {
-        String testBody = "I am all things!"
-        List testRoles = [ "Administrator", "Engineer", "User" ]
+        mockSubject["hasAllRoles"] = { List roles -> roles.containsAll(["Administrator", "User"]) }
 
-        // First test the case where the user does not have the roles.
-        this.tagLib.hasAllRoles.delegate = this.tagDelegate
-        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; false }
+        //Is user a User and Spy? no
+        assert "" == applyTemplate('<shiro:hasAllRoles in="${testRoles}">yup</shiro:hasAllRoles>', [testRoles: ["User", "Spy"]])
 
-        this.tagLib.hasAllRoles("in": testRoles) {-> testBody }
-        assertEquals "", this.tagDelegate.output
+        //Is user a User and Administrator? yes
+        assert "yup" == applyTemplate('<shiro:hasAllRoles in="${testRoles}">yup</shiro:hasAllRoles>', [testRoles: ["User", "Administrator"]])
 
-        // Now try the case where the user *does* have them.
-        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; true }
-
-        this.tagLib.hasAllRoles("in": testRoles) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        //Is user a Administrator? yes
+        assert "" == applyTemplate('<shiro:hasAllRoles in="${testRoles}">yup</shiro:hasAllRoles>', [testRoles: ["Administrator"]])
 
         // Check that the 'in' attribute is required.
         shouldFail(GrailsTagException) {
-            this.tagLib.hasAllRoles(name: "Administrator") {-> testBody }
+            applyTemplate('<shiro:hasAllRoles ">yup</shiro:hasAllRoles>')
         }
     }
 
     void testLacksAnyRole() {
-        String testBody = "I am NOT all things!"
-        List testRoles = [ "Administrator", "Engineer", "User" ]
+        mockSubject["hasAllRoles"] = { List roles -> roles.containsAll(["Administrator", "User"]) }
 
         // First test the case where the user has all the roles.
-        this.tagLib.lacksAnyRole.delegate = this.tagDelegate
-        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; true }
+        assert "" == applyTemplate('<shiro:lacksAnyRole in="${testRoles}">yup</shiro:lacksAnyRole>', [testRoles: ["User", "Administrator"]])
 
-        this.tagLib.lacksAnyRole("in": testRoles) {-> testBody }
-        assertEquals "", this.tagDelegate.output
-
-        // Now try the case where the user is missing at least one of
-        // them.
-        this.mockSubject["hasAllRoles"] = { List roles -> assertEquals testRoles, roles; false }
-
-        this.tagLib.lacksAnyRole("in": testRoles) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        // Now try the case where the user is missing at least one of them
+        assert "yup" == applyTemplate('<shiro:lacksAnyRole in="${testRoles}">yup</shiro:lacksAnyRole>', [testRoles: ["User", "spy"]])
 
         // Check that the 'in' attribute is required.
         shouldFail(GrailsTagException) {
-            this.tagLib.lacksAnyRole(name: "Administrator") {-> testBody }
+            applyTemplate('<shiro:lacksAnyRole ">yup</shiro:lacksAnyRole>')
         }
     }
 
     void testHasAnyRole() {
-        String testBody = "I am some things!"
-        List testRoles = [ "Administrator", "Engineer", "User" ]
+        mockSubject["hasRoles"] = { List roles ->
+            roles.collect { it == "User" } as boolean[]//user has the role User only
+        }
 
         // First test the case where the user has none of the roles.
-        this.tagLib.hasAnyRole.delegate = this.tagDelegate
-        this.mockSubject["hasRoles"] = { List roles ->
-            assertEquals testRoles, roles
-            [ false, false, false ] as boolean[]
-        }
-
-        this.tagLib.hasAnyRole("in": testRoles) {-> testBody }
-        assertEquals "", this.tagDelegate.output
+        assert "" == applyTemplate('<shiro:hasAnyRole in="${testRoles}">yup</shiro:hasAnyRole>', [testRoles: ["Administrator", "Spy", "Warlock"]])
 
         // Now try the case where the user has at least one of them.
-        this.mockSubject["hasRoles"] = { List roles ->
-            assertEquals testRoles, roles
-            [ false, true, false ] as boolean[]
-        }
-
-        this.tagLib.hasAnyRole("in": testRoles) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        assert "yup" == applyTemplate('<shiro:hasAnyRole in="${testRoles}">yup</shiro:hasAnyRole>', [testRoles: ["Administrator", "User", "Warlock"]])
 
         // Check that the 'in' attribute is required.
         shouldFail(GrailsTagException) {
-            this.tagLib.hasAnyRole(name: "Administrator") {-> testBody }
+            applyTemplate('<shiro:hasAnyRole>yup</shiro:hasAnyRole>')
         }
     }
 
     void testLacksAllRoles() {
-        String testBody = "I am none of the things!"
-        List testRoles = [ "Administrator", "Engineer", "User" ]
-
-        // First test the case where the user has at least one of the
-        // roles.
-        this.tagLib.lacksAllRoles.delegate = this.tagDelegate
-        this.mockSubject["hasRoles"] = { List roles ->
-            assertEquals testRoles, roles
-            [ false, true, true ] as boolean[]
+        mockSubject["hasRoles"] = { List roles ->
+            roles.collect {
+                it == "User" || it == "Administrator"
+            } as boolean[]//user has the User and Administrator roles
         }
 
-        this.tagLib.lacksAllRoles("in": testRoles) {-> testBody }
-        assertEquals "", this.tagDelegate.output
+        // First test the case where the user has at least one of the roles.
+        assert "" == applyTemplate('<shiro:lacksAllRoles in="${testRoles}">yup</shiro:lacksAllRoles>', [testRoles: ["Administrator", "User", "Warlock"]])
 
         // Now try the case where the user has none of them.
-        this.mockSubject["hasRoles"] = { List roles ->
-            assertEquals testRoles, roles
-            [ false, false, false ] as boolean[]
-        }
-
-        this.tagLib.lacksAllRoles("in": testRoles) {-> testBody }
-        assertEquals testBody, this.tagDelegate.output
+        assert "yup" == applyTemplate('<shiro:lacksAllRoles in="${testRoles}">yup</shiro:lacksAllRoles>', [testRoles: ["Loozer", "Spy", "Warlock"]])
 
         // Check that the 'in' attribute is required.
         shouldFail(GrailsTagException) {
-            this.tagLib.lacksAllRoles(name: "Administrator") {-> testBody }
+            applyTemplate('<shiro:lacksAllRoles>yup</shiro:lacksAllRoles>')
         }
-    }
-}
-
-/**
- * Use this as the delegate for tag closures when unit testing them.
- * It provides an 'out' property that you can then check.
- */
-class TagDelegate {
-    def out = new StringBuffer()
-
-    String getOutput() {
-        this.out.toString()
-    }
-
-    void reset() {
-        this.out = new StringBuffer()
     }
 }
