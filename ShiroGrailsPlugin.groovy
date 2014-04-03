@@ -43,7 +43,7 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 
 class ShiroGrailsPlugin {
 
-    def version = "1.2.1-SNAPSHOT"
+    def version = "1.2.1"
     def grailsVersion = "1.2 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
