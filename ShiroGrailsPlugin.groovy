@@ -465,9 +465,9 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
             // Add the ID if it's in the web parameters.
             if (filter.params.id) {
-				isPermitted = subject.isPermitted(permString + ':' + filter.params.list('id').join(','))
+                isPermitted = subject.isPermitted(permString + ':' + filter.params.list('id').join(','))
             } else {
-				isPermitted = subject.isPermitted(permString)
+                isPermitted = subject.isPermitted(permString)
             }
 
         } else {
