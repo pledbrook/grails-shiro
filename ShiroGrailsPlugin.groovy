@@ -461,13 +461,15 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         def isPermitted
         if (c == null) {
             // Check that the user has the required permission for the target controller/action.
-            def permString = new StringBuilder()
-            permString << filter.controllerName << ':' << (filter.actionName ?: "index")
+            def permString = filter.controllerName + ':' + (filter.actionName ?: "index")
 
             // Add the ID if it's in the web parameters.
-            if (filter.params.id) permString << ':' << filter.params.id
+            if (filter.params.id) {
+                isPermitted = subject.isPermitted(permString + ':' + filter.params.list('id').join(','))
+            } else {
+                isPermitted = subject.isPermitted(permString)
+            }
 
-            isPermitted = subject.isPermitted(permString.toString())
         } else {
             // Call the closure with the access control builder and
             // check the result. The closure will return 'true' if the
