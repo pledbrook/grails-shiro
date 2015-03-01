@@ -9,3 +9,4 @@ work/
 /web-app/
 grails-shiro*.zip
 *.iml
+.idea
