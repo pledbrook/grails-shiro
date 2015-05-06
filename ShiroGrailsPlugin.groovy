@@ -467,8 +467,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             permString << filter.controllerName << ':' << (filter.actionName ?: "index")
 
             // Add the ID if it's in the web parameters.
-            if (filter.params.id) permString << ':' << filter.params.id
-
+            if (filter.params.id) {
+                permString << ':' << filter.params.list('id').join(',')
+            }
+            
             isPermitted = subject.isPermitted(permString.toString())
         } else {
             // Call the closure with the access control builder and
