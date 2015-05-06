@@ -41,9 +41,11 @@ import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.plugins.web.filters.FilterConfig
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
 
+import javax.servlet.Filter
+
 class ShiroGrailsPlugin {
 
-    def version = "1.2.1"
+    def version = "1.2.2-SNAPSHOT"
     def grailsVersion = "1.2 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"

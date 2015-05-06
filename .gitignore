@@ -1,5 +1,4 @@
 .settings/
-stacktrace.log
 build/
 eclipse/
 plugin.xml
@@ -9,3 +8,6 @@ work/
 /web-app/
 grails-shiro*.zip
 *.iml
+.idea/**
+*.log
+grails-app/conf/UrlMappings.groovy

@@ -23,7 +23,7 @@ includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << new File(shiroPluginDir, "scripts/_ShiroInternal.groovy")
 
 USAGE = """
-    create-db-realm [--prefix=PREFIX]
+    create-ldap-realm [--prefix=PREFIX]
 
 where
     PREFIX = The prefix to add to the name of the realm. This may include a
