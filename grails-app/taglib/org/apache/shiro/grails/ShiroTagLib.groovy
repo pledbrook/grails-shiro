@@ -256,6 +256,26 @@ class ShiroTagLib {
         }
     }
 
+
+    /**
+     * This tag only writes its body to the output if the current user
+     * have any of the given permissions provided in a separated comma String.
+     */
+    def hasAnyPermission = { attrs, body ->
+        def permissions = attrs["permissions"]
+        if (!permissions){
+            throwTagError("Tag [hasAnyPermission] must have [permissions] attribute")
+        }
+        def permissionsList = permissions.split(',')
+        for (permission in permissionsList) {
+            if (checkPermission([permission: permission], "hasPermission")) {
+                // Output the body text.
+                out << body()
+                return out
+            }
+        }
+    }
+
     /**
      * Checks whether the current user is authenticated or not. Returns
      * <code>true</code> if the user is authenticated, otherwise
