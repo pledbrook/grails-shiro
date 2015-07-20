@@ -1,3 +1,7 @@
+package shiro
+
+import grails.plugins.*
+
 /*
  * Copyright 2007 Peter Ledbrook.
  *
@@ -18,16 +22,13 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
-
-package org.apache.shiro.grails
-
-import grails.util.GrailsClassUtils
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
 import org.apache.shiro.authc.credential.PasswordHashAdapter
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator
 import org.apache.shiro.authz.permission.WildcardPermissionResolver
+import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
@@ -40,15 +41,19 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import org.grails.core.artefact.ControllerArtefactHandler
-import org.grails.plugins.web.filters.FilterConfig
+import org.codehaus.groovy.grails.commons.GrailsClassUtils
+import grails.artefact.Interceptor
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
 
-class Shiro3GrailsPlugin {
+import javax.servlet.Filter
 
-    def grailsVersion = "3.0.1 > *"
+class ShiroGrailsPlugin extends Plugin {
+
+    def version = "1.2.2-SNAPSHOT"
+    def grailsVersion = "1.2 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
-    def title = "Apache Shiro Integration for Grails 3"
+    def title = "Apache Shiro Integration for Grails"
     def description = """\
 Enables Grails applications to take advantage of the Apache Shiro security layer, adding easy authentication and access control via roles and permissions.
 """
@@ -228,9 +233,9 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             authcRequired = application.config.security.shiro.authc.required
         }
 
-        // Add an 'accessControl' method to FilterConfig (so that it's
+        // Add an 'accessControl' method to Interceptor (so that it's
         // available from Grails filters).
-        def mc = FilterConfig.metaClass
+        def mc = Interceptor.metaClass
 
         mc.accessControl << { -> return accessControlMethod(application, delegate, authcRequired) }
         mc.accessControl << { Map args -> return accessControlMethod(application, delegate, authcRequired, args) }
@@ -469,7 +474,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             if (filter.params.id) {
                 permString << ':' << filter.params.list('id').join(',')
             }
-
+            
             isPermitted = subject.isPermitted(permString.toString())
         } else {
             // Call the closure with the access control builder and

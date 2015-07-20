@@ -20,15 +20,18 @@ import org.apache.shiro.SecurityUtils
 import org.apache.shiro.subject.PrincipalCollection
 import org.apache.shiro.subject.Subject
 import org.grails.taglib.GrailsTagException
-
+import spock.lang.Specification
+import spock.lang.Unroll
+import spock.lang.Shared
 /**
  * Test case for {@link ShiroTagLib}.
  */
 @TestFor(ShiroTagLib)
-class ShiroTagLibTests {
-    private Map mockSubject
+class ShiroTagLibTests extends Specification {
+    @Shared Map mockSubject
+    @Shared Map savedMetaClasses
 
-    void setUp() {
+    void setup() {
 
         // A map that backs the mock Subject instance.
         mockSubject = [
@@ -151,16 +154,16 @@ class ShiroTagLibTests {
 
     void testPrincipalWithType() {
         // Local setup.
-        def subjectControl = mockFor(Subject)
-        def principalCollectionControl = mockFor(PrincipalCollection)
+        def subjectControl = mockFor(Subject, true)
+        def principalCollectionControl = mockFor(PrincipalCollection, true)
 
-        subjectControl.demand.getPrincipal { -> null }
-        principalCollectionControl.demand.oneByType { Class clazz ->
+        subjectControl.demand.getPrincipal(0..4) { -> null }
+        principalCollectionControl.demand.oneByType(0..2) { Class clazz ->
             //we only have a String type
             if (clazz == String) return "admin"
             return null
         }
-        subjectControl.demand.getPrincipals { -> principalCollectionControl.createMock() }
+        subjectControl.demand.getPrincipals(0..4) { -> principalCollectionControl.createMock() }
         SecurityUtils.metaClass.static.getSubject = { -> subjectControl.createMock() }
 
         assert "" == applyTemplate('<shiro:principal type="java.lang.Integer"/>')
@@ -171,7 +174,7 @@ class ShiroTagLibTests {
         def id = "1"
         def testPermission = "user:manage:${id}"
 
-        mockSubject["isPermitted"] = { String permName -> testPermission.toString() == permName }
+        mockSubject["isPermitted"] = { String permName -> testPermission == permName }
 
         assert "yup" == applyTemplate('<shiro:hasPermission permission="user:manage:1">yup</shiro:hasPermission>')
         assert "" == applyTemplate('<shiro:hasPermission permission="user:manage:10">yup</shiro:hasPermission>')

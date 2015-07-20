@@ -18,13 +18,9 @@
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  */
-package org.apache.shiro.grails;
 
-
-import org.grails.core.AbstractInjectableGrailsClass;
-
-public class DefaultRealmGrailsClass extends AbstractInjectableGrailsClass implements RealmGrailsClass {
-    public DefaultRealmGrailsClass(Class<?> wrappedClass) {
-        super(wrappedClass, RealmArtefactHandler.TYPE);
-    }
-}
+//
+// This script is executed by Grails when the plugin is uninstalled from project.
+// Use this script if you intend to do any additional clean-up on uninstall, but
+// beware of messing up SVN directories!
+//
