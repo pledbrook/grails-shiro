@@ -53,9 +53,6 @@ grails:
         defaultScope: singleton
     converters:
         encoding: UTF-8
-    hibernate:
-        cache:
-            queries: false
     views:
         default:
             codec: html
@@ -67,8 +64,14 @@ grails:
                 scriptlets: html
                 taglib: none
                 staticparts: none
-
 ---
+hibernate:
+    cache:
+        queries: false
+        use_second_level_cache: true
+        use_query_cache: false
+        region.factory_class: 'org.hibernate.cache.ehcache.EhCacheRegionFactory' 
+        
 dataSource:
     pooled: true
     jmxExport: true

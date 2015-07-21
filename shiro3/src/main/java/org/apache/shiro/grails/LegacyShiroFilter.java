@@ -8,7 +8,7 @@ import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.IniShiroFilter;
 
-import grails.core.ApplicationAttributes;
+import org.codehaus.groovy.grails.commons.ApplicationAttributes;
 import org.springframework.context.ApplicationContext;
 
 /**
