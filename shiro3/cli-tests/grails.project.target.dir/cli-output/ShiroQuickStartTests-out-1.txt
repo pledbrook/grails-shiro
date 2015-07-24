@@ -1,0 +1,2 @@
+Error |
+Error occurred running Grails CLI: No such property: includeTargets for class: ShiroQuickStart (Use --stacktrace to see the full trace)

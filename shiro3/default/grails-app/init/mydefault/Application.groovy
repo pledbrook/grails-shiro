@@ -1,4 +1,4 @@
-package default
+package mydefault
 
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration

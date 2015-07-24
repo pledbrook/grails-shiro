@@ -17,7 +17,7 @@ plugins {
 }
 
 version "0.1"
-group "default"
+group "cli.tests"
 
 apply plugin: "spring-boot"
 apply plugin: "war"
@@ -56,6 +56,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-tomcat"
     compile "org.grails:grails-dependencies"
     compile "org.grails:grails-web-boot"
+    compile "org.codehaus.groovy:groovy-test"
 
     compile "org.grails.plugins:hibernate"
     compile "org.grails.plugins:cache"
@@ -71,6 +72,9 @@ dependencies {
     testRuntime 'org.seleniumhq.selenium:selenium-htmlunit-driver:2.44.0'
 
     console "org.grails:grails-console"
+
+    compile project(":grails-shiro")
+
 }
 
 task wrapper(type: Wrapper) {

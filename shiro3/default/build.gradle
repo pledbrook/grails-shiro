@@ -17,7 +17,7 @@ plugins {
 }
 
 version "0.1"
-group "cli.tests"
+group "mydefault"
 
 apply plugin: "spring-boot"
 apply plugin: "war"
@@ -71,6 +71,7 @@ dependencies {
     testRuntime 'org.seleniumhq.selenium:selenium-htmlunit-driver:2.44.0'
 
     console "org.grails:grails-console"
+    compile project(":shiro")
 }
 
 task wrapper(type: Wrapper) {
