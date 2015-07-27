@@ -134,7 +134,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             // Allow the user to customise the session type: 'http' or
             // 'native'.
             if (securityConfig.session.mode) {
-                sessionManager = createSessionManager(securityConfig.session.mode)
+                sessionManager = ShiroGrailsPlugin.createSessionManager(securityConfig.session.mode)
             }
 
             // Allow the user to provide his own versions of these
