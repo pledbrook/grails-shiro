@@ -101,7 +101,9 @@ abstract class AbstractCliTestCase extends GroovyTestCase {
         final currProcess = process
         Thread.startDaemon {
             output = currProcess.in.getText("UTF-8")
-
+            println "*****************************[COMMAND OUTPUT]*****************************"
+            println output
+            println "*****************************[/COMMAND OUTPUT]*****************************"
             // Once we've finished reading the process output, signal
             // the main thread.
             signalDone()

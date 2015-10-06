@@ -5,16 +5,16 @@
   <title>Login</title>
 </head>
 <body>
-  <g:if test="${flash.message}">
-    <div class="message">${flash.message}</div>
+  <g:if test="\${flash.message}">
+    <div class="message">\${flash.message}</div>
   </g:if>
   <g:form action="signIn">
-    <input type="hidden" name="targetUri" value="${targetUri}" />
+    <input type="hidden" name="targetUri" value="\${targetUri}" />
     <table>
       <tbody>
         <tr>
           <td>Username:</td>
-          <td><input type="text" name="username" value="${username}" /></td>
+          <td><input type="text" name="username" value="\${username}" /></td>
         </tr>
         <tr>
           <td>Password:</td>
@@ -22,7 +22,7 @@
         </tr>
         <tr>
           <td>Remember me?:</td>
-          <td><g:checkBox name="rememberMe" value="${rememberMe}" /></td>
+          <td><g:checkBox name="rememberMe" value="\${rememberMe}" /></td>
         </tr>
         <tr>
           <td />

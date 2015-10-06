@@ -1,4 +1,4 @@
-@package.line@class @domain.prefix@Role {
+${packageLine}class ${domainPrefix}Role {
     String name
 
     static constraints = {

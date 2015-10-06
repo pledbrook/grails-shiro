@@ -1,6 +1,6 @@
-@package.line@class @domain.prefix@UserPermissionRel {
-    @domain.prefix@User user
-    @domain.prefix@Permission permission
+${packageLine}class ${domainPrefix}UserPermissionRel {
+    ${domainPrefix}User user
+    ${domainPrefix}Permission permission
     String target
     String actions
 

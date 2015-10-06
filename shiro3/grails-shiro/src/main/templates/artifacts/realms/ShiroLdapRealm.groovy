@@ -1,4 +1,4 @@
-@package.line@import javax.naming.AuthenticationException
+${packageLine}import javax.naming.AuthenticationException
 import javax.naming.Context
 import javax.naming.NamingException
 import javax.naming.directory.BasicAttribute
@@ -13,7 +13,7 @@ import org.apache.shiro.authc.UnknownAccountException
 /**
  * Simple realm that authenticates users against an LDAP server.
  */
-class @realm.name@ {
+class ${realmName} {
     static authTokenClass = org.apache.shiro.authc.UsernamePasswordToken
 
     def grailsApplication

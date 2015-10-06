@@ -1,10 +1,10 @@
-@package.line@import org.apache.shiro.SecurityUtils
+${packageLine}import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.apache.shiro.web.util.SavedRequest
 import org.apache.shiro.web.util.WebUtils
 
-class @controller.name@ {
+class ${controllerName} {
     def shiroSecurityManager
 
     def index = { redirect(action: "login", params: params) }
@@ -38,13 +38,13 @@ class @controller.name@ {
             // password is incorrect.
             SecurityUtils.subject.login(authToken)
 
-            log.info "Redirecting to '${targetUri}'."
+            log.info "Redirecting to \${targetUri}."
             redirect(uri: targetUri)
         }
         catch (AuthenticationException ex){
             // Authentication failed, so display the appropriate message
             // on the login page.
-            log.info "Authentication failure for user '${params.username}'."
+            log.info "Authentication failure for user \${params.username}."
             flash.message = message(code: "login.failed")
 
             // Keep the username and "remember me" setting so that the

@@ -1,15 +1,15 @@
-@package.line@import org.apache.shiro.authc.AccountException
+${packageLine}import org.apache.shiro.authc.AccountException
 import org.apache.shiro.authc.IncorrectCredentialsException
 import org.apache.shiro.authc.UnknownAccountException
 import org.apache.shiro.authc.SimpleAccount
 
-class @realm.name@ {
+class ${realmName} {
     static authTokenClass = org.apache.shiro.authc.UsernamePasswordToken
 
     def credentialMatcher
 
     def authenticate(authToken) {
-        log.info "Attempting to authenticate ${authToken.username} in DB realm..."
+        log.info "Attempting to authenticate \${authToken.username} in DB realm..."
         def username = authToken.username
 
         // Null username is invalid
@@ -20,26 +20,26 @@ class @realm.name@ {
         // Get the user with the given username. If the user is not
         // found, then they don't have an account and we throw an
         // exception.
-        def user = @domain.prefix@User.findByUsername(username)
+        def user = ${domainPrefix}User.findByUsername(username)
         if (!user) {
-            throw new UnknownAccountException("No account found for user [${username}]")
+            throw new UnknownAccountException("No account found for user [\${username}]")
         }
 
-        log.info "Found user '${user.username}' in DB"
+        log.info "Found user \${user.username} in DB"
 
         // Now check the user's password against the hashed value stored
         // in the database.
-        def account = new SimpleAccount(username, user.passwordHash, "@realm.name@")
+        def account = new SimpleAccount(username, user.passwordHash, "${realmName}")
         if (!credentialMatcher.doCredentialsMatch(authToken, account)) {
             log.info 'Invalid password (DB realm)'
-            throw new IncorrectCredentialsException("Invalid password for user '${username}'")
+            throw new IncorrectCredentialsException("Invalid password for user \${username}")
         }
 
         return account
     }
 
     def hasRole(principal, roleName) {
-        def criteria = @domain.prefix@UserRoleRel.createCriteria()
+        def criteria = ${domainPrefix}UserRoleRel.createCriteria()
         def roles = criteria.list {
             role {
                 eq('name', roleName)
@@ -53,7 +53,7 @@ class @realm.name@ {
     }
 
     def hasAllRoles(principal, roles) {
-        def criteria = @domain.prefix@UserRoleRel.createCriteria()
+        def criteria = ${domainPrefix}UserRoleRel.createCriteria()
         def r = criteria.list {
             role {
                 'in'('name', roles)
@@ -72,7 +72,7 @@ class @realm.name@ {
         //
         // First find all the permissions that the user has that match
         // the required permission's type and project code.
-        def criteria = @domain.prefix@UserPermissionRel.createCriteria()
+        def criteria = ${domainPrefix}UserPermissionRel.createCriteria()
         def permissions = criteria.list {
             user {
                 eq('username', principal)
@@ -96,7 +96,7 @@ class @realm.name@ {
                 perm = constructor.newInstance(rel.target)
             }
             else {
-                log.error "Unusable permission: ${rel.permission.type}"
+                log.error "Unusable permission: \${rel.permission.type}"
                 return false
             }
 
@@ -119,15 +119,15 @@ class @realm.name@ {
         // If not, does he gain it through a role?
         //
         // First, find the roles that the user has.
-        def user = @domain.prefix@User.findByUsername(principal)
-        def roles = @domain.prefix@UserRoleRel.findAllByUser(user)
+        def user = ${domainPrefix}User.findByUsername(principal)
+        def roles = ${domainPrefix}UserRoleRel.findAllByUser(user)
 
         // If the user has no roles, then he obviously has no permissions
         // via roles.
         if (roles.isEmpty()) return false
 
         // Get the permissions from the roles that the user does have.
-        criteria = @domain.prefix@RolePermissionRel.createCriteria()
+        criteria = ${domainPrefix}RolePermissionRel.createCriteria()
         def results = criteria.list {
             'in'('role', roles.collect { it.role })
             permission {
@@ -149,7 +149,7 @@ class @realm.name@ {
                 perm = constructor.newInstance(rel.target)
             }
             else {
-                log.error "Unusable permission: ${rel.permission.type}"
+                log.error "Unusable permission: \${rel.permission.type}"
                 return false
             }
 

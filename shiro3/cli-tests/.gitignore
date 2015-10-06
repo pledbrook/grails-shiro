@@ -12,3 +12,4 @@ grails-shiro*.zip
 .idea/**
 *.log
 grails-app/conf/UrlMappings.groovy
+grails.project.target.dir/

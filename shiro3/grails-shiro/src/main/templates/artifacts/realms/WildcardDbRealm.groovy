@@ -1,10 +1,10 @@
-@package.line@import org.apache.shiro.authc.AccountException
+${packageLine}import org.apache.shiro.authc.AccountException
 import org.apache.shiro.authc.IncorrectCredentialsException
 import org.apache.shiro.authc.UnknownAccountException
 import org.apache.shiro.authc.SimpleAccount
 import org.apache.shiro.authz.permission.WildcardPermission
 
-class @realm.name@ {
+class ${realmName} {
     static authTokenClass = org.apache.shiro.authc.UsernamePasswordToken
 
     def credentialMatcher
@@ -22,7 +22,7 @@ class @realm.name@ {
         // Get the user with the given username. If the user is not
         // found, then they don't have an account and we throw an
         // exception.
-        def user = @domain.prefix@User.findByUsername(username)
+        def user = ${domainPrefix}User.findByUsername(username)
         if (!user) {
             throw new UnknownAccountException("No account found for user [${username}]")
         }
@@ -31,7 +31,7 @@ class @realm.name@ {
 
         // Now check the user's password against the hashed value stored
         // in the database.
-        def account = new SimpleAccount(username, user.passwordHash, "@realm.name@")
+        def account = new SimpleAccount(username, user.passwordHash, "${realmName}")
         if (!credentialMatcher.doCredentialsMatch(authToken, account)) {
             log.info "Invalid password (DB realm)"
             throw new IncorrectCredentialsException("Invalid password for user '${username}'")
@@ -41,7 +41,7 @@ class @realm.name@ {
     }
 
     def hasRole(principal, roleName) {
-        def roles = @domain.prefix@User.withCriteria {
+        def roles = ${domainPrefix}User.withCriteria {
             roles {
                 eq("name", roleName)
             }
@@ -52,7 +52,7 @@ class @realm.name@ {
     }
 
     def hasAllRoles(principal, roles) {
-        def r = @domain.prefix@User.withCriteria {
+        def r = ${domainPrefix}User.withCriteria {
             roles {
                 'in'("name", roles)
             }
@@ -68,7 +68,7 @@ class @realm.name@ {
         //
         // First find all the permissions that the user has that match
         // the required permission's type and project code.
-        def user = @domain.prefix@User.findByUsername(principal)
+        def user = ${domainPrefix}User.findByUsername(principal)
         def permissions = user.permissions
 
         // Try each of the permissions found and see whether any of
@@ -97,7 +97,7 @@ class @realm.name@ {
         // If not, does he gain it through a role?
         //
         // Get the permissions from the roles that the user does have.
-        def results = @domain.prefix@User.executeQuery("select distinct p from @domain.prefix@User as user join user.roles as role join role.permissions as p where user.username = '$principal'")
+        def results = ${domainPrefix}User.executeQuery("select distinct p from ${domainPrefix}User as user join user.roles as role join role.permissions as p where user.username = '$principal'")
 
         // There may be some duplicate entries in the results, but
         // at this stage it is not worth trying to remove them. Now,

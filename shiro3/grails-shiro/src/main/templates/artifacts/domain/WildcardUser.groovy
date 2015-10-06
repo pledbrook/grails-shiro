@@ -1,8 +1,8 @@
-@package.line@class @domain.prefix@User {
+${packageLine}class ${domainPrefix}User {
     String username
     String passwordHash
     
-    static hasMany = [ roles: @domain.prefix@Role, permissions: String ]
+    static hasMany = [ roles: ${domainPrefix}Role, permissions: String ]
 
     static constraints = {
         username(nullable: false, blank: false, unique: true)

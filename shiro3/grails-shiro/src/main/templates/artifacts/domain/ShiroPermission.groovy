@@ -1,4 +1,4 @@
-@package.line@class @domain.prefix@Permission {
+${packageLine}class ${domainPrefix}Permission {
     String type
     String possibleActions
 

@@ -27,5 +27,5 @@ ant.mkdir(dir:"${basedir}/grails-app/realms")
 
 // Install the message bundle.
 ant.copy(
-        file: "${shiroPluginDir}/grails-app/i18n/messages.properties",
+        file: "${shiro3PluginDir}/grails-app/i18n/messages.properties",
         tofile: "grails-app/i18n/shiro.properties")
