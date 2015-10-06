@@ -1,0 +1,15 @@
+.settings/
+build/
+.gradle/
+eclipse/
+plugin.xml
+target/
+test/reports/
+work/
+/web-app/
+grails-shiro*.zip
+*.iml
+.idea/**
+*.log
+grails-app/conf/UrlMappings.groovy
+grails.project.target.dir/
