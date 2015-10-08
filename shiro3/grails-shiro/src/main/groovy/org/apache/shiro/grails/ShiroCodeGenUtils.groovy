@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2007 Peter Ledbrook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,25 +19,29 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-import static org.apache.shiro.grails.ShiroCodeGenUtils.*
-
-description("Creates a new ldap realm from a template.") {
-	usage "grails create-ldap-realm [--prefix=PREFIX]"
-	flag name:'PREFIX', description:"""The prefix to add to the names of the realm and domain classes.
-             This may include a package. (default: "Shiro").
-"""
-}
-
-def (pkg, prefix) = parsePrefix(argsMap)
-
-
-// Copy over the standard DB realm.
-def className = "${prefix}DbRealm"
-def m = [:]
-m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
-m['realmName'] = className
-m['domainPrefix'] = prefix
-render  template:"artifacts/realms/ShiroLdapRealm.groovy",
-        destination: file("grails-app/realms/${packageToPath(pkg)}/${className}.groovy"),
-        model:m
  
+package org.apache.shiro.grails
+
+class ShiroCodeGenUtils {
+
+
+	static parsePrefix(argsMap) {
+	    def prefix = "Shiro"
+	    def pkg = ""
+	    if (argsMap["prefix"] != null) {
+	        def givenValue = argsMap["prefix"].split(/\./, -1)
+	        prefix = givenValue[-1]
+	        pkg = givenValue.size() > 1 ? givenValue[0..-2].join('.') : ""
+	    }
+
+	    return [ pkg, prefix ]
+	}
+
+	/**
+	 * Converts a package name (with '.' separators) to a file path (with
+	 * '/' separators). If the package is <tt>null</tt>, this returns an
+	 */
+	static packageToPath(String pkg) {
+	    return pkg ? '/' + pkg.replace('.' as char, '/' as char) : ''
+	}
+}

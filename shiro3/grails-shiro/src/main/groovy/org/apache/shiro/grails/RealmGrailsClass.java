@@ -17,17 +17,10 @@
  *
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
- * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
+package org.apache.shiro.grails;
 
-description("Sets up a basic security system with a wildcard realm, auth controller, etc.") {
-	usage "grails shiro-quick-start [--prefix=PREFIX]"
-	flag name:'PREFIX', description:"""The prefix to add to the names of the realm and domain classes.
-             This may include a package. (default: "Shiro").
-"""
+import grails.core.InjectableGrailsClass;
+
+public interface RealmGrailsClass extends InjectableGrailsClass{
 }
-String fPrefix = flag('prefix')
-String prefixStr = fPrefix ? "--prefix=${fPrefix}" : ""
-createWildcardRealm(prefixStr) 
-createAuthController(prefixStr)
-createSecurityInterceptor(prefixStr)

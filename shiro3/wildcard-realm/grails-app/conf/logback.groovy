@@ -25,4 +25,10 @@ if(Environment.current == Environment.DEVELOPMENT) {
         }
         logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false )
     }
+logger 'org.apache.shiro',DEBUG, ['STDOUT'] 
+logger 'grails.app.realms', DEBUG, ['STDOUT']
+logger 'grails.app.interceptors', DEBUG, ['STDOUT']
+logger 'grails.app.controllers', DEBUG, ['STDOUT']
+logger 'grails.app.services', DEBUG, ['STDOUT']
 }
+

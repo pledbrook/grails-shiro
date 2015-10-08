@@ -1,1 +1,1 @@
-include 'cli-tests', 'grails-shiro'
+include 'wildcard-realm','cli-tests', 'grails-shiro'

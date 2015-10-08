@@ -19,46 +19,22 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-
 import static org.apache.shiro.grails.ShiroCodeGenUtils.*
 
-description("""Creates a new database realm from a template that only works with
-	wildcard permissions. Other types of permission are not supported.
-	""") {
-	usage "grails create-wildcard-realm [--prefix=PREFIX]"
+description("Creates a new security interceptor from a template.") {
+	usage "grails create-security-interceptor [--prefix=PREFIX]"
 	flag name:'PREFIX', description:"""The prefix to add to the names of the realm and domain classes.
              This may include a package. (default: "Shiro").
 """
 }
 
 /**
- * Creates a new database realm from a template that only works with
- * wildcard permissions. Other types of permission are not supported.
+ * Creates a new authentication controller from a template.
  */
 def (pkg, prefix) = parsePrefix(argsMap)
-
-// First create the domain objects: ShiroUser, ShiroRole, etc.
-def domainClasses = [ 'User', 'Role' ]
-
-def artefactPath = "grails-app/domain${packageToPath(pkg)}"
-ant.mkdir(dir: "${baseDir}/${artefactPath}")
-
-domainClasses.each { domainClass ->
-	def m = [:]
-	m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
-	m['domainPrefix'] = prefix
-	render  template:"artifacts/domain/Wildcard${domainClass}.groovy",
-	        destination: file("${artefactPath}/${packageToPath(pkg)}/${prefix}${domainClass}.groovy"),
-	        model:m
-}
-
-// Copy over the standard DB realm.
-def className = "${prefix}DbRealm"
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
-m['realmName'] = className
-m['domainPrefix'] = prefix
-render  template:"artifacts/realms/WildcardDbRealm.groovy",
-        destination: file("grails-app/realms/${packageToPath(pkg)}/${className}.groovy"),
+m['prefix'] = prefix
+render  template:"artifacts/interceptors/SecurityInterceptor.groovy",
+        destination: file("grails-app/controllers/${packageToPath(pkg)}/${m['prefix']}SecurityInterceptor.groovy"),
         model:m
- 
