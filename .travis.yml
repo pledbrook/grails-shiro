@@ -17,9 +17,11 @@ before_install:
   - "~/install_sdkman.sh"
   - echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
   - source ~/.sdkman/bin/sdkman-init.sh
-  - GRAILS_VERSION=`grep '^\s*grailsVersion' gradle.properties | sed -e 's/^grailsVersion=//g' | tr -d "\r"`
+  - GRAILS_VERSION=`grep '^\s*grailsVersion' ./shiro3/grails-shiro/gradle.properties | sed -e 's/^grailsVersion=//g' | tr -d "\r"`
   - echo "GRAILS_VERSION:$GRAILS_VERSION"
   - sdk install grails $GRAILS_VERSION || true
+  - GRAILS_HOME=`which grails`
+  - echo "GRAILS_HOME:$GRAILS_HOME"
   - cd ./shiro3
   - chmod +x ./gradlew
 script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest -i
