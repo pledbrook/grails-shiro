@@ -1,5 +1,7 @@
 env:
-  - TERM: dumb, GRAILS_HOME : /home/travis/.sdkman/grails/current/bin/grails
+  global:
+  - TERM=dumb
+  - GRAILS_HOME=/home/travis/.sdkman/grails/current/bin/grails
 jdk:
   - oraclejdk7
   - oraclejdk8
