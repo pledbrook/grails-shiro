@@ -3,7 +3,5 @@ jdk:
 - oraclejdk7
 - oraclejdk8
 before_script:
-- rm -rf build
-- cd shiro3
-- chmod +x ./gradlew
-script: ./gradlew :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
+- chmod +x ./shiro3/gradlew
+script: cd shiro3 && ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
