@@ -1,6 +1,5 @@
 env:
   - TERM: dumb
-  - GRAILS_VERSION: 3.0.3
 jdk:
   - oraclejdk7
   - oraclejdk8
@@ -12,11 +11,15 @@ cache:
     - ~/.gradle/wrapper/
     - ~/.sdkman/
 before_install:
-  - curl -s http://get.sdkman.io > ~/install_sdkman.sh
+  - rm -rf ~/.sdkman
+  - curl -s get.sdkman.io > ~/install_sdkman.sh
   - chmod 775 ~/install_sdkman.sh
-  - ~/install_sdkman.sh
-  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
-  - gvm install grails $GRAILS_VERSION
+  - "~/install_sdkman.sh"
+  - echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
+  - source ~/.sdkman/bin/sdkman-init.sh
+  - GRAILS_VERSION=`grep '^\s*grailsVersion' gradle.properties | sed -e 's/^grailsVersion=//g' | tr -d "\r"`
+  - echo "GRAILS_VERSION:$GRAILS_VERSION"
+  - sdk install grails $GRAILS_VERSION || true
   - cd ./shiro3
   - chmod +x ./gradlew
 script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest -i
