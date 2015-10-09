@@ -1,15 +1,22 @@
 env:
   - TERM: dumb
+  - GRAILS_VERSION: 3.0.3
 jdk:
   - oraclejdk7
   - oraclejdk8
 before_cache:
-  - find $HOME/.gradle/caches/ -type f -name "*.lock" -delete
+  - find ~/.gradle/caches/ -type f -name "*.lock" -delete
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+    - ~/.gradle/caches/
+    - ~/.gradle/wrapper/
+    - ~/.sdkman/
 before_install:
+  - curl -s http://get.sdkman.io > ~/install_sdkman.sh
+  - chmod 775 ~/install_sdkman.sh
+  - ~/install_sdkman.sh
+  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+  - gvm install grails $GRAILS_VERSION
   - cd ./shiro3
   - chmod +x ./gradlew
 script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest -i
