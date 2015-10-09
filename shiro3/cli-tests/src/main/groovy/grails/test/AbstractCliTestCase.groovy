@@ -70,7 +70,7 @@ abstract class AbstractCliTestCase extends GroovyTestCase {
         def quoteArgs = false
         if (windows) {
             cmd << "cmd" << "/c"
-            cmd << "${grailsHome}\\bin\\grails.bat".toString()
+            cmd << "${grailsHome}/bin/grails".toString()
             quoteArgs = true
         }
         else {
