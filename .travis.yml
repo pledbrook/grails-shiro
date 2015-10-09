@@ -1,4 +1,6 @@
 language: groovy
+env:
+  - TERM: dumb
 jdk:
   - oraclejdk7
   - oraclejdk8
