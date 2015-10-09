@@ -7,4 +7,5 @@ jdk:
 before_install:
   - cd ./shiro3
   - chmod +x ./gradlew
-script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
+script: ./gradlew -q clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
+
