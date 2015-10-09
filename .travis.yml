@@ -4,5 +4,6 @@ jdk:
 - oraclejdk8
 before_script:
 - rm -rf build
-- chmod +x ./travis-build.sh
-script: ./travis-build.sh
+- cd shiro3
+- chmod +x ./gradlew
+script: ./gradlew :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
