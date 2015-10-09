@@ -1,7 +1,8 @@
 language: groovy
 jdk:
-- oraclejdk7
-- oraclejdk8
+  - oraclejdk7
+  - oraclejdk8
 before_install:
-- chmod +x ./shiro3/gradlew
-script: cd ./shiro3 && ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
+  - cd ./shiro3
+  - chmod +x ./gradlew
+script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest --stacktrace
