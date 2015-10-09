@@ -23,7 +23,8 @@ import grails.plugins.*
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-import org.apache.shiro.SecurityUtils
+import grails.artefact.Interceptor
+import javax.servlet.Filter
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
 import org.apache.shiro.authc.credential.PasswordHashAdapter
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
@@ -33,6 +34,7 @@ import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.spring.LifecycleBeanPostProcessor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
@@ -41,15 +43,15 @@ import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
-import org.grails.core.artefact.ControllerArtefactHandler
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import grails.artefact.Interceptor
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
-
-import javax.servlet.Filter
-
+import org.grails.core.artefact.ControllerArtefactHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
+import org.springframework.boot.context.embedded.FilterRegistrationBean
+import org.springframework.core.Ordered
+import org.springframework.web.filter.DelegatingFilterProxy
+import static javax.servlet.DispatcherType.*
 
 class ShiroGrailsPlugin extends Plugin {
 
@@ -139,7 +141,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             // Shiro doesn't like an empty collection of realms, so we
             // only configure the "realms" property if there are some.
             if (!realmBeans.isEmpty()) {
-                realms = realmBeans.collect { ref(it) }
+                realms = realmBeans.collect { 
+                    log.debug("Adding realm bean $it")
+                    ref(it) 
+                }
             }
 
             // Allow the user to customise the session type: 'http' or
@@ -153,7 +158,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
         }
-        shiroAnnotationSecurityInterceptor(ShiroAnnotationSecurityInterceptor)
+   //      shiroAnnotationSecurityInterceptor(ShiroAnnotationSecurityInterceptor)
 
         // If the legacy 'shiro.filter.config' setting has a value, then
         // configuration is done via IniShiroFilter and we don't use the
@@ -183,7 +188,17 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     filters = [authcBasic: ref("authcBasicFilter")]
                 }
             }
+            //New in Grails 3.0.x
+            //instead of web.xml configuration
+            log.debug('Filter definition via FilterRegistrationBean')
+            servletShiroFilter(FilterRegistrationBean) {
+                filter = ref('shiroFilter')
+                urlPatterns = ['/*']
+                dispatcherTypes = EnumSet.of(REQUEST,ERROR)
+                //order = Ordered.HIGHEST_PRECEDENCE
+            }
         }
+
         println '\nShiro Configured'
     }}
 
@@ -290,6 +305,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // Create the realm bean.
         "${realmName}Instance"(grailsClass.clazz) { bean ->
             bean.autowire = "byName"
+            bean.dependsOn = "shiroLifecycleBeanPostProcessor"
         }
 
         // Wrap each realm with an adapter that implements the Shiro Realm interface.

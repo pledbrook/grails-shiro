@@ -8,19 +8,15 @@ class ShiroSecurityInterceptor {
     int order = HIGHEST_PRECEDENCE + 200
 
     ShiroSecurityInterceptor(){
-        matchAll().excludes(controller: 'auth')
+        match(controller: /.*/)
+        .excludes(controller: 'auth')
     }
     boolean after() { 
-        true
+          true
     }
     boolean before() {
-        if (accessControl()) {
-            return true
-        } else {
-            return false
-        }
+        return accessControl()
     }
     void afterView() {
-        
     }
 }

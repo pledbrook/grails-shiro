@@ -5,7 +5,8 @@ import grails.util.Environment
 // See http://logback.qos.ch/manual/groovy.html for details on configuration
 appender('STDOUT', ConsoleAppender) {
     encoder(PatternLayoutEncoder) {
-        pattern = "%level %logger - %msg%n"
+        //pattern = "%level %logger - %msg%n"
+        pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100}%n>>>>>>>>>>>>%msg%n"
     }
 }
 
@@ -20,15 +21,31 @@ if(Environment.current == Environment.DEVELOPMENT) {
             file = "${targetDir}/stacktrace.log"
             append = true
             encoder(PatternLayoutEncoder) {
-                pattern = "%level %logger - %msg%n"
+                //pattern = "%level %logger - %msg%n"
+                pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100}%n>>>>>>>>>>>>%msg%n"
             }
         }
-        logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false )
+        appender("DEVLOG", FileAppender) {
+
+            file = "${targetDir}/devel.log"
+            append = true
+            encoder(PatternLayoutEncoder) {
+                //pattern = "%level %logger - %msg%n"
+                pattern = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger%n>>>>>>>>>>>>%msg%n"
+            }
+        }
+        logger("StackTrace", ERROR, ['FULL_STACKTRACE','DEVLOG'], false )
     }
-logger 'org.apache.shiro',DEBUG, ['STDOUT'] 
-logger 'grails.app.realms', DEBUG, ['STDOUT']
-logger 'grails.app.interceptors', DEBUG, ['STDOUT']
-logger 'grails.app.controllers', DEBUG, ['STDOUT']
-logger 'grails.app.services', DEBUG, ['STDOUT']
+logger 'grails.artefact.Interceptor', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.artefact.Filter', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.artefact.Realm', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'shiro',DEBUG, ['STDOUT','DEVLOG'] 
+logger 'shiro3',DEBUG, ['STDOUT','DEVLOG'] 
+logger 'org.apache.shiro',DEBUG, ['STDOUT','DEVLOG'] 
+logger 'grails.app.realms', DEBUG, ['STDOUT','DEVLOG']
+logger 'grails.app.taglibs', DEBUG, ['STDOUT','DEVLOG']
+logger 'grails.app.interceptors', DEBUG, ['STDOUT','DEVLOG']
+logger 'grails.app.controllers', DEBUG, ['STDOUT','DEVLOG']
+logger 'grails.app.services', DEBUG, ['STDOUT','DEVLOG']
 }
 
