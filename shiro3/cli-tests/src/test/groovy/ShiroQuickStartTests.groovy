@@ -10,6 +10,7 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
     private File userFile
     private File roleFile
     private File authFile
+    private File interceptorFile
     private File viewFile
     private File realmsDir
 
@@ -19,6 +20,7 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         userFile = new File(workDir, "grails-app/domain/ShiroUser.groovy")
         roleFile = new File(workDir, "grails-app/domain/ShiroRole.groovy")
         authFile = new File(workDir, "grails-app/controllers/AuthController.groovy")
+        interceptorFile = new File(workDir, "grails-app/controllers/ShiroSecurityInterceptor.groovy")
         viewFile = new File(workDir, "grails-app/views/auth/login.gsp")
     
         realmsDir = new File(workDir, "grails-app/realms")
@@ -26,6 +28,7 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         userFile.delete()
         roleFile.delete()
         authFile.delete()
+        interceptorFile.delete()
         viewFile.parentFile.deleteDir()
         realmsDir.deleteDir()
     }
@@ -37,6 +40,7 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         userFile.delete()
         roleFile.delete()
         authFile.delete()
+        interceptorFile.delete()
         viewFile.parentFile.deleteDir()
     }
 
@@ -50,6 +54,7 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         assert !userFile.exists()
         assert !roleFile.exists()
         assert !authFile.exists()
+        assert !interceptorFile.exists()
         assert !viewFile.exists()
         assert !realmsDir.exists()
 
@@ -65,12 +70,13 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         assertTrue "User domain was not created", userFile.exists()
         assertTrue "Role domain was not created", roleFile.exists()
         assertTrue "Auth controller was not created", authFile.exists()
+        assertTrue "Interceptor was not created", interceptorFile.exists()
         assertTrue "Login view was not created", viewFile.exists()
         
         def realmContent = realmFile.text.trim()
         assertFalse "Realm class is in a package", realmContent.startsWith("package")
         assertTrue  "Realm class name incorrect", realmContent.contains("class ShiroDbRealm {")
-
+ 
         def userContent = userFile.text.trim()
         assertFalse "User domain class is in a package", userContent.startsWith("package")
         assertTrue "User domain class name incorrect : $userContent", userContent.contains("class ShiroUser {")
@@ -82,6 +88,10 @@ class ShiroQuickStartTests extends AbstractCliTestCase {
         def authContent = authFile.text.trim()
         assertFalse "Auth controller class is in a package", authContent.startsWith("package")
         assertTrue "Auth controller class name incorrect", authContent.contains("class AuthController {")
+
+        def interceptorContent = interceptorFile.text.trim()
+        assertFalse "Interceptor class is in a package", interceptorContent.startsWith("package")
+        assertTrue "Interceptor class name incorrect", interceptorContent.contains("class ShiroSecurityInterceptor {")
 
         def viewContent = viewFile.text.trim()
         assertTrue "Login view missing title", viewContent.contains("<title>Login</title>")

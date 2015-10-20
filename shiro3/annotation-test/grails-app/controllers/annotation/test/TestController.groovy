@@ -4,45 +4,45 @@ class TestController {
     def securedMethodsService
     def securedService
 
-    def index = {}
-    def show = { render "Show page" }
-    def create = { render "Create page" }
-    def edit = { render "Edit page" }
-    def delete = { render "Delete page" }
+    def index() {}
+    def show() { render "Show page" }
+    def create() { render "Create page" }
+    def edit() { render "Edit page" }
+    def delete() { render "Delete page" }
 
-    def hasRole = {}
-    def lacksRole = {}
-    def hasPermission = {}
+    def hasRole() {}
+    def lacksRole() {}
+    def hasPermission() {}
 
-    def unsecured = {
+    def unsecured() {
         render(view: 'simple', model: [msg: "Unsecured: " + securedMethodsService.methodOne()])
     }
 
-    def guest = {
+    def guest() {
         render(view: 'simple', model: [msg: "Guest: " + securedMethodsService.methodTwo()])
     }
 
-    def user = {
+    def user() {
         render(view: 'simple', model: [msg: "User: " + securedMethodsService.methodThree()])
     }
 
-    def authenticated = {
+    def authenticated() {
         render(view: 'simple', model: [msg: "Authenticated: " + securedMethodsService.methodFour()])
     }
 
-    def role = {
+    def role() {
         render(view: 'simple', model: [msg: "Role: " + securedMethodsService.methodFive()])
     }
 
-    def permission = {
+    def permission() {
         render(view: 'simple', model: [msg: "Permission: " + securedMethodsService.methodSix()])
     }
 
-    def unrestricted = {
+    def unrestricted() {
         render(view: 'simple', model: [msg: "secure class: " + securedService.unrestricted()])
     }
 
-    def administrator = {
+    def administrator() {
         render(view: 'simple', model: [msg: "secure class: " + securedService.requiresRoleAdministrator()])
     }
 }

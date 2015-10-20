@@ -32,7 +32,7 @@ class SecuredMethodsService {
         return 'five'
     }
 
-    @RequiresPermissions("book:view")
+    @RequiresPermissions("book2:view")
     def methodSix() {
         return 'six'
     }

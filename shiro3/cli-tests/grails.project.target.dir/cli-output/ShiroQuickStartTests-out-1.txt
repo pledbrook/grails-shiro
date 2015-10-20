@@ -1,2 +1,9 @@
 Error |
-Error occurred running Grails CLI: No such property: includeTargets for class: ShiroQuickStart (Use --stacktrace to see the full trace)
+Could not checkout tag for Grails release [3.0.8]: Cannot lock C:\Users\m.elaoufir\.grails\repository\.git\index (Use --stacktrace to see the full trace)
+.
+|Rendered template WildcardUser.groovy to destination grails-app\domain\ShiroUser.groovy
+|Rendered template WildcardRole.groovy to destination grails-app\domain\ShiroRole.groovy
+|Rendered template WildcardDbRealm.groovy to destination grails-app\realms\ShiroDbRealm.groovy
+|Rendered template AuthController.groovy to destination grails-app\controllers\AuthController.groovy
+|Rendered template login.gsp to destination grails-app\views\auth\login.gsp
+|Rendered template SecurityInterceptor.groovy to destination grails-app\controllers\ShiroSecurityInterceptor.groovy

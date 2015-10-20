@@ -7,7 +7,6 @@ class UrlMappings {
         }
         "/"(view:'/index')
         "500"(view:'/error')
-
         "/books" {
             controller = "book"
             action = "list"

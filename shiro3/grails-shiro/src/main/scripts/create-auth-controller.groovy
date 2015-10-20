@@ -19,26 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-def parsePrefix= {
-    def prefix = "Shiro"
-    def pkg = ""
-    if (argsMap["prefix"] != null) {
-        def givenValue = argsMap["prefix"].split(/\./, -1)
-        prefix = givenValue[-1]
-        pkg = givenValue.size() > 1 ? givenValue[0..-2].join('.') : ""
-    }
-
-    return [ pkg, prefix ]
-}
-
-/**
- * Converts a package name (with '.' separators) to a file path (with
- * '/' separators). If the package is <tt>null</tt>, this returns an
- * empty string.
- */
-def packageToPath = {String pkg->
-    return pkg ? '/' + pkg.replace('.' as char, '/' as char) : ''
-}
+import static org.apache.shiro.grails.ShiroCodeGenUtils.*
 
 description("Creates a new authentication controller from a template.") {
 	usage "grails create-auth-controller [--prefix=PREFIX]"
@@ -50,7 +31,7 @@ description("Creates a new authentication controller from a template.") {
 /**
  * Creates a new authentication controller from a template.
  */
-def (pkg, prefix) = parsePrefix()
+def (pkg, prefix) = parsePrefix(argsMap)
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['controllerName'] = 'AuthController'

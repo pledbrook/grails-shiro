@@ -30,3 +30,4 @@ String fPrefix = flag('prefix')
 String prefixStr = fPrefix ? "--prefix=${fPrefix}" : ""
 createWildcardRealm(prefixStr) 
 createAuthController(prefixStr)
+createSecurityInterceptor(prefixStr)

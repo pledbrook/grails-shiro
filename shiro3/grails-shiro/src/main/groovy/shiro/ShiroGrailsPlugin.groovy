@@ -21,13 +21,21 @@ import grails.plugins.*
  *
  * Modified 2009 Bradley Beddoes, Intient Pty Ltd, Ported to Apache Ki
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
+ * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
+
+import grails.artefact.Interceptor
+import grails.util.GrailsClassUtils
+import javax.servlet.Filter
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
 import org.apache.shiro.authc.credential.PasswordHashAdapter
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator
+import org.apache.shiro.authz.AuthorizationException
+import org.apache.shiro.authz.UnauthenticatedException
 import org.apache.shiro.authz.permission.WildcardPermissionResolver
+import org.apache.shiro.config.Ini
 import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
@@ -35,17 +43,24 @@ import org.apache.shiro.realm.Realm
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.spring.LifecycleBeanPostProcessor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.web.config.WebIniSecurityManagerFactory
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
 import org.grails.core.artefact.ControllerArtefactHandler
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import grails.artefact.Interceptor
+import org.grails.spring.DefaultBeanConfiguration
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
-
-import javax.servlet.Filter
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+import org.springframework.beans.factory.support.BeanDefinitionBuilder
+import org.springframework.boot.context.embedded.FilterRegistrationBean
+import org.springframework.core.Ordered
+import org.springframework.web.filter.DelegatingFilterProxy
+import org.springframework.web.util.WebUtils
+import static javax.servlet.DispatcherType.*
 
 class ShiroGrailsPlugin extends Plugin {
 
@@ -64,22 +79,25 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
     def issueManagement = [system: "JIRA", url: "http://jira.grails.org/browse/GPSHIRO"]
     def scm = [url: "https://github.com/pledbrook/grails-shiro"]
 
-    def loadAfter = ["controllers", "services"]
+    def loadAfter = ["controllers", "services","logging"]
     def observe = ["controllers"]
     def watchedResources = "file:./grails-app/realms/**/*Realm.groovy"
+
     def artefacts = [RealmArtefactHandler]
 
     def roleMaps = [:]
     def permMaps = [:]
 
-    def doWithSpring = {
-        def securityConfig = application.config.security.shiro
+   final static log = LoggerFactory.getLogger(ShiroGrailsPlugin)
+
+   Closure doWithSpring() {{->
+        def securityConfig = grailsApplication.config.security.shiro
 
         println '\nConfiguring Shiro ...'
 
         // Configure realms defined in the project.
         def realmBeans = []
-        def realmClasses = application.realmClasses
+        def realmClasses = grailsApplication.realmClasses
         realmClasses.each { realmClass ->
             log.info "Registering realm: ${realmClass.fullName}"
             configureRealm.delegate = delegate
@@ -132,7 +150,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             // Shiro doesn't like an empty collection of realms, so we
             // only configure the "realms" property if there are some.
             if (!realmBeans.isEmpty()) {
-                realms = realmBeans.collect { ref(it) }
+                realms = realmBeans.collect { 
+                    log.debug("Adding realm bean $it")
+                    ref(it) 
+                }
             }
 
             // Allow the user to customise the session type: 'http' or
@@ -146,6 +167,8 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
         }
+       //Alias
+   //      shiroAnnotationSecurityInterceptor(ShiroAnnotationSecurityInterceptor)
 
         // If the legacy 'shiro.filter.config' setting has a value, then
         // configuration is done via IniShiroFilter and we don't use the
@@ -175,11 +198,48 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     filters = [authcBasic: ref("authcBasicFilter")]
                 }
             }
+        } else {
+            println "Using legacy configuration..."
+            log.warn "security.shiro.filter.config option is deprecated. Use Grails' bean property override mechanism instead."
+            def iniConfig = new Ini()
+            iniConfig.load(securityConfig.filter.config)
+            shiroSecurityManagerFactory(LegacyIniSecurityManagerFactory,applicationContext,"shiroSecurityManager",iniConfig)
+            // Create the main security filter.
+            shiroFilter(ShiroFilterFactoryBean) { bean ->
+                securityManager = ref("shiroSecurityManager")
+
+                loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
+                unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
+
+                if (securityConfig.filter.filterChainDefinitions) {
+                    filterChainDefinitions = securityConfig.filter.filterChainDefinitions
+                }
+
+                if (securityConfig.filter.basicAppName) {
+                    filters = [authcBasic: ref("authcBasicFilter")]
+                }
+            }
+/*            shiroFilter(ShiroFilterFactoryBean){
+                securityManager = {bean->
+                    bean.factoryMethod = "getInstance"
+                    bean.factoryBean = "shiroSecurityManagerFactory"
+                }
+            }
+*/
+        }
+        //New in Grails 3.0.x
+        //instead of web.xml configuration
+        log.debug('Filter definition via FilterRegistrationBean')
+        servletShiroFilter(FilterRegistrationBean) {
+            filter = ref('shiroFilter')
+            urlPatterns = ['/*']
+            dispatcherTypes = EnumSet.of(REQUEST,ERROR)
+            //order = Ordered.HIGHEST_PRECEDENCE
         }
         println '\nShiro Configured'
-    }
+    }}
 
-    def doWithApplicationContext = { applicationContext ->
+    void doWithApplicationContext() {
         def mgr = applicationContext.getBean("shiroSecurityManager")
 
         // Add any extra realms that might have been defined in the project
@@ -210,17 +270,17 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
      * so that the before-interceptor can query them to find out
      * whether a user has the required role/permission for an action.
      */
-    def doWithDynamicMethods = { ctx ->
+    void doWithDynamicMethods(){
         // Get the access control information from the controllers, if
         // there are any.
         if (manager?.hasGrailsPlugin("controllers")) {
             // Process each controller.
-            application.controllerClasses.each { controllerClass ->
+            grailsApplication.controllerClasses.each { controllerClass ->
                 processController(controllerClass, log)
             }
         }
 
-        application.filtersClasses.each { filterClass ->
+        grailsApplication.filtersClasses.each { filterClass ->
             filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
             filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
         }
@@ -229,137 +289,46 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // is required for access control or not. By default, it is
         // required.
         boolean authcRequired = true
-        if (application.config.security.shiro.authc.required instanceof Boolean) {
-            authcRequired = application.config.security.shiro.authc.required
+        if (grailsApplication.config.security.shiro.authc.required instanceof Boolean) {
+            authcRequired = grailsApplication.config.security.shiro.authc.required
         }
 
         // Add an 'accessControl' method to Interceptor (so that it's
         // available from Grails filters).
         def mc = Interceptor.metaClass
 
-        mc.accessControl << { -> return accessControlMethod(application, delegate, authcRequired) }
-        mc.accessControl << { Map args -> return accessControlMethod(application, delegate, authcRequired, args) }
-        mc.accessControl << { Closure c -> return accessControlMethod(application, delegate, authcRequired, [:], c) }
-        mc.accessControl << { Map args, Closure c -> return accessControlMethod(application, delegate, authcRequired, args, c) }
+        mc.accessControl << { -> return accessControlMethod(grailsApplication, delegate, authcRequired) }
+        mc.accessControl << { Map args -> return accessControlMethod(grailsApplication, delegate, authcRequired, args) }
+        mc.accessControl << { Closure c -> return accessControlMethod(grailsApplication, delegate, authcRequired, [:], c) }
+        mc.accessControl << { Map args, Closure c -> return accessControlMethod(grailsApplication, delegate, authcRequired, args, c) }
     }
 
-    def doWithWebDescriptor = { xml ->
-        def contextParam = xml.'context-param'
-        contextParam[contextParam.size() - 1] + {
-            'filter' {
-                'filter-name'('shiroFilter')
-
-                // If the legacy 'security.shiro.filter.config' option is set,
-                // use our custom INI-based filter...
-                if (application.config.security.shiro.filter.config) {
-                    log.warn "security.shiro.filter.config option is deprecated. Use Grails' bean property override mechanism instead."
-
-                    'filter-class'('org.apache.shiro.grails.LegacyShiroFilter')
-                    'init-param' {
-                        'param-name'('securityManagerBeanName')
-                        'param-value'('shiroSecurityManager')
-                    }
-
-                    // If a Shiro configuration is available, add it
-                    // as an 'init-param' of the filter. This config should
-                    // be in .ini format.
-                    'init-param' {
-                        'param-name'('config')
-                        'param-value'(application.config.security.shiro.filter.config)
-                    }
-                } else {
-                    // ...otherwise use a DelagatingFilterProxy with the 'shiroFilter'
-                    // bean, which is now the recommended approach. Configuration is
-                    // done via Grails' bean property override configuration.
-                    'filter-class'('org.springframework.web.filter.DelegatingFilterProxy')
-                    'init-param' {
-                        'param-name'('targetFilterLifecycle')
-                        'param-value'('true')
-                    }
-                }
-            }
-        }
-
-        // Place the Shiro filters after the Spring character encoding filter, otherwise the latter filter won't work.
-        def filter = xml.'filter-mapping'.find { it.'filter-name'.text() == "charEncodingFilter" }
-
-        // NOTE: The following shenanigans are designed to ensure that
-        // the filter mapping is inserted in the right location under
-        // a variety of circumstances. However, at this point in time
-        // it's a bit of wasted effort because Grails itself can't handle
-        // certain situations, such as no filter mappings at all, or
-        // a SiteMesh one but no character encoding filter mapping.
-        // Bleh.
-        if (!filter) {
-            /* Of course, if there is no char encoding filter, the next
-             requirement is that we come before the SiteMesh filter.
-             This is trickier to accomplish. First we find out at what
-             index the SiteMesh filter mapping is. */
-            int i = 0
-            int siteMeshIndex = -1
-            xml.'filter-mapping'.each {
-                if (it.'filter-name'.text().equalsIgnoreCase("sitemesh")) {
-                    siteMeshIndex = i
-                }
-                i++
-            }
-
-            if (siteMeshIndex > 0) {
-                /* There is at least one other filter mapping that comes
-                 before the SiteMesh one, so we can simply use the filter
-                 mapping that comes immediately before SiteMesh as the
-                 insertion point. */
-                filter = xml.'filter-mapping'[siteMeshIndex - 1]
-            } else if (siteMeshIndex == 0 || xml.'filter-mapping'.size() == 0) {
-                /* If the index of the SiteMesh filter mapping is 0, i.e.
-                 it's the first one, we need to use the last filter
-                 definition as the insertion point. We also need to do
-                 this if there are no filter mappings. */
-                def filters = xml.'filter'
-                filter = filters[filters.size() - 1]
-            } else {
-                // Simply add this filter mapping to the end.
-                def filterMappings = xml.'filter-mapping'
-                filter = filterMappings[filterMappings.size() - 1]
-            }
-        }
-
-        // Finally add the Shiro filter mapping after the selected insertion point.
-        filter + {
-            'filter-mapping' {
-                'filter-name'('shiroFilter')
-                'url-pattern'("/*")
-                dispatcher('REQUEST')
-                dispatcher('ERROR')
-            }
-        }
-    }
-
-    def onChange = { event ->
-        if (application.isControllerClass(event.source)) {
+    void onChange( Map<String, Object> event) {
+        log.debug "onChange -> $event"
+        if (grailsApplication.isControllerClass(event.source)) {
             // Get the GrailsClass instance for the controller.
-            def controllerClass = application.getControllerClass(event.source?.name)
+            def controllerClass = grailsApplication.getControllerClass(event.source?.name)
 
             // If no GrailsClass can be found, i.e. 'controllerClass' is null, then this is a new controller.
             if (controllerClass == null) {
-                controllerClass = application.addArtefact(ControllerArtefactHandler.TYPE, event.source)
+                controllerClass = grailsApplication.addArtefact(ControllerArtefactHandler.TYPE, event.source)
             }
 
             // Now update the role and permission information for this controller.
             log.info "Reconfiguring access control for ${controllerClass.shortName}"
             processController(controllerClass, log)
             return
-        } else if (application.isRealmClass(event.source)) {
+        } else if (grailsApplication.isRealmClass(event.source)) {
             log.info "Realm modified!"
 
             def context = event.ctx
             if (!context) {
-                log.debug("Application context not found - can't reload.")
+                log.debug("grailsApplication context not found - can't reload.")
                 return
             }
 
             // Make sure the new realm class is registered.
-            def realmClass = application.addArtefact(RealmArtefactHandler.TYPE, event.source)
+            def realmClass = grailsApplication.addArtefact(RealmArtefactHandler.TYPE, event.source)
 
             // We clone the closure because we're going to change
             // the delegate.
@@ -374,6 +343,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // Create the realm bean.
         "${realmName}Instance"(grailsClass.clazz) { bean ->
             bean.autowire = "byName"
+            bean.dependsOn = "shiroLifecycleBeanPostProcessor"
         }
 
         // Wrap each realm with an adapter that implements the Shiro Realm interface.
@@ -390,10 +360,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
     /**
      * Implementation of the "accessControl()" dynamic method available
-     * to filters. It requires a reference to the filter so that it can
+     * to filters. It requires a reference to the interceptor so that it can
      * access the dynamic properties and methods, such as "request" and
      * "redirect()".
-     * @param filter The filter instance that the "accessControl()"
+     * @param interceptor The interceptor instance that the "accessControl()"
      * method is called from.
      * @param authcRequired Specifies whether the default behaviour is
      * to only allow access if the user is authenticated. If
@@ -405,17 +375,17 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
      * by the authentication requirement. The closure should return
      * <code>true</code> to allow access, or <code>false</code> otherwise.
      */
-    boolean accessControlMethod(application, filter, boolean authcRequired, Map args = [:], Closure c = null) {
+    boolean accessControlMethod(grailsApplication, interceptor, boolean authcRequired, Map args = [:], Closure c = null) {
         // If we're accessing the auth controller itself, we don't
         // want to check whether the user is authenticated, otherwise
         // we end up in an infinite loop of redirects.
-        if (filter.controllerName == "auth") return true
+        if (interceptor.controllerName == "auth") return true
 
-        // Get hold of the filters class instance.
-        def filtersClass = filter.filtersDefinition
+        // Get hold of the interceptors class instance.
+        def interceptorClass = interceptor.class
 
         // ...and the HTTP request.
-        def request = filter.request
+        def request = interceptor.request
 
         // Is an authenticated user required for this URL? If not,
         // then we can do a permission check for remembered users
@@ -427,10 +397,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         def subject = SecurityUtils.subject
         if (subject.principal == null || (authenticatedUserRequired && !subject.authenticated)) {
             // User is not authenticated, so deal with it. First, let
-            // the filters class deal with it.
+            // the interceptors class deal with it.
             boolean doDefault = true
-            if (filtersClass.metaClass.respondsTo(filtersClass, "onNotAuthenticated")) {
-                doDefault = filtersClass.onNotAuthenticated(subject, filter)
+            if (interceptorClass.metaClass.respondsTo(interceptorClass, "onNotAuthenticated")) {
+                doDefault = interceptorClass.onNotAuthenticated(subject, interceptor)
             }
 
             // Continue with the default behaviour of redirecting to
@@ -450,11 +420,11 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     targetUri << query
                 }
 
-                def redirectUri = application.config.security.shiro.redirect.uri
+                def redirectUri = grailsApplication.config.security.shiro.redirect.uri
                 if (redirectUri) {
-                    filter.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
+                    interceptor.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
                 } else {
-                    filter.redirect(
+                    interceptor.redirect(
                             controller: "auth",
                             action: "login",
                             params: [targetUri: targetUri.toString()])
@@ -468,11 +438,11 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         if (c == null) {
             // Check that the user has the required permission for the target controller/action.
             def permString = new StringBuilder()
-            permString << filter.controllerName << ':' << (filter.actionName ?: "index")
+            permString << interceptor.controllerName << ':' << (interceptor.actionName ?: "index")
 
             // Add the ID if it's in the web parameters.
-            if (filter.params.id) {
-                permString << ':' << filter.params.list('id').join(',')
+            if (interceptor.params.id) {
+                permString << ':' << interceptor.params.list('id').join(',')
             }
             
             isPermitted = subject.isPermitted(permString.toString())
@@ -486,11 +456,11 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
         if (!isPermitted) {
             // User does not have the required permission(s)
-            if (filtersClass.metaClass.respondsTo(filtersClass, "onUnauthorized")) {
-                filtersClass.onUnauthorized(subject, filter)
+            if (interceptorClass.metaClass.respondsTo(interceptorClass, "onUnauthorized")) {
+                interceptorClass.onUnauthorized(subject, interceptor)
             } else {
                 // Default behaviour is to redirect to the 'unauthorized' page.
-                filter.redirect(controller: "auth", action: "unauthorized")
+                interceptor.redirect(controller: "auth", action: "unauthorized")
             }
 
             return false

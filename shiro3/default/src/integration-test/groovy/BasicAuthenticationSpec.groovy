@@ -5,17 +5,22 @@ import groovyx.net.http.HttpResponseException
 import org.apache.commons.codec.binary.Base64
 import spock.lang.Specification
 
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
+
 /**
  * Functional tests for the Basic Authentication handling of the plugin
  * (and Shiro). Uses HttpBuilder to send requests to the server and parse
  * the responses.
  */
+@Integration(applicationClass=mydefault.Application)
+@Rollback
 class BasicAuthenticationSpec extends Specification {
     def http = new HTTPBuilder("http://localhost:8080")
 
     def "Test basic authentication response"() {
         when: "I access the basic list page"
-        http.get path: "/default/basic/list"
+        http.get path: "/basic/list"
 
         then: "I get a 401 response"
         HttpResponseException e = thrown()
@@ -25,7 +30,7 @@ class BasicAuthenticationSpec extends Specification {
     def "Test basic authentication with empty password"() {
         when: "I access the basic list page"
         http.request GET, { req ->
-            uri.path = "/default/basic/list" 
+            uri.path = "/basic/list" 
             headers.'Authorization' = createAuthorizationHeader("dilbert", "")
         }
 
@@ -38,7 +43,7 @@ class BasicAuthenticationSpec extends Specification {
     def "Test basic authentication with invalid password"() {
         when: "I access the basic list page"
         http.request GET, { req ->
-            uri.path = "/default/basic/list" 
+            uri.path = "/basic/list" 
             headers.'Authorization' = createAuthorizationHeader("dilbert", "teatimex")
         }
 
@@ -50,7 +55,7 @@ class BasicAuthenticationSpec extends Specification {
 
     def "Test basic authentication with valid password"() {
         when: "I access the basic list page with a valid username and password"
-        def page = http.get(path: "/default/basic/list", headers: [Authorization: createAuthorizationHeader("dilbert", "password")])
+        def page = http.get(path: "/basic/list", headers: [Authorization: createAuthorizationHeader("dilbert", "password")])
 
         then: "it's displayed"
         page.HEAD.TITLE.text() == "Basic List"

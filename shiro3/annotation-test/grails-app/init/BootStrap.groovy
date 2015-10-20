@@ -16,7 +16,7 @@ class BootStrap {
             def userRole = new ShiroRole(name: "User")
             def normalUser = new ShiroUser(username: "dilbert", passwordHash: new Sha256Hash("password").toHex())
             normalUser.addToRoles(userRole)
-            normalUser.addToPermissions("book:view")
+            normalUser.addToPermissions("book2:view")
             normalUser.save()
 
             // Users for the TestController.
@@ -24,7 +24,7 @@ class BootStrap {
             def testUser1 = new ShiroUser(username: "test1", passwordHash: new Sha256Hash("test1").toHex())
             testUser1.addToRoles(testRole)
             testUser1.addToPermissions("custom:read,write")
-            testUser1.addToPermissions("book:*")
+            testUser1.addToPermissions("book2:*")
             testUser1.save()
 
             // Some initial books that we can test against.

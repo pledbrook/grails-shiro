@@ -1,10 +1,15 @@
+import annotation.test.Application
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Cookie
 import pages.*
+import spock.lang.Unroll
+import grails.test.mixin.integration.Integration
 
+@Integration(applicationClass=Application)
 class ServiceAnnotationSpec extends GebReportingSpec {
 
-    def "When not logged in service method annotations return expected results"() {
+    @Unroll
+    def "When not logged in service method annotations return [#value] for #theUrl @#select"() {
         when:
         go theUrl
 
@@ -24,7 +29,8 @@ class ServiceAnnotationSpec extends GebReportingSpec {
         'test/user'       | 'title' | 'Login'
     }
 
-    def "When logged in as user service method annotations return expected results"() {
+    @Unroll
+    def "When logged in as #user/#password service method annotations returns [#value] for #theUrl @#select"() {
         given:
         go 'auth/signOut'
 

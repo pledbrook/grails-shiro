@@ -1,9 +1,13 @@
-import geb.spock.GebReportingSpec
+import geb.spock.GebSpec
 import pages.BookListPage
 import pages.HomePage
 import pages.LoginPage
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 
-class MainFunctionalSpec extends GebReportingSpec {
+@Integration(applicationClass=wildcard.realm.Application)
+@Rollback
+class MainFunctionalSpec extends GebSpec {
     def "Test login page"() {
         when:
         to LoginPage

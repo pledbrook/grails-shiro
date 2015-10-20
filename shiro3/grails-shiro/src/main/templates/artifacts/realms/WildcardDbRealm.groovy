@@ -11,7 +11,7 @@ class ${realmName} {
     def shiroPermissionResolver
 
     def authenticate(authToken) {
-        log.info "Attempting to authenticate ${authToken.username} in DB realm..."
+        log.info "Attempting to authenticate \${authToken.username} in DB realm..."
         def username = authToken.username
 
         // Null username is invalid
@@ -24,17 +24,17 @@ class ${realmName} {
         // exception.
         def user = ${domainPrefix}User.findByUsername(username)
         if (!user) {
-            throw new UnknownAccountException("No account found for user [${username}]")
+            throw new UnknownAccountException("No account found for user [\${username}]")
         }
 
-        log.info "Found user '${user.username}' in DB"
+        log.info "Found user \${user.username} in DB"
 
         // Now check the user's password against the hashed value stored
         // in the database.
         def account = new SimpleAccount(username, user.passwordHash, "${realmName}")
         if (!credentialMatcher.doCredentialsMatch(authToken, account)) {
             log.info "Invalid password (DB realm)"
-            throw new IncorrectCredentialsException("Invalid password for user '${username}'")
+            throw new IncorrectCredentialsException("Invalid password for user \${username}")
         }
 
         return account
@@ -97,7 +97,12 @@ class ${realmName} {
         // If not, does he gain it through a role?
         //
         // Get the permissions from the roles that the user does have.
-        def results = ${domainPrefix}User.executeQuery("select distinct p from ${domainPrefix}User as user join user.roles as role join role.permissions as p where user.username = '$principal'")
+        def results = ${domainPrefix}User.executeQuery("""
+            select distinct p from ${domainPrefix}User as user 
+            join user.roles as role 
+            join role.permissions as p 
+            where user.username = :principal""",[principal:principal]
+        )
 
         // There may be some duplicate entries in the results, but
         // at this stage it is not worth trying to remove them. Now,

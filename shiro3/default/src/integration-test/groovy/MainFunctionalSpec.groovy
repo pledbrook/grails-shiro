@@ -1,6 +1,13 @@
 import geb.spock.GebReportingSpec
 import pages.*
+import spock.lang.Stepwise
 
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
+
+@Integration(applicationClass=mydefault.Application)
+@Rollback
+//@Stepwise
 class MainFunctionalSpec extends GebReportingSpec {
     def "Test login page"() {
         when:

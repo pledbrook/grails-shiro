@@ -1,8 +1,28 @@
-language: groovy
+env:
+  global:
+  - TERM=dumb
+  - GRAILS_HOME=/home/travis/.sdkman/grails/current/
 jdk:
-- oraclejdk7
-- oraclejdk8
-before_script:
-- rm -rf build
-- chmod +x ./travis-build.sh
-script: ./travis-build.sh
+  - oraclejdk7
+  - oraclejdk8
+before_cache:
+  - find ~/.gradle/caches/ -type f -name "*.lock" -delete
+cache:
+  directories:
+    - ~/.gradle/caches/
+    - ~/.gradle/wrapper/
+    - ~/.sdkman/
+before_install:
+  - rm -rf ~/.sdkman
+  - curl -s get.sdkman.io > ~/install_sdkman.sh
+  - chmod 775 ~/install_sdkman.sh
+  - "~/install_sdkman.sh"
+  - echo "sdkman_auto_answer=true" > ~/.sdkman/etc/config
+  - source ~/.sdkman/bin/sdkman-init.sh
+  - GRAILS_VERSION=`grep '^\s*grailsVersion' ./shiro3/grails-shiro/gradle.properties | sed -e 's/^grailsVersion=//g' | tr -d "\r"`
+  - echo "GRAILS_VERSION:$GRAILS_VERSION"
+  - sdk install grails $GRAILS_VERSION || true
+  - cd ./shiro3
+  - chmod +x ./gradlew
+script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest :annotation-test:integrationTest -i | grep -v "Gradle compiler daemon" | grep -v "^Tasks to be executed:" | grep -v "^Resolved versions" | grep -v "^Applying dependency management to configuration" | grep -v "^Using version" | grep -v "^Downloading"; exit `echo "${PIPESTATUS[0]}"`
+

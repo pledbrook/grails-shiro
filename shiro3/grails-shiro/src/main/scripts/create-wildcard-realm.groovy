@@ -20,27 +20,7 @@
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
 
-
-	def parsePrefix= {
-	    def prefix = "Shiro"
-	    def pkg = ""
-	    if (argsMap["prefix"] != null) {
-	        def givenValue = argsMap["prefix"].split(/\./, -1)
-	        prefix = givenValue[-1]
-	        pkg = givenValue.size() > 1 ? givenValue[0..-2].join('.') : ""
-	    }
-
-	    return [ pkg, prefix ]
-	}
-
-	/**
-	 * Converts a package name (with '.' separators) to a file path (with
-	 * '/' separators). If the package is <tt>null</tt>, this returns an
-	 * empty string.
-	 */
-	def packageToPath = {String pkg->
-	    return pkg ? '/' + pkg.replace('.' as char, '/' as char) : ''
-	}
+import static org.apache.shiro.grails.ShiroCodeGenUtils.*
 
 description("""Creates a new database realm from a template that only works with
 	wildcard permissions. Other types of permission are not supported.
@@ -55,7 +35,7 @@ description("""Creates a new database realm from a template that only works with
  * Creates a new database realm from a template that only works with
  * wildcard permissions. Other types of permission are not supported.
  */
-def (pkg, prefix) = parsePrefix()
+def (pkg, prefix) = parsePrefix(argsMap)
 
 // First create the domain objects: ShiroUser, ShiroRole, etc.
 def domainClasses = [ 'User', 'Role' ]
@@ -67,7 +47,7 @@ domainClasses.each { domainClass ->
 	def m = [:]
 	m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 	m['domainPrefix'] = prefix
-	render  template:"artifacts/domain/Shiro${domainClass}.groovy",
+	render  template:"artifacts/domain/Wildcard${domainClass}.groovy",
 	        destination: file("${artefactPath}/${packageToPath(pkg)}/${prefix}${domainClass}.groovy"),
 	        model:m
 }
@@ -78,7 +58,7 @@ def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['realmName'] = className
 m['domainPrefix'] = prefix
-render  template:"artifacts/realms/ShiroDbRealm.groovy",
+render  template:"artifacts/realms/WildcardDbRealm.groovy",
         destination: file("grails-app/realms/${packageToPath(pkg)}/${className}.groovy"),
         model:m
  
