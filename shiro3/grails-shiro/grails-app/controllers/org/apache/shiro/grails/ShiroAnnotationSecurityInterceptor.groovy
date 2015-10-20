@@ -24,7 +24,8 @@ package org.apache.shiro.grails
 import org.apache.shiro.authz.AuthorizationException
 import org.apache.shiro.authz.UnauthenticatedException
 import org.springframework.web.util.WebUtils
-
+import org.grails.web.util.GrailsApplicationAttributes
+import org.apache.shiro.SecurityUtils
 /**
  * <p>A Grails interceptor that implements the same functionality as the old
  * JsecAuthBase abstract controller. It uses the role and permission
@@ -34,7 +35,7 @@ import org.springframework.web.util.WebUtils
  * <p>The role and permission maps are populated via the 'accessControl'
  * property on controllers or via annotations.</p>
  */
-class ShiroAnnotationSecurityInterceptor implements grails.artefact.Interceptor {
+class ShiroAnnotationSecurityInterceptor {
     def shiroAnnotationHandlerService
     ShiroAnnotationSecurityInterceptor(){
         matchAll()
@@ -47,50 +48,22 @@ class ShiroAnnotationSecurityInterceptor implements grails.artefact.Interceptor 
                 handlers.each { h -> h.invoke() }
                 return true
             }
-            catch (UnauthenticatedException ex) {
-                redirect(
-                        controller: 'auth',
-                        action: 'login',
-                        params: [ targetUri: request.forwardURI - request.contextPath ])
-                return false
-            }
             catch (AuthorizationException ex) {
-                redirect(controller: 'auth', action: 'unauthorized')
+                if (!request.getAttribute(GrailsApplicationAttributes.REDIRECT_ISSUED)) {
+                    if (SecurityUtils.subject?.isAuthenticated()) {
+                        redirect(controller: 'auth', action: 'unauthorized')
+                    } else {
+                        redirect(controller: 'auth', action: 'login',
+                            params: [targetUri: request.forwardURI - request.contextPath])
+                    }
+                } else {
+                    log.warn("Request already redirected!!!")
+                }
                 return false
             }
+        } else {
+            return true
         }
     }
     
-    // Methods with Shiro @Requires* annotations throw AuthorizationExceptions,
-    // so rather than force the user to catch them himself, we deal with them
-    // in an 'afterView' interceptor.
-    void afterView() {
-        def e  = throwable
-        if (grailsApplication.config.security.shiro.annotationdriven.enabled) {
-            while (e && !(e instanceof AuthorizationException)) {
-                e = e.cause
-            }
-
-            // Redirect to the 'unauthorized' page if the cause was an
-            // AuthorizationException.
-            if (e instanceof AuthorizationException) {
-                if (e instanceof UnauthenticatedException) {
-                    // User is not authenticated, so redirect to the login page.
-                    redirect(
-                            controller: 'auth',
-                            action: 'login',
-                            params: [ targetUri: request.forwardURI - request.contextPath ])
-                }
-                else {
-                    redirect(controller: 'auth', action: 'unauthorized')
-                }
-
-                // HACK! Even with the redirect, Tomcat will execute
-                // the error dispatcher unless we remove all the
-                // javax.servlet.error.* attributes from the request.
-                //todo is this still the case, or just for old versions??
-                WebUtils.clearErrorRequestAttributes(request)
-            }
-        }
-    }
 }

@@ -1,10 +1,16 @@
+import annotation.test.Application
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Cookie
 import pages.LoginPage
+import spock.lang.Unroll
 
+import grails.test.mixin.integration.Integration
+
+@Integration(applicationClass=Application)
 class ControllerAnnotationSpec extends GebReportingSpec {
 
-    def "RequiresAuthentication on controller class works on every action"() {
+    @Unroll
+    def "RequiresAuthentication on controller class works on every action #theUrl"() {
         given:
         go 'auth/signOut'
 
@@ -16,17 +22,18 @@ class ControllerAnnotationSpec extends GebReportingSpec {
 
         where:
         theUrl        | val
-        'book/index'  | ''
-        'book/list'   | ''
-        'book/create' | ''
-        'book/save'   | ''
-        'book/show'   | ''
-        'book/edit'   | ''
-        'book/update' | ''
-        'book/delete' | ''
+        'book2/index'  | ''
+        'book2/list'   | ''
+        'book2/create' | ''
+        'book2/save'   | ''
+        'book2/show'   | ''
+        'book2/edit'   | ''
+        'book2/update' | ''
+        'book2/delete' | ''
     }
 
-    def "Only a user with correct Roles can access controller methods"() {
+    @Unroll
+    def "User #user/#password with correct Roles has [#val] for url: #theUrl @#select"() {
         given:
         go 'auth/signOut'
 
@@ -47,32 +54,32 @@ class ControllerAnnotationSpec extends GebReportingSpec {
 
         where:
         user      | password   | theUrl        | val
-        'admin'   | 'admin'    | 'book/index'  | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/list'   | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/create' | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/save'   | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/show'   | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/edit'   | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/update' | 'You do not have permission to access this page.'
-        'admin'   | 'admin'    | 'book/delete' | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/index'  | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/list'   | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/create' | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/save'   | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/show'   | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/edit'   | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/update' | 'You do not have permission to access this page.'
+        'admin'   | 'admin'    | 'book2/delete' | 'You do not have permission to access this page.'
 
-        'test1'   | 'test1'    | 'book/index'  | 'list'
-        'test1'   | 'test1'    | 'book/list'   | 'list'
-        'test1'   | 'test1'    | 'book/create' | 'create'
-        'test1'   | 'test1'    | 'book/save'   | 'save'
-        'test1'   | 'test1'    | 'book/show'   | 'show'
-        'test1'   | 'test1'    | 'book/edit'   | 'edit'
-        'test1'   | 'test1'    | 'book/update' | 'update'
-        'test1'   | 'test1'    | 'book/delete' | 'delete'
+        'test1'   | 'test1'    | 'book2/index'  | 'list'
+        'test1'   | 'test1'    | 'book2/list'   | 'list'
+        'test1'   | 'test1'    | 'book2/create' | 'create'
+        'test1'   | 'test1'    | 'book2/save'   | 'save'
+        'test1'   | 'test1'    | 'book2/show'   | 'show'
+        'test1'   | 'test1'    | 'book2/edit'   | 'edit'
+        'test1'   | 'test1'    | 'book2/update' | 'update'
+        'test1'   | 'test1'    | 'book2/delete' | 'delete'
 
-        'dilbert' | 'password' | 'book/index'  | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/list'   | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/create' | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/save'   | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/show'   | 'show'
-        'dilbert' | 'password' | 'book/edit'   | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/update' | 'You do not have permission to access this page.'
-        'dilbert' | 'password' | 'book/delete' | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/index'  | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/list'   | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/create' | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/save'   | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/show'   | 'show'
+        'dilbert' | 'password' | 'book2/edit'   | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/update' | 'You do not have permission to access this page.'
+        'dilbert' | 'password' | 'book2/delete' | 'You do not have permission to access this page.'
 
     }
 }

@@ -24,5 +24,5 @@ before_install:
   - sdk install grails $GRAILS_VERSION || true
   - cd ./shiro3
   - chmod +x ./gradlew
-script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest -i | grep -v "Gradle compiler daemon" | grep -v "^Tasks to be executed:" | grep -v "^Resolved versions" | grep -v "^Applying dependency management to configuration" | grep -v "^Using version" | grep -v "^Downloading"; exit `echo "${PIPESTATUS[0]}"`
+script: ./gradlew clean :grails-shiro:test :cli-tests:test :wildcard-realm:integrationTest :annotation-test:integrationTest -i | grep -v "Gradle compiler daemon" | grep -v "^Tasks to be executed:" | grep -v "^Resolved versions" | grep -v "^Applying dependency management to configuration" | grep -v "^Using version" | grep -v "^Downloading"; exit `echo "${PIPESTATUS[0]}"`
 

@@ -11,7 +11,18 @@
             <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
         </div>	
         <div class="logo"><img src="${createLinkTo(dir:'images',file:'grails_logo.jpg')}" alt="Grails" /></div>	
-        <shiro:user>Welcome back <shiro:principal/>!</shiro:user>
+        <shiro:user>Welcome back <shiro:principal/><%
+        def principal = org.apache.shiro.SecurityUtils.subject.principal
+                def criteria = ShiroUserPermissionRel.createCriteria()
+        %> <%=criteria.list {
+            user {
+                eq('username', principal)
+            }
+        }.collect{p->
+                "[${p.target} , ${p.actions}, ${p.permission.type}, ${p.permission.possibleActions}]"
+            }
+
+        %>!</shiro:user>
         <g:layoutBody />		
     </body>	
 </html>

@@ -29,6 +29,7 @@ import org.codehaus.groovy.ast.ClassNode
 import static org.grails.io.support.GrailsResourceUtils.GRAILS_APP_DIR
 import static org.grails.io.support.GrailsResourceUtils.REGEX_FILE_SEPARATOR
 
+@SuppressWarnings("unchecked")
 class RealmArtefactHandler extends ArtefactHandlerAdapter {
     public static final String TYPE = "Realm"
     public static Pattern REALM_PATH_PATTERN = 

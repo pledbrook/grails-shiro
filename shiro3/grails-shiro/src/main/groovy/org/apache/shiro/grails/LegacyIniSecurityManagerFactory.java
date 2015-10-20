@@ -5,6 +5,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
 import org.springframework.context.ApplicationContext;
 
+
 /**
  * Custom security manager factory that fetches the security manager
  * from a given application context rather than creating a new instance.

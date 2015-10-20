@@ -1,6 +1,6 @@
 package annotation.test
 
-class Book {
+class Book2 {
 
     String title
     String author

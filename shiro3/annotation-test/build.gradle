@@ -71,8 +71,11 @@ dependencies {
     testRuntime 'org.seleniumhq.selenium:selenium-htmlunit-driver:2.44.0'
 
     console "org.grails:grails-console"
+
+    compile project(":grails-shiro")
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
+//task test(dependsOn:integrationTest,overwrite:true,type:Test)

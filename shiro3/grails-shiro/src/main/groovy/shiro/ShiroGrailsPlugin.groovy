@@ -23,34 +23,43 @@ import grails.plugins.*
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
+
 import grails.artefact.Interceptor
+import grails.util.GrailsClassUtils
 import javax.servlet.Filter
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
 import org.apache.shiro.authc.credential.PasswordHashAdapter
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator
+import org.apache.shiro.authz.AuthorizationException
+import org.apache.shiro.authz.UnauthenticatedException
 import org.apache.shiro.authz.permission.WildcardPermissionResolver
+import org.apache.shiro.config.Ini
 import org.apache.shiro.grails.*
 import org.apache.shiro.grails.annotations.PermissionRequired
 import org.apache.shiro.grails.annotations.RoleRequired
 import org.apache.shiro.realm.Realm
-import org.apache.shiro.SecurityUtils
 import org.apache.shiro.session.mgt.SessionManager
 import org.apache.shiro.spring.LifecycleBeanPostProcessor
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
+import org.apache.shiro.web.config.WebIniSecurityManagerFactory
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.apache.shiro.web.mgt.CookieRememberMeManager
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.grails.core.artefact.ControllerArtefactHandler
+import org.grails.spring.DefaultBeanConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean
+import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.boot.context.embedded.FilterRegistrationBean
 import org.springframework.core.Ordered
 import org.springframework.web.filter.DelegatingFilterProxy
+import org.springframework.web.util.WebUtils
 import static javax.servlet.DispatcherType.*
 
 class ShiroGrailsPlugin extends Plugin {
@@ -158,6 +167,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             authenticator = ref("shiroAuthenticator")
             rememberMeManager = ref("shiroRememberMeManager")
         }
+       //Alias
    //      shiroAnnotationSecurityInterceptor(ShiroAnnotationSecurityInterceptor)
 
         // If the legacy 'shiro.filter.config' setting has a value, then
@@ -188,17 +198,44 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     filters = [authcBasic: ref("authcBasicFilter")]
                 }
             }
-            //New in Grails 3.0.x
-            //instead of web.xml configuration
-            log.debug('Filter definition via FilterRegistrationBean')
-            servletShiroFilter(FilterRegistrationBean) {
-                filter = ref('shiroFilter')
-                urlPatterns = ['/*']
-                dispatcherTypes = EnumSet.of(REQUEST,ERROR)
-                //order = Ordered.HIGHEST_PRECEDENCE
-            }
-        }
+        } else {
+            println "Using legacy configuration..."
+            log.warn "security.shiro.filter.config option is deprecated. Use Grails' bean property override mechanism instead."
+            def iniConfig = new Ini()
+            iniConfig.load(securityConfig.filter.config)
+            shiroSecurityManagerFactory(LegacyIniSecurityManagerFactory,applicationContext,"shiroSecurityManager",iniConfig)
+            // Create the main security filter.
+            shiroFilter(ShiroFilterFactoryBean) { bean ->
+                securityManager = ref("shiroSecurityManager")
 
+                loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
+                unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
+
+                if (securityConfig.filter.filterChainDefinitions) {
+                    filterChainDefinitions = securityConfig.filter.filterChainDefinitions
+                }
+
+                if (securityConfig.filter.basicAppName) {
+                    filters = [authcBasic: ref("authcBasicFilter")]
+                }
+            }
+/*            shiroFilter(ShiroFilterFactoryBean){
+                securityManager = {bean->
+                    bean.factoryMethod = "getInstance"
+                    bean.factoryBean = "shiroSecurityManagerFactory"
+                }
+            }
+*/
+        }
+        //New in Grails 3.0.x
+        //instead of web.xml configuration
+        log.debug('Filter definition via FilterRegistrationBean')
+        servletShiroFilter(FilterRegistrationBean) {
+            filter = ref('shiroFilter')
+            urlPatterns = ['/*']
+            dispatcherTypes = EnumSet.of(REQUEST,ERROR)
+            //order = Ordered.HIGHEST_PRECEDENCE
+        }
         println '\nShiro Configured'
     }}
 
@@ -267,7 +304,8 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
     }
 
     void onChange( Map<String, Object> event) {
-            if (grailsApplication.isControllerClass(event.source)) {
+        log.debug "onChange -> $event"
+        if (grailsApplication.isControllerClass(event.source)) {
             // Get the GrailsClass instance for the controller.
             def controllerClass = grailsApplication.getControllerClass(event.source?.name)
 
@@ -322,10 +360,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
     /**
      * Implementation of the "accessControl()" dynamic method available
-     * to filters. It requires a reference to the filter so that it can
+     * to filters. It requires a reference to the interceptor so that it can
      * access the dynamic properties and methods, such as "request" and
      * "redirect()".
-     * @param filter The filter instance that the "accessControl()"
+     * @param interceptor The interceptor instance that the "accessControl()"
      * method is called from.
      * @param authcRequired Specifies whether the default behaviour is
      * to only allow access if the user is authenticated. If

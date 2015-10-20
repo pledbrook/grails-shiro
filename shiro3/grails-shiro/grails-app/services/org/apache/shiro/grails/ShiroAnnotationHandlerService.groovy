@@ -59,16 +59,18 @@ class ShiroAnnotationHandlerService implements InitializingBean {
                 authzClassHandler = [ ann, authzHandlers[annClass] ]
             }
         }
-
         // Next, we go through the controller's fields
-        clazz.declaredFields.each { field ->
-            // At the start, this field uses the class annotation handlers.
+        (clazz.declaredMethods+clazz.declaredFields).findAll{
+            //Only fields and methods that are controller actions
+            it.name in controllerClass.actions
+        }.each { fieldOrMethod ->
+            // At the start, this fieldOrMethod uses the class annotation handlers.
             def authcHandler = authcClassHandler
             def authzHandler = authzClassHandler
 
-            // Go through the field's annotations and check whether any are
+            // Go through the fieldOrMethod's annotations and check whether any are
             // Shiro requirements.
-            field.declaredAnnotations.each { ann ->
+            fieldOrMethod.declaredAnnotations.each { ann ->
                 def annClass = ann.annotationType()
                 if (annClass in authcAnnotations) {
                     authcHandler = [ ann, authcHandlers[annClass] ]
@@ -80,7 +82,7 @@ class ShiroAnnotationHandlerService implements InitializingBean {
 
             // Create combined annotations + handlers where required and add
             // them to the handler map.
-            def handlerKey = controllerClass.logicalPropertyName + ":" + field.name
+            def handlerKey = controllerClass.logicalPropertyName + ":" + fieldOrMethod.name
             handlerMap[handlerKey] = []
 
             if (authcHandler) {

@@ -28,7 +28,15 @@ apply plugin: "org.grails.grails-gsp"
 // Used for publishing to central repository, remove if not needed
 //apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
 apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
-
+idea {
+    module {
+        name = "Shiro Plugin"
+        //if you love browsing Javadoc
+        downloadJavadoc = true
+        //and don't hate reading sources :)
+        downloadSources = true
+    }
+}
 ext {
     grailsVersion = project.grailsVersion
     gradleWrapperVersion = project.gradleWrapperVersion
@@ -133,4 +141,3 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
-

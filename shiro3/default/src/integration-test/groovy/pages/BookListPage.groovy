@@ -3,7 +3,7 @@ package pages
 import geb.Page
 
 class BookListPage extends Page {
-    static url = "books"
+    static url = "http://localhost:8080/books"
 
     static at = {
         assert title == "Book List"

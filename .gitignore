@@ -4,11 +4,13 @@ build/
 eclipse/
 plugin.xml
 target/
+classes/
 test/reports/
 work/
 /web-app/
 grails-shiro*.zip
 *.iml
 .idea/**
+.idea/
 *.log
 grails-app/conf/UrlMappings.groovy
