@@ -1,20 +1,20 @@
 /**
  * This was part of the former SecurityFilters which was split into many interceptors.
  */
-class ItemsInterceptor {
+class BookViewingInterceptor {
 
     //customize me
     int order = HIGHEST_PRECEDENCE + 200
 
-    ItemsInterceptor(){
-        match(controller: "itemSecured", action: "*")
+    BookViewingInterceptor(){
+        match(controller: "book", action: "(list|show)")
     }
     boolean after() { 
           true
     }
     boolean before() {
         accessControl {
-            role("Administrator")
+            permission("book:view")
         }
     }
 }

@@ -39,13 +39,13 @@ if(Environment.current == Environment.DEVELOPMENT) {
 logger 'grails.artefact.Interceptor', DEBUG, ['STDOUT','DEVLOG'], false
 logger 'grails.artefact.Filter', DEBUG, ['STDOUT','DEVLOG'], false
 logger 'grails.artefact.Realm', DEBUG, ['STDOUT','DEVLOG'], false
-logger 'shiro',DEBUG, ['STDOUT','DEVLOG'] 
-logger 'shiro3',DEBUG, ['STDOUT','DEVLOG'] 
-logger 'org.apache.shiro',DEBUG, ['STDOUT','DEVLOG'] 
-logger 'grails.app.realms', DEBUG, ['STDOUT','DEVLOG']
-logger 'grails.app.taglibs', DEBUG, ['STDOUT','DEVLOG']
-logger 'grails.app.interceptors', DEBUG, ['STDOUT','DEVLOG']
-logger 'grails.app.controllers', DEBUG, ['STDOUT','DEVLOG']
-logger 'grails.app.services', DEBUG, ['STDOUT','DEVLOG']
+logger 'shiro',DEBUG, ['STDOUT','DEVLOG'], false 
+logger 'shiro3',DEBUG, ['STDOUT','DEVLOG'], false 
+logger 'org.apache.shiro',DEBUG, ['STDOUT','DEVLOG'], false 
+logger 'grails.app.realms', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.app.taglibs', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.app.interceptors', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.app.controllers', DEBUG, ['STDOUT','DEVLOG'], false
+logger 'grails.app.services', DEBUG, ['STDOUT','DEVLOG'], false
 }
 
