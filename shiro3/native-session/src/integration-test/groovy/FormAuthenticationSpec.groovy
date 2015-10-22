@@ -2,7 +2,10 @@ import geb.spock.GebReportingSpec
 import groovyx.net.http.HTTPBuilder
 import pages.*
 import spock.lang.Specification
+import nativesession.Application
+import grails.test.mixin.integration.Integration
 
+@Integration(applicationClass=Application)
 class FormAuthenticationSpec extends GebReportingSpec {
     def "Test form page requires authentication"() {
         when: "I access the form list page"
@@ -63,13 +66,13 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with query parameters"() {
         given:
-        def http = new HTTPBuilder("http://localhost:8080")
-        http.post path: "/native-session/auth/signIn", body: [username: "dilbert", password: "password"]
-        http.post path: "/native-session/form/save", body: [name: "One"]
-        http.post path: "/native-session/form/save", body: [name: "Two"]
-        http.post path: "/native-session/form/save", body: [name: "Three"]
-        http.post path: "/native-session/form/save", body: [name: "Four"]
-        http.post path: "/native-session/form/save", body: [name: "Five"]
+        def http = new HTTPBuilder("http://localhost:8080/")
+        http.post path: "/auth/signIn", body: [username: "dilbert", password: "password"]
+        http.post path: "/form/save", body: [name: "One"]
+        http.post path: "/form/save", body: [name: "Two"]
+        http.post path: "/form/save", body: [name: "Three"]
+        http.post path: "/form/save", body: [name: "Four"]
+        http.post path: "/form/save", body: [name: "Five"]
         go "auth/signOut"
 
         when: "I go to the form list page with some query parameters and log in"

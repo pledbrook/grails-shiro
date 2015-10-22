@@ -14,7 +14,7 @@ class BooksInterceptor {
     }
     boolean before() {
         accessControl {
-            permission("book:$actionName")
+            role("Administrator")
         }
     }
 }

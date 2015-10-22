@@ -16,7 +16,7 @@ import grails.transaction.Rollback
 @Integration(applicationClass=mydefault.Application)
 @Rollback
 class BasicAuthenticationSpec extends Specification {
-    def http = new HTTPBuilder("http://localhost:8080")
+    def http = new HTTPBuilder("http://localhost:8080/")
 
     def "Test basic authentication response"() {
         when: "I access the basic list page"

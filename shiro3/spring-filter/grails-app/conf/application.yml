@@ -110,3 +110,13 @@ environments:
                 testOnReturn: false
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+security:
+    shiro:
+        filter:
+            basicAppName: "Shiro Plugin Test"
+            loginUrl: "/login"
+            successUrl: "/"
+            unauthorizedUrl: "/unauthorized"
+            filterChainDefinitions: |
+                                    /basic/** = authcBasic
+                                    /form/** = authc

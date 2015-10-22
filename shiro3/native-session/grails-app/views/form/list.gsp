@@ -39,7 +39,7 @@
 				</tbody>
 			</table>
 			<div class="pagination">
-				<g:paginate total="${formInstanceTotal}" />
+				<g:paginate total="${formCount}" />
 			</div>
 		</div>
 	</body>

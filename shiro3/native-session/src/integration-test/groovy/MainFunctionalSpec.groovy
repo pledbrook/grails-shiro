@@ -1,6 +1,10 @@
 import geb.spock.GebReportingSpec
 import pages.*
 
+import nativesession.Application
+import grails.test.mixin.integration.Integration
+
+@Integration(applicationClass=Application)
 class MainFunctionalSpec extends GebReportingSpec {
     def "Test login page"() {
         when:

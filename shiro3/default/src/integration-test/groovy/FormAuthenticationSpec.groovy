@@ -68,7 +68,7 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with query parameters"() {
         given:
-        def http = new HTTPBuilder("http://localhost:8080")
+        def http = new HTTPBuilder("http://localhost:8080/")
         http.post path: "/auth/signIn", body: [username: "dilbert", password: "password"]
         http.post path: "/form/save", body: [name: "One"]
         http.post path: "/form/save", body: [name: "Two"]

@@ -7,14 +7,12 @@ class AuthInterceptor {
     int order = HIGHEST_PRECEDENCE + 200
 
     AuthInterceptor(){
-        match(controller: /\b(?!(item|book)\b)\w+/, action: "*")
+        match(controller: /\b(?!(item|book|basic|form)\b)\w+/, action: "*")
     }
     boolean after() { 
           true
     }
     boolean before() {
-        accessControl(auth: true) {
-            true
-        }
+        accessControl(auth: true) { true }
     }
 }
