@@ -1,20 +1,20 @@
 /**
  * This was part of the former SecurityFilters which was split into many interceptors.
  */
-class WildcardsInterceptor {
+class BookEditingInterceptor {
 
     //customize me
     int order = HIGHEST_PRECEDENCE + 200
 
-    WildcardsInterceptor(){
-        match(controller: "wildcard", action: "*")
+    BookEditingInterceptor(){
+        match(controller: "book", action: "(create|edit|save|update|delete)")
     }
     boolean after() { 
           true
     }
     boolean before() {
         accessControl {
-            permission("w:$actionName")
+            role("Administrator")
         }
     }
 }

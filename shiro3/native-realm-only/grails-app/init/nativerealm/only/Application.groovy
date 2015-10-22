@@ -1,4 +1,4 @@
-package native.session
+package nativerealm.only
 
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration

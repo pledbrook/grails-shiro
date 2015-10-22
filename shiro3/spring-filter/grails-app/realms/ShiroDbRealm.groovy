@@ -3,7 +3,9 @@ import org.apache.shiro.authc.IncorrectCredentialsException
 import org.apache.shiro.authc.UnknownAccountException
 import org.apache.shiro.authc.SimpleAccount
 import org.apache.shiro.authz.permission.WildcardPermission
+import grails.transaction.Transactional
 
+@Transactional(readOnly = true)
 class ShiroDbRealm {
     static authTokenClass = org.apache.shiro.authc.UsernamePasswordToken
 
@@ -63,6 +65,7 @@ class ShiroDbRealm {
     }
 
     def isPermitted(principal, requiredPermission) {
+        log.info ">>>>>isPermitted($principal, $requiredPermission)"
         // Does the user have the given permission directly associated
         // with himself?
         //
@@ -98,7 +101,7 @@ class ShiroDbRealm {
         //
         // Get the permissions from the roles that the user does have.
         def results = ShiroUser.executeQuery("select distinct p from ShiroUser as user join user.roles as role join role.permissions as p where user.username = '$principal'")
-
+        log.info  results
         // There may be some duplicate entries in the results, but
         // at this stage it is not worth trying to remove them. Now,
         // create a real permission from each result and check it

@@ -1,100 +1,100 @@
-import org.springframework.dao.DataIntegrityViolationException
+import static org.springframework.http.HttpStatus.*
+import grails.transaction.Transactional
 
+@Transactional(readOnly = true)
 class FormController {
 
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-
-    def index() {
-        redirect(action: "list", params: params)
-    }
+    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        [formInstanceList: Form.list(params), formInstanceTotal: Form.count()]
+        respond Form.list(params), model:[formCount: Form.count()]
+    }
+
+    def show(Form form) {
+        respond form
     }
 
     def create() {
-        [formInstance: new Form(params)]
+        respond new Form(params)
     }
 
-    def save() {
-        def formInstance = new Form(params)
-        if (!formInstance.save(flush: true)) {
-            render(view: "create", model: [formInstance: formInstance])
+    @Transactional
+    def save(Form form) {
+        if (form == null) {
+            transactionStatus.setRollbackOnly()
+            notFound()
             return
         }
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'form.label', default: 'Form'), formInstance.id])
-        redirect(action: "show", id: formInstance.id)
-    }
-
-    def show(Long id) {
-        def formInstance = Form.get(id)
-        if (!formInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "list")
+        if (form.hasErrors()) {
+            transactionStatus.setRollbackOnly()
+            respond form.errors, view:'create'
             return
         }
 
-        [formInstance: formInstance]
+        form.save flush:true
+
+        flash.message = message(code: 'default.created.message', args: [message(code: 'form.label', default: 'Form'), form.id])
+        redirect form
     }
 
-    def edit(Long id) {
-        def formInstance = Form.get(id)
-        if (!formInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "list")
+    def edit(Form form) {
+        respond form
+    }
+
+    @Transactional
+    def update(Form form) {
+        if (form == null) {
+            transactionStatus.setRollbackOnly()
+            notFound()
             return
         }
 
-        [formInstance: formInstance]
-    }
-
-    def update(Long id, Long version) {
-        def formInstance = Form.get(id)
-        if (!formInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "list")
+        if (form.hasErrors()) {
+            transactionStatus.setRollbackOnly()
+            respond form.errors, view:'edit'
             return
         }
 
-        if (version != null) {
-            if (formInstance.version > version) {
-                formInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
-                          [message(code: 'form.label', default: 'Form')] as Object[],
-                          "Another user has updated this Form while you were editing")
-                render(view: "edit", model: [formInstance: formInstance])
-                return
+        form.save flush:true
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.updated.message', args: [message(code: 'form.label', default: 'Form'), form.id])
+                redirect form
             }
+            '*'{ respond form, [status: OK] }
         }
-
-        formInstance.properties = params
-
-        if (!formInstance.save(flush: true)) {
-            render(view: "edit", model: [formInstance: formInstance])
-            return
-        }
-
-        flash.message = message(code: 'default.updated.message', args: [message(code: 'form.label', default: 'Form'), formInstance.id])
-        redirect(action: "show", id: formInstance.id)
     }
 
-    def delete(Long id) {
-        def formInstance = Form.get(id)
-        if (!formInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "list")
+    @Transactional
+    def delete(Form form) {
+
+        if (form == null) {
+            transactionStatus.setRollbackOnly()
+            notFound()
             return
         }
 
-        try {
-            formInstance.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "list")
+        form.delete flush:true
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.deleted.message', args: [message(code: 'form.label', default: 'Form'), form.id])
+                redirect action:"index", method:"GET"
+            }
+            '*'{ render status: NO_CONTENT }
         }
-        catch (DataIntegrityViolationException e) {
-            flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'form.label', default: 'Form'), id])
-            redirect(action: "show", id: id)
+    }
+
+    protected void notFound() {
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'form.label', default: 'Form'), params.id])
+                redirect action: "index", method: "GET"
+            }
+            '*'{ render status: NOT_FOUND }
         }
     }
 }

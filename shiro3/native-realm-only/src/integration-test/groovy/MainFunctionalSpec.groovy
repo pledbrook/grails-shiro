@@ -1,7 +1,10 @@
+import nativerealm.only.Application
 import geb.spock.GebReportingSpec
 import pages.BookCreatePage
 import pages.LoginPage
+import grails.test.mixin.integration.Integration
 
+@Integration(applicationClass=Application)
 class MainFunctionalSpec extends GebReportingSpec {
     /**
      * Tests the access control based on the custom realm.

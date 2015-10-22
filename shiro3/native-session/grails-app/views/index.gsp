@@ -85,6 +85,7 @@
 
 		</div>
 		<div id="pageBody">
+                <div><shiro:authenticated>Welcome back <shiro:principal/>!</shiro:authenticated></div>
 	        <h1>Welcome to Grails</h1>
 	        <p>Congratulations, you have successfully started your first Grails application! At the moment
 	        this is the default page, feel free to modify it to either redirect to a controller or display whatever
