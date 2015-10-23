@@ -72,7 +72,7 @@ dependencies {
     testCompile "org.grails:grails-plugin-testing"
 
     console "org.grails:grails-console"
-    def shiroVersion = '1.2.3'
+    def shiroVersion = '1.2.4'
     compile ("org.apache.shiro:shiro-core:$shiroVersion") {
         exclude module:'ejb'
         exclude module:'jsf-api'
