@@ -4,7 +4,7 @@
 class WildcardsInterceptor {
 
     //customize me
-    int order = HIGHEST_PRECEDENCE + 200
+    int order = HIGHEST_PRECEDENCE - 4
 
     WildcardsInterceptor(){
         match(controller: "wildcard", action: "*")

@@ -88,3 +88,4 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
+task test(dependsOn:integrationTest,overwrite:true,type:Test)

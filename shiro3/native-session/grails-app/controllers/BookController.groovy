@@ -2,14 +2,14 @@ class BookController {
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [delete:'POST', save:'POST', update:'POST']
     
-    def index = { redirect(action:list,params:params) }
+    def index(){ redirect(action:list,params:params) }
 
-    def list = {
+    def list(){
         if(!params.max) params.max = 10
         [ bookList: Book.list( params ) ]
     }
 
-    def show = {
+    def show(){
         def book = Book.get( params.id )
 
         if(!book) {
@@ -19,7 +19,7 @@ class BookController {
         else { return [ book : book ] }
     }
 
-    def delete = {
+    def delete(){
         def book = Book.get( params.id )
         if(book) {
             book.delete()
@@ -32,7 +32,7 @@ class BookController {
         }
     }
 
-    def edit = {
+    def edit(){
         def book = Book.get( params.id )
 
         if(!book) {
@@ -44,7 +44,7 @@ class BookController {
         }
     }
 
-    def update = {
+    def update(){
         def book = Book.get( params.id )
         if(book) {
             book.properties = params
@@ -62,17 +62,17 @@ class BookController {
         }
     }
 
-    def create = {
+    def create(){
         def book = new Book()
         book.properties = params
         return ['book':book]
     }
 
-    def save = {
+    def save(){
         def book = new Book(params)
         if(!book.hasErrors() && book.save()) {
             flash.message = "Book ${book.id} created"
-            redirect(action:show,id:book.id)
+            redirect(action:'show',id:book.id)
         }
         else {
             render(view:'create',model:[book:book])
