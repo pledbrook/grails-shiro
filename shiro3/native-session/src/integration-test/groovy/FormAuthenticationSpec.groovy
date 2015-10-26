@@ -66,19 +66,25 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with query parameters"() {
         given:
-        def http = new HTTPBuilder("http://localhost:8080")
+        def http = new HTTPBuilder("http://localhost:8080/")
         http.post path: "/auth/signIn", body: [username: "dilbert", password: "password"]
         http.post path: "/form/save", body: [name: "One"]
         http.post path: "/form/save", body: [name: "Two"]
         http.post path: "/form/save", body: [name: "Three"]
         http.post path: "/form/save", body: [name: "Four"]
         http.post path: "/form/save", body: [name: "Five"]
-        when:
         go "auth/signOut"
-        then:
-        assert true
+
         when: "I go to the form list page with some query parameters and log in"
-        login "dilbert", "password", FormListPage, [max: 3, sort: "name"]
+        go "$FormListPage.url/?max=3&sort=name"
+
+        then:
+        at LoginPage
+
+        when:
+        loginForm.username = "dilbert"
+        loginForm.password = "password"
+        signIn.click()
 
         then: "the form list page is displayed with the items in the correct order"
         at FormListPage

@@ -34,6 +34,7 @@ script: >
     :cli-tests:test 
     :wildcard-realm:integrationTest 
     :native-realm-only:integrationTest 
+    :native-session:integrationTest 
     :spring-filter:integrationTest 
     :annotation-test:integrationTest -i | 
     grep -v "Gradle compiler daemon" | 
