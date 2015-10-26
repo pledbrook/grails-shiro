@@ -11,7 +11,7 @@ import grails.transaction.Rollback
 class FormAuthenticationSpec extends GebReportingSpec {
     def "Test form page requires authentication"() {
         when: "I access the form list page"
-        go "/form/list"
+        go "form/list"
         page LoginPage
 
         then: "I'm redirected to the login page"
@@ -21,7 +21,7 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with no password"() {
         given:
-        go "/form/list"
+        go "form/list"
         page LoginPage
 
         when: "I enter a username but no password"
@@ -37,7 +37,7 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with invalid password"() {
         given:
-        go "/form/list"
+        go "form/list"
         page LoginPage
 
         when:
@@ -54,7 +54,7 @@ class FormAuthenticationSpec extends GebReportingSpec {
 
     def "Test authentication with valid credentials"() {
         given:
-        go "/form/list"
+        go "form/list"
         page LoginPage
 
         when:
@@ -75,10 +75,13 @@ class FormAuthenticationSpec extends GebReportingSpec {
         http.post path: "/form/save", body: [name: "Three"]
         http.post path: "/form/save", body: [name: "Four"]
         http.post path: "/form/save", body: [name: "Five"]
+        when:
         go "auth/signOut"
+        then:
+        true
 
         when: "I go to the form list page with some query parameters and log in"
-        go FormListPage.url + "/?max=3&sort=name"
+        go "$FormListPage.url/?max=3&sort=name"
 
         then:
         at LoginPage
