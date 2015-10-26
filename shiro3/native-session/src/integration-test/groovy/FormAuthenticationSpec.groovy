@@ -76,7 +76,15 @@ class FormAuthenticationSpec extends GebReportingSpec {
         go "auth/signOut"
 
         when: "I go to the form list page with some query parameters and log in"
-        login "dilbert", "password", FormListPage, [max: 3, sort: "name"]
+        go "$FormListPage.url/?max=3&sort=name"
+
+        then:
+        at LoginPage
+
+        when:
+        loginForm.username = "dilbert"
+        loginForm.password = "password"
+        signIn.click()
 
         then: "the form list page is displayed with the items in the correct order"
         at FormListPage

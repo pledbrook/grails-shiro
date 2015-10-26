@@ -1,7 +1,7 @@
 env:
   global:
   - TERM=dumb
-  - GRAILS_HOME=/home/travis/.sdkman/grails/current/
+  - GRAILS_HOME=/home/travis/.sdkman/candidates/grails/current/
 jdk:
   - oraclejdk7
   - oraclejdk8
@@ -34,6 +34,7 @@ script: >
     :cli-tests:test 
     :wildcard-realm:integrationTest 
     :native-realm-only:integrationTest 
+    :native-session:integrationTest 
     :spring-filter:integrationTest 
     :annotation-test:integrationTest -i | 
     grep -v "Gradle compiler daemon" | 

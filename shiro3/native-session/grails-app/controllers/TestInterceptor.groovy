@@ -4,7 +4,7 @@
 class TestInterceptor {
 
     //customize me
-    int order = HIGHEST_PRECEDENCE + 200
+    int order = HIGHEST_PRECEDENCE - 3
 
     TestInterceptor(){
         match(controller: "test", action: "(create|edit|save|update|delete)")
