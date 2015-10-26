@@ -1,7 +1,7 @@
 env:
   global:
   - TERM=dumb
-  - GRAILS_HOME=/home/travis/.sdkman/grails/current/
+  - GRAILS_HOME=/home/travis/.sdkman/candidates/grails/current/
 jdk:
   - oraclejdk7
   - oraclejdk8
@@ -11,7 +11,7 @@ cache:
   directories:
     - ~/.gradle/caches/
     - ~/.gradle/wrapper/
-#    - ~/.sdkman/
+    - ~/.sdkman/
 before_install:
   - rm -rf ~/.sdkman
   - curl -s get.sdkman.io > ~/install_sdkman.sh
