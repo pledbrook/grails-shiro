@@ -19,7 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-import static org.apache.shiro.grails.ShiroCodeGenUtils.*
+
 
 description("Creates a new authentication controller from a template.") {
 	usage "grails create-auth-controller [--prefix=PREFIX]"
@@ -31,12 +31,12 @@ description("Creates a new authentication controller from a template.") {
 /**
  * Creates a new authentication controller from a template.
  */
-def (pkg, prefix) = parsePrefix(argsMap)
+def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['controllerName'] = 'AuthController'
 render  template:"artifacts/controllers/${m['controllerName']}.groovy",
-        destination: file("grails-app/controllers${packageToPath(pkg)}/${m['controllerName']}.groovy"),
+        destination: file("grails-app/controllers${ShiroCodeGenUtils.packageToPath(pkg)}/${m['controllerName']}.groovy"),
         model:m
 render  template:"artifacts/views/auth/login.gsp",
         destination: file("grails-app/views/auth/login.gsp")

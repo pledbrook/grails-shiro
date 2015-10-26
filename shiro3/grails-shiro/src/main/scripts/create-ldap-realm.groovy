@@ -19,7 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-import static org.apache.shiro.grails.ShiroCodeGenUtils.*
+
 
 description("Creates a new ldap realm from a template.") {
 	usage "grails create-ldap-realm [--prefix=PREFIX]"
@@ -28,7 +28,7 @@ description("Creates a new ldap realm from a template.") {
 """
 }
 
-def (pkg, prefix) = parsePrefix(argsMap)
+def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
 
 
 // Copy over the standard DB realm.
@@ -38,6 +38,6 @@ m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['realmName'] = className
 m['domainPrefix'] = prefix
 render  template:"artifacts/realms/ShiroLdapRealm.groovy",
-        destination: file("grails-app/realms/${packageToPath(pkg)}/${className}.groovy"),
+        destination: file("grails-app/realms/${ShiroCodeGenUtils.packageToPath(pkg)}/${className}.groovy"),
         model:m
  
