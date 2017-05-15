@@ -273,10 +273,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             }
         }
 
-        grailsApplication.filtersClasses.each { filterClass ->
-            filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
-            filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
-        }
+//        grailsApplication.filtersClasses.each { filterClass ->
+//            filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
+//            filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
+//        }
 
         // Get the config option that determines whether authentication
         // is required for access control or not. By default, it is
