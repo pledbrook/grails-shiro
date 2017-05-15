@@ -22,12 +22,37 @@ group "org.grails.plugins"
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId 'org.grails.plugins'
+            artifactId 'grails-shiro'
+            version project.version
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                }
+            }
+        }
+    }
+}
+
 apply plugin: "spring-boot"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
+
+
 // Used for publishing to central repository, remove if not needed
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
+//apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
+//apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
 idea {
     module {
         name = "Shiro Plugin"
@@ -58,20 +83,23 @@ dependencyManagement {
     }
     applyMavenExclusions false
 }
-dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
-    provided "org.springframework.boot:spring-boot-starter-actuator"
-    provided "org.springframework.boot:spring-boot-autoconfigure"
-    provided "org.springframework.boot:spring-boot-starter-tomcat"
 
-    provided "org.grails:grails-web-boot"
-    provided "org.grails:grails-dependencies"
+dependencies {
+
+    def springVersion = '1.2.7.RELEASE'
+    provided "org.springframework.boot:spring-boot-starter-logging:$springVersion"
+    provided "org.springframework.boot:spring-boot-starter-actuator:$springVersion"
+    provided "org.springframework.boot:spring-boot-autoconfigure:$springVersion"
+    provided "org.springframework.boot:spring-boot-starter-tomcat:$springVersion"
+
+    provided "org.grails:grails-web-boot:$grailsVersion"
+    provided "org.grails:grails-dependencies:$grailsVersion"
     provided 'javax.servlet:javax.servlet-api:3.1.0'
 
-    testCompile "org.grails:grails-plugin-testing"
+    testCompile "org.grails:grails-plugin-testing:$grailsVersion"
 
-    console "org.grails:grails-console"
-    def shiroVersion = '1.2.4'
+    console "org.grails:grails-console:$grailsVersion"
+    def shiroVersion = '1.2.3'
     compile ("org.apache.shiro:shiro-core:$shiroVersion") {
         exclude module:'ejb'
         exclude module:'jsf-api'
