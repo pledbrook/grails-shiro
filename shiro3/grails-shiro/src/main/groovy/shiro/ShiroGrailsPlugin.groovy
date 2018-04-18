@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
-import org.springframework.boot.context.embedded.FilterRegistrationBean
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.core.Ordered
 import org.springframework.web.filter.DelegatingFilterProxy
 import org.springframework.web.util.WebUtils
@@ -69,7 +69,7 @@ import static javax.servlet.DispatcherType.*
 class ShiroGrailsPlugin extends Plugin {
 
     def version = "1.2.2-SNAPSHOT"
-    def grailsVersion = "1.2 > *"
+    def grailsVersion = "3.3.0 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
     def title = "Apache Shiro Integration for Grails"
