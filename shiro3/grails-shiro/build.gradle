@@ -45,7 +45,7 @@ publishing {
     }
 }
 
-apply plugin: "spring-boot"
+apply plugin: "org.springframework.boot"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
 
