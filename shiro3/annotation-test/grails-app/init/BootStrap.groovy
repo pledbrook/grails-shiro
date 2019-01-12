@@ -1,5 +1,4 @@
 import org.apache.shiro.crypto.hash.Sha256Hash
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class BootStrap {
 

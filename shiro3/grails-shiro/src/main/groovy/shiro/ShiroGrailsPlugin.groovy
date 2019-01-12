@@ -68,7 +68,7 @@ import static javax.servlet.DispatcherType.*
 
 class ShiroGrailsPlugin extends Plugin {
 
-    def version = "1.2.2-SNAPSHOT"
+    def version = "1.4.0"
     def grailsVersion = "3.3.0 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
@@ -98,7 +98,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         { ->
             def securityConfig = grailsApplication.config.security.shiro
 
-            println '\nConfiguring Shiro ...'
+            log.info 'Configuring security framework - Shiro ...'
 
             // Configure realms defined in the project.
             def realmBeans = []
@@ -226,9 +226,9 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                 filter = ref('shiroFilter')
                 urlPatterns = ['/*']
                 dispatcherTypes = EnumSet.of(REQUEST, ERROR)
-                //order = Ordered.HIGHEST_PRECEDENCE
+                order = Ordered.HIGHEST_PRECEDENCE + 100
             }
-            println '\nShiro Configured'
+            log.info 'Security layer configured.'
         }
     }
 

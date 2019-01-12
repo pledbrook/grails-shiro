@@ -1,6 +1,7 @@
 buildscript {
     ext {
         grailsVersion = project.grailsVersion
+        shiroVersion = "1.4.0"
     }
     repositories {
         mavenLocal()
@@ -13,15 +14,16 @@ buildscript {
 
 plugins {
     id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.2"
+    id "com.jfrog.bintray" version "1.7"
 }
 
-version "2.0.2"
+version "3.3.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'com.jfrog.bintray'
 
 publishing {
     publications {
@@ -85,12 +87,10 @@ dependencyManagement {
 }
 
 dependencies {
-
-    def springVersion = '1.2.7.RELEASE'
-    provided "org.springframework.boot:spring-boot-starter-logging:$springVersion"
-    provided "org.springframework.boot:spring-boot-starter-actuator:$springVersion"
-    provided "org.springframework.boot:spring-boot-autoconfigure:$springVersion"
-    provided "org.springframework.boot:spring-boot-starter-tomcat:$springVersion"
+    provided "org.springframework.boot:spring-boot-starter-logging"
+    provided "org.springframework.boot:spring-boot-starter-actuator"
+    provided "org.springframework.boot:spring-boot-autoconfigure"
+    provided "org.springframework.boot:spring-boot-starter-tomcat"
 
     provided "org.grails:grails-web-boot:$grailsVersion"
     provided "org.grails:grails-dependencies:$grailsVersion"
@@ -99,70 +99,25 @@ dependencies {
     testCompile "org.grails:grails-plugin-testing:$grailsVersion"
 
     console "org.grails:grails-console:$grailsVersion"
-    def shiroVersion = '1.2.3'
-    compile ("org.apache.shiro:shiro-core:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
+
+    ['ehcache', 'core', 'spring', 'web'].each {
+        compile("org.apache.shiro:shiro-$it:$shiroVersion") {
+            exclude module:'ejb'
+            exclude module:'jsf-api'
+            exclude module:'servlet-api'
+            exclude module:'jsp-api'
+            exclude module:'jstl'
+            exclude module:'jms'
+            exclude module:'connector-api'
+            exclude module:'ehcache-core'
+            exclude module:'slf4j-api'
+            exclude module:'commons-logging'
+        }
     }
-    compile ("org.apache.shiro:shiro-web:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-spring:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-ehcache:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-quartz:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    // runtime "org.grails.plugins:hibernate:$grailsVersion", {
-    //     export = false
-    // }
+}
+
+bootRepackage {
+    enabled = false
 }
 
 task wrapper(type: Wrapper) {
