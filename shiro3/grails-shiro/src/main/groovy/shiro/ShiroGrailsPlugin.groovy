@@ -26,6 +26,10 @@ import grails.plugins.*
 
 import grails.artefact.Interceptor
 import grails.util.GrailsClassUtils
+import org.apache.shiro.cache.ehcache.EhCacheManager
+import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO
+import org.apache.shiro.web.servlet.SimpleCookie
+
 import javax.servlet.Filter
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher
@@ -56,7 +60,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
-import org.springframework.boot.context.embedded.FilterRegistrationBean
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.core.Ordered
 import org.springframework.web.filter.DelegatingFilterProxy
 import org.springframework.web.util.WebUtils
@@ -64,8 +68,8 @@ import static javax.servlet.DispatcherType.*
 
 class ShiroGrailsPlugin extends Plugin {
 
-    def version = "1.2.2-SNAPSHOT"
-    def grailsVersion = "1.2 > *"
+    def version = "1.4.0"
+    def grailsVersion = "3.3.0 > *"
     def author = "Peter Ledbrook"
     def authorEmail = "peter@cacoethes.co.uk"
     def title = "Apache Shiro Integration for Grails"
@@ -94,7 +98,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         { ->
             def securityConfig = grailsApplication.config.security.shiro
 
-            println '\nConfiguring Shiro ...'
+            log.info 'Configuring security framework - Shiro ...'
 
             // Configure realms defined in the project.
             def realmBeans = []
@@ -147,10 +151,25 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             shiroRememberMeManager(CookieRememberMeManager)
 
             def sessionMode = securityConfig.session.mode ?: null
-            if (sessionMode == null || !sessionMode.equalsIgnoreCase('native')) {
-                sessionManager(ServletContainerSessionManager)
+            if (sessionMode?.equalsIgnoreCase('native')) {
+                log.debug("Using shiro native session manager with sensible defaults")
+                shiroSessionIdCookie(SimpleCookie) {
+                    name = 'MYSESSIONID'
+                    maxAge = 288000
+                }
+                shiroSessionCacheManager(EhCacheManager)
+                shiroSessionDAO(EnterpriseCacheSessionDAO) {
+                    cacheManager = ref('shiroSessionCacheManager')
+                }
+                shiroSessionManager(DefaultWebSessionManager) {
+                    cacheManager = ref('shiroSessionCacheManager')
+                    sessionDAO = ref('shiroSessionDAO')
+                    sessionIdCookie = ref('shiroSessionIdCookie')
+                    sessionValidationSchedulerEnabled = true
+                }
             } else {
-                sessionManager(DefaultWebSessionManager)
+                log.debug("Using servlet container session manager")
+                shiroSessionManager(ServletContainerSessionManager)
             }
             // The real security manager instance.
             shiroSecurityManager(DefaultWebSecurityManager) { bean ->
@@ -165,72 +184,40 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
                 // Allow the user to customise the session type: 'http' or
                 // 'native'.
-                sessionManager = ref('sessionManager')
+                sessionManager = ref('shiroSessionManager')
 
                 // Allow the user to provide his own versions of these
                 // components in resources.xml or resources.groovy.
                 authenticator = ref("shiroAuthenticator")
                 rememberMeManager = ref("shiroRememberMeManager")
             }
-            //Alias
-            //      shiroAnnotationSecurityInterceptor(ShiroAnnotationSecurityInterceptor)
 
-            // If the legacy 'shiro.filter.config' setting has a value, then
-            // configuration is done via IniShiroFilter and we don't use the
-            // shiroFilter Spring bean. Otherwise, we create the bean so that
-            // it can be used by the configured DelegatingFilterProxy.
-            if (!securityConfig.filter.config) {
-                // Create a basic authentication filter bean if the relevant
-                // configuration setting is used.
-                if (securityConfig.filter.basicAppName) {
-                    authcBasicFilter(BasicHttpAuthenticationFilter) {
-                        applicationName = securityConfig.filter.basicAppName
-                    }
-                }
-
-                // Create the main security filter.
-                shiroFilter(ShiroFilterFactoryBean) { bean ->
-                    securityManager = ref("shiroSecurityManager")
-
-                    loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
-                    unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
-
-                    if (securityConfig.filter.filterChainDefinitions) {
-                        filterChainDefinitions = securityConfig.filter.filterChainDefinitions
-                    }
-
-                    if (securityConfig.filter.basicAppName) {
-                        filters = [authcBasic: ref("authcBasicFilter")]
-                    }
-                }
-            } else {
-                println "Using legacy configuration..."
-                log.warn "security.shiro.filter.config option is deprecated. Use Grails' bean property override mechanism instead."
-                def iniConfig = new Ini()
-                iniConfig.load(securityConfig.filter.config)
-                shiroSecurityManagerFactory(LegacyIniSecurityManagerFactory, applicationContext, "shiroSecurityManager", iniConfig)
-                // Create the main security filter.
-                shiroFilter(ShiroFilterFactoryBean) { bean ->
-                    securityManager = ref("shiroSecurityManager")
-
-                    loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
-                    unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
-
-                    if (securityConfig.filter.filterChainDefinitions) {
-                        filterChainDefinitions = securityConfig.filter.filterChainDefinitions
-                    }
-
-                    if (securityConfig.filter.basicAppName) {
-                        filters = [authcBasic: ref("authcBasicFilter")]
-                    }
-                }
-/*            shiroFilter(ShiroFilterFactoryBean){
-                securityManager = {bean->
-                    bean.factoryMethod = "getInstance"
-                    bean.factoryBean = "shiroSecurityManagerFactory"
+            def basicAppName = securityConfig.filter.basicAppName
+            if (basicAppName) {
+                authcBasicFilter(BasicHttpAuthenticationFilter) {
+                    applicationName = basicAppName
                 }
             }
-*/
+            // If the legacy 'shiro.filter.config' setting is not supported anymore.
+            if (securityConfig.filter.config) {
+                throw new IllegalStateException("security.shiro.filter.config option is not supported. Use Grails' bean property override mechanism instead...")
+            }
+            // Create a basic authentication filter bean if the relevant
+            // configuration setting is used.
+            // Create the main security filter.
+            shiroFilter(ShiroFilterFactoryBean) { bean ->
+                securityManager = ref("shiroSecurityManager")
+                loginUrl = securityConfig.filter.loginUrl ?: "/auth/login"
+                unauthorizedUrl = securityConfig.filter.unauthorizedUrl ?: "/auth/unauthorized"
+                successUrl = securityConfig.filter.successUrl ?: null
+
+                if (securityConfig.filter.filterChainDefinitions) {
+                    filterChainDefinitions = securityConfig.filter.filterChainDefinitions
+                }
+
+                if (basicAppName) {
+                    filters = [authcBasic: ref("authcBasicFilter")]
+                }
             }
             //New in Grails 3.0.x
             //instead of web.xml configuration
@@ -239,9 +226,9 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                 filter = ref('shiroFilter')
                 urlPatterns = ['/*']
                 dispatcherTypes = EnumSet.of(REQUEST, ERROR)
-                //order = Ordered.HIGHEST_PRECEDENCE
+                order = Ordered.HIGHEST_PRECEDENCE + 100
             }
-            println '\nShiro Configured'
+            log.info 'Security layer configured.'
         }
     }
 
@@ -286,10 +273,10 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             }
         }
 
-        grailsApplication.filtersClasses.each { filterClass ->
-            filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
-            filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
-        }
+//        grailsApplication.filtersClasses.each { filterClass ->
+//            filterClass.clazz.metaClass.getRoleMap = { String controller -> return roleMaps[controller] }
+//            filterClass.clazz.metaClass.getPermissionMap = { String controller -> return permMaps[controller] }
+//        }
 
         // Get the config option that determines whether authentication
         // is required for access control or not. By default, it is

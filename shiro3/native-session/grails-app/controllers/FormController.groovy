@@ -8,11 +8,11 @@ class FormController {
 
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Form.list(params), model:[formCount: Form.count()]
+        [formInstanceList:Form.list(params),formCount: Form.count()]
     }
 
     def show(Form form) {
-        respond form
+        [formInstance:form]
     }
 
     def create() {
@@ -32,8 +32,8 @@ class FormController {
             respond form.errors, view:'create'
             return
         }
-
-        form.save flush:true
+        assert form.name
+        form.save flush:true, failOnError:true
 
         flash.message = message(code: 'default.created.message', args: [message(code: 'form.label', default: 'Form'), form.id])
         redirect form

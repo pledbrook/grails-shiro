@@ -19,7 +19,7 @@ plugins {
 version "0.1"
 group "spring.filter"
 
-apply plugin: "spring-boot"
+apply plugin: "org.springframework.boot"
 apply plugin: "war"
 apply plugin: "asset-pipeline"
 apply plugin: 'eclipse'
@@ -57,11 +57,11 @@ dependencies {
     compile "org.grails:grails-dependencies"
     compile "org.grails:grails-web-boot"
 
-    compile "org.grails.plugins:hibernate"
+    compile "org.grails.plugins:hibernate5"
     compile "org.grails.plugins:cache"
     compile "org.hibernate:hibernate-ehcache"
 
-    runtime "org.grails.plugins:asset-pipeline"
+    runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.14.8"
     runtime "org.grails.plugins:scaffolding"
 
     testCompile "org.grails:grails-plugin-testing"

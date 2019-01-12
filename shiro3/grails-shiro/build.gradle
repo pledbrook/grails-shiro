@@ -1,6 +1,7 @@
 buildscript {
     ext {
         grailsVersion = project.grailsVersion
+        shiroVersion = "1.4.0"
     }
     repositories {
         mavenLocal()
@@ -13,21 +14,36 @@ buildscript {
 
 plugins {
     id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.2"
+    id "com.jfrog.bintray" version "1.7"
 }
 
-version "0.1-SNAPSHOT"
+version "3.3.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: "spring-boot"
+apply plugin: 'com.jfrog.bintray'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId 'org.grails.plugins'
+            artifactId 'grails-shiro'
+            version project.version
+        }
+    }
+}
+
+apply plugin: "org.springframework.boot"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
+
+
 // Used for publishing to central repository, remove if not needed
 //apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
+//apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
 idea {
     module {
         name = "Shiro Plugin"
@@ -60,82 +76,38 @@ dependencyManagement {
 }
 
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
+    provided "org.springframework.boot:spring-boot-starter-logging"
     provided "org.springframework.boot:spring-boot-starter-actuator"
     provided "org.springframework.boot:spring-boot-autoconfigure"
     provided "org.springframework.boot:spring-boot-starter-tomcat"
 
-    provided "org.grails:grails-web-boot"
-    provided "org.grails:grails-dependencies"
+    provided "org.grails:grails-web-boot:$grailsVersion"
+    provided "org.grails:grails-dependencies:$grailsVersion"
     provided 'javax.servlet:javax.servlet-api:3.1.0'
 
-    testCompile "org.grails:grails-plugin-testing"
+    testCompile "org.grails:grails-test-mixins:3.3.0"
+    testCompile "org.grails:grails-plugin-testing:$grailsVersion"
 
-    console "org.grails:grails-console"
-    def shiroVersion = '1.2.3'
-    compile ("org.apache.shiro:shiro-core:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
+    console "org.grails:grails-console:$grailsVersion"
+
+    ['ehcache', 'core', 'spring', 'web'].each {
+        compile("org.apache.shiro:shiro-$it:$shiroVersion") {
+            exclude module:'ejb'
+            exclude module:'jsf-api'
+            exclude module:'servlet-api'
+            exclude module:'jsp-api'
+            exclude module:'jstl'
+            exclude module:'jms'
+            exclude module:'connector-api'
+            exclude module:'ehcache-core'
+            exclude module:'slf4j-api'
+            exclude module:'commons-logging'
+        }
     }
-    compile ("org.apache.shiro:shiro-web:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-spring:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-ehcache:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    compile ("org.apache.shiro:shiro-quartz:$shiroVersion") {
-        exclude module:'ejb'
-        exclude module:'jsf-api'
-        exclude module:'servlet-api'
-        exclude module:'jsp-api'
-        exclude module:'jstl'
-        exclude module:'jms'
-        exclude module:'connector-api'
-        exclude module:'ehcache-core'
-        exclude module:'slf4j-api'
-        exclude module:'commons-logging'
-    }
-    // runtime "org.grails.plugins:hibernate:$grailsVersion", {
-    //     export = false
-    // }
+}
+
+bootRepackage {
+    enabled = false
 }
 
 task wrapper(type: Wrapper) {

@@ -1,4 +1,5 @@
 import geb.spock.GebReportingSpec
+import grails.transaction.Rollback
 import pages.*
 
 import nativesession.Application
@@ -69,8 +70,8 @@ class MainFunctionalSpec extends GebReportingSpec {
         at LoginPage
 
         when: "I log in using a valid username and password"
-        loginForm.username = "dilbert"
-        loginForm.password = "password"
+        loginForm.username = "admin"
+        loginForm.password = "admin"
         signIn.click()
 
         then: "I am redirected to the the secured item page"

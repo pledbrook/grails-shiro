@@ -1,8 +1,8 @@
 include 'grails-shiro',
 		'spring-filter',
-//		'native-session',
+		'native-session',
 //		'default',
 		'native-realm-only',
 		'annotation-test',
-		'wildcard-realm',
+		'wildcard-realm'
 		'cli-tests'

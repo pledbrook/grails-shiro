@@ -20,7 +20,7 @@
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
 
-import static org.apache.shiro.grails.ShiroCodeGenUtils.*
+
 
 description("""Creates a new database realm from a template that only works with
 	wildcard permissions. Other types of permission are not supported.
@@ -35,12 +35,12 @@ description("""Creates a new database realm from a template that only works with
  * Creates a new database realm from a template that only works with
  * wildcard permissions. Other types of permission are not supported.
  */
-def (pkg, prefix) = parsePrefix(argsMap)
+def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
 
 // First create the domain objects: ShiroUser, ShiroRole, etc.
 def domainClasses = [ 'User', 'Role' ]
 
-def artefactPath = "grails-app/domain${packageToPath(pkg)}"
+def artefactPath = "grails-app/domain${ShiroCodeGenUtils.packageToPath(pkg)}"
 ant.mkdir(dir: "${baseDir}/${artefactPath}")
 
 domainClasses.each { domainClass ->
@@ -48,7 +48,7 @@ domainClasses.each { domainClass ->
 	m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 	m['domainPrefix'] = prefix
 	render  template:"artifacts/domain/Wildcard${domainClass}.groovy",
-	        destination: file("${artefactPath}/${packageToPath(pkg)}/${prefix}${domainClass}.groovy"),
+	        destination: file("${artefactPath}/${ShiroCodeGenUtils.packageToPath(pkg)}/${prefix}${domainClass}.groovy"),
 	        model:m
 }
 
@@ -59,6 +59,6 @@ m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['realmName'] = className
 m['domainPrefix'] = prefix
 render  template:"artifacts/realms/WildcardDbRealm.groovy",
-        destination: file("grails-app/realms/${packageToPath(pkg)}/${className}.groovy"),
+        destination: file("grails-app/realms/${ShiroCodeGenUtils.packageToPath(pkg)}/${className}.groovy"),
         model:m
  

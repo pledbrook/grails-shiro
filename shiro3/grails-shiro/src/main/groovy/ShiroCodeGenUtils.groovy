@@ -20,8 +20,6 @@
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
  
-package org.apache.shiro.grails
-
 class ShiroCodeGenUtils {
 
 	static parsePrefix(argsMap) {

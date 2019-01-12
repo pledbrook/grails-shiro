@@ -4,7 +4,7 @@
 class BooksInterceptor {
 
     //customize me
-    int order = HIGHEST_PRECEDENCE + 200
+    int order = HIGHEST_PRECEDENCE - 2
 
     BooksInterceptor(){
         match(controller: "book", action: "*")

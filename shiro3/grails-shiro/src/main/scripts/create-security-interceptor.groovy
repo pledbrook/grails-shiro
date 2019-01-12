@@ -19,7 +19,7 @@
  * Modified 2009 Kapil Sachdeva, Gemalto Inc, Ported to Apache Shiro
  * Modified 2015 Yellowsnow, Arkilog, Migrated to Grails 3
  */
-import static org.apache.shiro.grails.ShiroCodeGenUtils.*
+
 
 description("Creates a new security interceptor from a template.") {
 	usage "grails create-security-interceptor [--prefix=PREFIX]"
@@ -31,10 +31,10 @@ description("Creates a new security interceptor from a template.") {
 /**
  * Creates a new authentication controller from a template.
  */
-def (pkg, prefix) = parsePrefix(argsMap)
+def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['prefix'] = prefix
 render  template:"artifacts/interceptors/SecurityInterceptor.groovy",
-        destination: file("grails-app/controllers/${packageToPath(pkg)}/${m['prefix']}SecurityInterceptor.groovy"),
+        destination: file("grails-app/controllers/${ShiroCodeGenUtils.packageToPath(pkg)}/${m['prefix']}SecurityInterceptor.groovy"),
         model:m
