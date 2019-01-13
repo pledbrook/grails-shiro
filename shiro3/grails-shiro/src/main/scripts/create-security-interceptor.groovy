@@ -1,3 +1,5 @@
+import grails.codegen.model.Model
+
 /*
  * Copyright 2007 Peter Ledbrook.
  *
@@ -31,10 +33,13 @@ description("Creates a new security interceptor from a template.") {
 /**
  * Creates a new authentication controller from a template.
  */
-def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
+Model model = argsMap.prefix ? model(argsMap.prefix) : model("Shiro")
+def prefix = model.className
+def pkg = model.packageName
+def pkgPath = model.packagePath
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['prefix'] = prefix
 render  template:"artifacts/interceptors/SecurityInterceptor.groovy",
-        destination: file("grails-app/controllers/${ShiroCodeGenUtils.packageToPath(pkg)}/${m['prefix']}SecurityInterceptor.groovy"),
+        destination: file("grails-app/controllers/${pkgPath}/${m['prefix']}SecurityInterceptor.groovy"),
         model:m

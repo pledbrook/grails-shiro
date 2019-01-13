@@ -27,7 +27,6 @@ description("Sets up a basic security system with a wildcard realm, auth control
 """
 }
 String fPrefix = flag('prefix')
-String prefixStr = fPrefix ? "--prefix=${fPrefix}" : ""
-createWildcardRealm(prefixStr) 
-createAuthController(prefixStr)
-createSecurityInterceptor(prefixStr)
+createWildcardRealm()
+createAuthController()
+createSecurityInterceptor()
