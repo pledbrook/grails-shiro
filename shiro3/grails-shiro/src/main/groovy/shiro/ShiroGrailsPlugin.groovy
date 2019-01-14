@@ -96,7 +96,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
 
     Closure doWithSpring() {
         { ->
-            def securityConfig = grailsApplication.config.security.shiro
+            def securityConfig = grailsApplication.config.grails.plugin.shirosecurity
 
             log.info 'Configuring security framework - Shiro ...'
 
@@ -282,8 +282,8 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         // is required for access control or not. By default, it is
         // required.
         boolean authcRequired = true
-        if (grailsApplication.config.security.shiro.authc.required instanceof Boolean) {
-            authcRequired = grailsApplication.config.security.shiro.authc.required
+        if (grailsApplication.config.grails.plugin.shirosecurity.authc.required instanceof Boolean) {
+            authcRequired = grailsApplication.config.grails.plugin.shirosecurity.authc.required
         }
 
         // Add an 'accessControl' method to Interceptor (so that it's
@@ -413,7 +413,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
                     targetUri << query
                 }
 
-                def redirectUri = grailsApplication.config.security.shiro.redirect.uri
+                def redirectUri = grailsApplication.config.grails.plugin.shirosecurity.redirect.uri
                 if (redirectUri) {
                     interceptor.redirect(uri: redirectUri + "?targetUri=${targetUri.encodeAsURL()}")
                 } else {
