@@ -1,3 +1,5 @@
+import grails.codegen.model.Model
+
 /*
  * Copyright 2007 Peter Ledbrook.
  *
@@ -31,12 +33,14 @@ description("Creates a new authentication controller from a template.") {
 /**
  * Creates a new authentication controller from a template.
  */
-def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
+Model model = argsMap.prefix ? model(argsMap.prefix) : model("Shiro")
+def pkg = model.packageName
+def pkgPath = model.packagePath
 def m = [:]
 m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['controllerName'] = 'AuthController'
 render  template:"artifacts/controllers/${m['controllerName']}.groovy",
-        destination: file("grails-app/controllers${ShiroCodeGenUtils.packageToPath(pkg)}/${m['controllerName']}.groovy"),
+        destination: file("grails-app/controllers/${pkgPath}/${m['controllerName']}.groovy"),
         model:m
 render  template:"artifacts/views/auth/login.gsp",
         destination: file("grails-app/views/auth/login.gsp")

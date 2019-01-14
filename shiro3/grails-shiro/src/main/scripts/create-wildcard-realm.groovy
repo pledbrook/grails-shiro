@@ -1,3 +1,5 @@
+import grails.codegen.model.Model
+
 /*
  * Copyright 2007 Peter Ledbrook.
  *
@@ -35,12 +37,15 @@ description("""Creates a new database realm from a template that only works with
  * Creates a new database realm from a template that only works with
  * wildcard permissions. Other types of permission are not supported.
  */
-def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
+Model model = argsMap.prefix ? model(argsMap.prefix) : model("Shiro")
+def prefix = model.className
+def pkg = model.packageName
+def pkgPath = model.packagePath
 
 // First create the domain objects: ShiroUser, ShiroRole, etc.
 def domainClasses = [ 'User', 'Role' ]
 
-def artefactPath = "grails-app/domain${ShiroCodeGenUtils.packageToPath(pkg)}"
+def artefactPath = "grails-app/domain/${pkgPath}"
 ant.mkdir(dir: "${baseDir}/${artefactPath}")
 
 domainClasses.each { domainClass ->
@@ -48,7 +53,7 @@ domainClasses.each { domainClass ->
 	m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 	m['domainPrefix'] = prefix
 	render  template:"artifacts/domain/Wildcard${domainClass}.groovy",
-	        destination: file("${artefactPath}/${ShiroCodeGenUtils.packageToPath(pkg)}/${prefix}${domainClass}.groovy"),
+	        destination: file("${artefactPath}/${prefix}${domainClass}.groovy"),
 	        model:m
 }
 
@@ -59,6 +64,6 @@ m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['realmName'] = className
 m['domainPrefix'] = prefix
 render  template:"artifacts/realms/WildcardDbRealm.groovy",
-        destination: file("grails-app/realms/${ShiroCodeGenUtils.packageToPath(pkg)}/${className}.groovy"),
+        destination: file("grails-app/realms/${pkgPath}/${className}.groovy"),
         model:m
  

@@ -1,3 +1,5 @@
+import grails.codegen.model.Model
+
 /*
  * Copyright 2007 Peter Ledbrook.
  *
@@ -28,7 +30,10 @@ description("Creates a new ldap realm from a template.") {
 """
 }
 
-def (pkg, prefix) = ShiroCodeGenUtils.parsePrefix(argsMap)
+Model model = argsMap.prefix ? model(argsMap.prefix) : model("Shiro")
+def prefix = model.className
+def pkg = model.packageName
+def pkgPath = model.packagePath
 
 
 // Copy over the standard DB realm.
@@ -38,6 +43,6 @@ m['packageLine'] = (pkg ? "package ${pkg}\n\n" : "")
 m['realmName'] = className
 m['domainPrefix'] = prefix
 render  template:"artifacts/realms/ShiroLdapRealm.groovy",
-        destination: file("grails-app/realms/${ShiroCodeGenUtils.packageToPath(pkg)}/${className}.groovy"),
+        destination: file("grails-app/realms/${pkgPath}/${className}.groovy"),
         model:m
  
