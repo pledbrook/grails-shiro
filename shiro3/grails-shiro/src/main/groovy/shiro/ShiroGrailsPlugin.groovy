@@ -393,7 +393,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
             // the interceptors class deal with it.
             boolean doDefault = true
             if (interceptorClass.metaClass.respondsTo(interceptorClass, "onNotAuthenticated")) {
-                doDefault = interceptorClass.onNotAuthenticated(subject, interceptor)
+                doDefault = interceptor.onNotAuthenticated(subject, interceptor)
             }
 
             // Continue with the default behaviour of redirecting to
@@ -450,7 +450,7 @@ Enables Grails applications to take advantage of the Apache Shiro security layer
         if (!isPermitted) {
             // User does not have the required permission(s)
             if (interceptorClass.metaClass.respondsTo(interceptorClass, "onUnauthorized")) {
-                interceptorClass.onUnauthorized(subject, interceptor)
+                interceptor.onUnauthorized(subject, interceptor)
             } else {
                 // Default behaviour is to redirect to the 'unauthorized' page.
                 interceptor.redirect(controller: "auth", action: "unauthorized")
