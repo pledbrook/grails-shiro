@@ -1,4 +1,8 @@
-Grails 3 Shiro plugin
+New Grails Shiro plugin
+=======================
+The Grails 3 (Grails 3.3.10, Shiro 1.4.1) plugin has been re-written and now lives at https://github.com/nerdErg/grails-shiro . The code here should be considered archived and not for current use (it contains some vulnerabilities and is not maintained)
+
+OLD Grails 3 Shiro plugin
 =====================
 
 [![Build Status](https://api.travis-ci.org/pledbrook/grails-shiro.png)](http://travis-ci.org/pledbrook/grails-shiro)
