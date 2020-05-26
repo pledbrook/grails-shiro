@@ -5,7 +5,7 @@ Don't post issues here please.
 
 New Grails Shiro plugin
 =======================
-The Grails 3 (Grails 3.3.10, Shiro 1.4.1) plugin has been re-written and now lives at https://github.com/nerdErg/grails-shiro . The code here should be considered archived and not for current use (it contains some vulnerabilities and is not maintained)
+The Grails 3 (Grails 3 & 4, Shiro 1.5+) plugin has been re-written and now lives at https://github.com/nerdErg/grails-shiro . The code here should be considered archived and not for current use (it contains some vulnerabilities and is not maintained)
 
 You can find the plugin on the plugin portal at http://plugins.grails.org/plugin/nerderg/grails-shiro
 
